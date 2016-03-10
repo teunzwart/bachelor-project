@@ -1,0 +1,131 @@
+\RequirePackage[l2tabu, orthodox]{nag} % Warn about outdated commands/packages.
+% The report class uses some outdated commands, about which nag will complain.
+% You can just ignore these warnings.
+
+\documentclass[11pt, a4paper]{report} % Sets font and paper size.
+
+%%% General formatting packages (order is important, so don't sort) %%%
+\usepackage{amsmath} % More equation formatting.
+\usepackage[dutch, english]{babel} % Language specific quirks.
+\usepackage{booktabs} % Improved tables.
+\usepackage[font=small]{caption} % Better caption formatting.
+\usepackage{fancyhdr} % Modification of headers and footers.
+\usepackage[T1]{fontenc} % Makes one unicode character of special input (e.g. ö).
+\usepackage[margin=1.25in]{geometry} % Control page layout.
+\usepackage{float} % More control over image positions.
+\usepackage{graphicx} % Include graphics. Use '\graphicspath' to locate files in a different folder.
+\usepackage[utf8]{inputenc} % Special characters (e.g. trema) can be entered directly: .tex file has to be saved using UTF-8 encoding.
+\usepackage{lmodern} % Alternative font because 'fontenc' package does not work with default.
+\usepackage{microtype} % Improves character spacing.
+\usepackage{natbib} % Provides (author, year) references. \citet: textual, \citep: parenthetical
+\usepackage{physics} % Provides physics macros such as Dirac notation.
+\usepackage{tikz} % Draw diagrams and figures.
+\usepackage{url} % Allow inclusion of urls in text.
+\usepackage{siunitx} % SI unit formatting and scientific notation.
+\usepackage{subcaption} % Allow subcaptions.
+\usepackage[nottoc]{tocbibind} % Include references in table of contents.
+\usepackage[colorinlistoftodos]{todonotes} % Add todo notes.
+\usepackage{varioref} % Automatically put reference to page in reference. Use \vref.
+\usepackage{cleveref} % Automate "equation (...)" reference. Use \vref.
+
+%%% Additional options %%%
+\pagestyle{fancy} % Set header style.
+\setlength{\headheight}{14pt}
+
+%%% Personal Information %%%
+\newcommand\TITLE{Monte Carlo Simulations of the 3-State Potts Model in 2D}
+\newcommand\THESISFORM{Bachelor Project Physics and Astronomy, size 15 EC}
+\newcommand\AUTHOR{Teun Zwart (10499873)}
+\newcommand\SUPERVISOR{dr. Phillipe Corboz}
+\newcommand\SECONDASSESSOR{dr. Edan Lerner}
+\newcommand\UNIVERSITYLOGO{UvA-logo.jpg} % Uncomment line below and add name of logo file.
+
+\graphicspath{{./images/}}
+
+
+\begin{document}
+
+\begin{titlepage}
+	\begin{center}
+		\includegraphics[width=\textwidth]{\UNIVERSITYLOGO}
+		\rule{\textwidth}{0.4mm}\\[0.5cm]
+		\huge{\textbf{\TITLE}}
+		\rule{\textwidth}{0.4mm}\\[0.5cm]
+		\large{\THESISFORM}\\[0.5cm]
+		\begin{minipage}[t]{0.4\textwidth}
+			\begin{flushleft}
+				\large\emph{Author}\\{\AUTHOR}
+			\end{flushleft}
+		\end{minipage}
+		\begin{minipage}[t]{0.4\textwidth}
+			\begin{flushright}
+				\large\emph{Supervisor}\\{\SUPERVISOR}\\~\\
+				\large\emph{Second Assessor}\\{\SECONDASSESSOR}
+			\end{flushright}
+		\end{minipage}
+		\vfill
+		\large \today\\
+	\end{center}
+\end{titlepage}
+
+\thispagestyle{plain}
+\section*{Abstract}
+
+
+\newpage
+\thispagestyle{plain}
+\section*{Populaire Samenvatting}
+
+
+\tableofcontents
+
+
+\chapter{The First Chapter}
+
+\section{Introduction}
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+
+\newpage
+\section{Intriguing Results}
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+%
+\begin{equation}
+	E = mc ^ 2
+\end{equation}
+%
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+culpa qui officia deserunt mollit anim id est laborum.
+
+
+\chapter{The Second Chapter}
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+
+% Set style to abbrv to get Vancouver style citations.
+\bibliographystyle{abbrv}
+% \bibliography{}
+
+\end{document}
