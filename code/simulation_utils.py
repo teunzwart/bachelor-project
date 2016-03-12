@@ -16,7 +16,7 @@ class Simulation():
     Classes implementing the actual simulations should inherit from this class.
     """
 
-    def __init__(self, xsize, ysize, debug, rng_seed=None, temperature):
+    def __init__(self, xsize, ysize, temperature, debug, rng_seed=None):
         """
         Initialize q-state Potts model simulation.
 
@@ -32,7 +32,9 @@ class Simulation():
         self._set_rng_seed(rng_seed)
         self.xsize = xsize
         self.ysize = ysize
+        self.lattice = self._initiate_lattice(temperature)
         signal.signal(signal.SIGINT, self._interrupt_handler)
+        logging.debug(self.lattice)
         logging.info("Simulation started.")
 
     def _set_rng_seed(self, rng_seed):
@@ -87,6 +89,28 @@ class Simulation():
         logging.debug("Done")
         sys.exit(1)
 
+    def _initiate_lattice(self, temperature):
+        """
+        Initiate the lattice at either high or low temperature limits.
+
+        High temperature means completly random distribution of spins, low
+        temperature means completly ordered distribution.
+
+        Args:
+            temperature: Initial temperature of simulation.
+
+        Returns:
+            initial_lattice: List of lists describing the lattice.
+        """
+        initial_lattice = []
+        if temperature == "hi":
+            pass
+
+        elif temperature == "lo":
+            pass
+
+        return initial_lattice
+
 
 def argument_parser():
     """
@@ -120,5 +144,4 @@ def argument_parser():
     arguments = parser.parse_args()
     return arguments
 
-# TODO: Implemnt json save
-# TODO: Implent hi/lo temp initial condition.
+# TODO: Implement json save

@@ -8,7 +8,7 @@ import simulation_utils as utils
 
 class IsingModel(utils.Simulation):
     """
-
+    Simulate the Ising Model
     """
 
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     ising = IsingModel(
         arguments.xsize,
         arguments.ysize,
+        arguments.temperature,
         arguments.debug,
-        arguments.seed,
-        arguments.temperature)
+        arguments.seed,)
     ising.main()
