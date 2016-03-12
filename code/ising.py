@@ -21,5 +21,10 @@ class IsingModel(utils.Simulation):
 if __name__ == "__main__":
 
     arguments = utils.argument_parser()
-    ising = IsingModel(arguments.xsize, arguments.ysize, arguments.debug)
+    ising = IsingModel(
+        arguments.xsize,
+        arguments.ysize,
+        arguments.debug,
+        arguments.seed,
+        arguments.temperature)
     ising.main()

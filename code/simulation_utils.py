@@ -16,7 +16,7 @@ class Simulation():
     Classes implementing the actual simulations should inherit from this class.
     """
 
-    def __init__(self, xsize, ysize, debug):
+    def __init__(self, xsize, ysize, debug, rng_seed=None, temperature):
         """
         Initialize q-state Potts model simulation.
 
@@ -24,21 +24,31 @@ class Simulation():
             xsize: Extent of simulation in x-direction.
             ysize: Extent of simulation in y-direction.
             debug: Whether debugging info has to be shown.
+            rng_seed: Optional seed for the random number generator.
         """
+        self.start_time = time.time()
         self.date_format = "%Y-%m-%d %H:%M:%S"
         self._logging_config(debug)
-
+        self._set_rng_seed(rng_seed)
         self.xsize = xsize
         self.ysize = ysize
-        self.start_time = time.time()
-        # Explicitly set state of random number generator. This increases
-        # reproduciblity. TODO: Implemnt seed passing.
-        random.seed(self.start_time)
-        self.start_time_human = time.strftime(
-            self.date_format,
-            self.start_time)
         signal.signal(signal.SIGINT, self._interrupt_handler)
         logging.info("Simulation started.")
+
+    def _set_rng_seed(self, rng_seed):
+        """
+        Set the seed of the random number generator.
+
+        Setting the seed explicitly improves reproducibility as the same
+        simulation can be run multiple times.
+
+        Args:
+            seed: Seed to use in random number generator.
+        """
+        if rng_seed is None:
+            random.seed(self.start_time)
+        else:
+            random.seed(rng_seed)
 
     def _logging_config(self, debug):
         """
@@ -64,10 +74,10 @@ class Simulation():
         Cleanly handle keyboard interrupts.
 
         Cleanup code is called and the program is terminated when cleanup
-        finished
+        finishes.
 
         Args:
-            interrupt_signal: Signal to handle (2 for KeyBoardInterrupt)
+            interrupt_signal: Signal to handle (2 for KeyBoardInterrupt).
             frame: Current stack frame.
         """
         # Ignore any subsequent interrupt so cleanup can be performed.
@@ -96,9 +106,17 @@ def argument_parser():
         help="specify y extent",
         type=int)
     parser.add_argument(
+        "temperature",
+        choices=["hi", "lo"],
+        help=('specify initial temperature of simulation ("hi" is infinite, '
+              '"lo" is 0)'))
+    parser.add_argument(
         "-d", "--debug",
         help="print debugging information",
         action="store_true")
+    parser.add_argument(
+        "-s", "--seed",
+        help="specify seed for random rumber generator")
     arguments = parser.parse_args()
     return arguments
 
