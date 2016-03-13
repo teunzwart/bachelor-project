@@ -1,6 +1,8 @@
 """Helper utilities for simulations of the Ising and 3-state Potts model."""
 
+
 import argparse
+import collections
 import json
 import logging
 import random
@@ -16,7 +18,8 @@ class Simulation():
     Classes implementing the actual simulations should inherit from this class.
     """
 
-    def __init__(self, xsize, ysize, temperature, debug, rng_seed=None):
+    def __init__(self, no_of_states, xsize, ysize, initial_temperature, debug,
+                 rng_seed=None):
         """
         Initialize q-state Potts model simulation.
 
@@ -27,30 +30,29 @@ class Simulation():
             rng_seed: Optional seed for the random number generator.
         """
         self.start_time = time.time()
-        self.date_format = "%Y-%m-%d %H:%M:%S"
         self._logging_config(debug)
-        self._set_rng_seed(rng_seed)
+        self.rng_seed = rng_seed
+        self._set_rng_seed()
+        self.no_of_states = no_of_states
+        self.states = self._initialize_states()
         self.xsize = xsize
         self.ysize = ysize
-        self.lattice = self._initiate_lattice(temperature)
+        self.lattice = self._initialize_lattice(initial_temperature)
         signal.signal(signal.SIGINT, self._interrupt_handler)
-        logging.debug(self.lattice)
         logging.info("Simulation started.")
 
-    def _set_rng_seed(self, rng_seed):
+    def _set_rng_seed(self):
         """
         Set the seed of the random number generator.
 
         Setting the seed explicitly improves reproducibility as the same
         simulation can be run multiple times.
-
-        Args:
-            seed: Seed to use in random number generator.
         """
-        if rng_seed is None:
-            random.seed(self.start_time)
+        if self.rng_seed is None:
+            self.rng_seed = self.start_time
+            random.seed(self.rng_seed)
         else:
-            random.seed(rng_seed)
+            random.seed(self.rng_seed)
 
     def _logging_config(self, debug):
         """
@@ -60,16 +62,13 @@ class Simulation():
             debug: Whether debugging info has to be shown.
         """
         logging_format = "%(asctime)s %(levelname)s:%(message)s"
+        date_format = "%Y-%m-%d %H:%M:%S"
         if debug:
-            logging.basicConfig(
-                format=logging_format,
-                datefmt=self.date_format,
-                level=logging.DEBUG)
+            logging.basicConfig(format=logging_format, datefmt=date_format,
+                                level=logging.DEBUG)
         else:
-            logging.basicConfig(
-                format=logging_format,
-                datefmt=self.date_format,
-                level=logging.INFO)
+            logging.basicConfig(format=logging_format, datefmt=date_format,
+                                level=logging.INFO)
 
     def _interrupt_handler(self, interrupt_signal, frame):
         """
@@ -85,11 +84,16 @@ class Simulation():
         # Ignore any subsequent interrupt so cleanup can be performed.
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         logging.info("Interrupted. Cleaning up...")
-        # TODO: Add way to pass cleanup function here.
-        logging.debug("Done")
+        self.save_simulation_run("INTERRUPTED")
         sys.exit(1)
 
-    def _initiate_lattice(self, temperature):
+    def _initialize_states(self):
+        if self.no_of_states == 2:
+            return [-1, 1]
+        elif self.no_of_states == 3:
+            return [-1, 0, 1]
+
+    def _initialize_lattice(self, initial_temperature):
         """
         Initiate the lattice at either high or low temperature limits.
 
@@ -103,13 +107,41 @@ class Simulation():
             initial_lattice: List of lists describing the lattice.
         """
         initial_lattice = []
-        if temperature == "hi":
-            pass
-
-        elif temperature == "lo":
-            pass
+        for y in range(self.ysize):
+            lattice_row = []
+            for x in range(self.xsize):
+                if initial_temperature == "hi":
+                    lattice_row.append(random.choice(self.states))
+                elif initial_temperature == "lo":
+                    lattice_row.append(1)
+            initial_lattice.append(lattice_row)
 
         return initial_lattice
+
+    def save_simulation_run(self, status):
+        start_time_human = time.strftime("%Y-%m-%d %H:%M:%S",
+                                         time.localtime(self.start_time))
+        end_time = time.time()
+        end_time_human = time.strftime("%Y-%m-%d %H:%M:%S",
+                                       time.localtime(end_time))
+        elapsed_time = round(end_time - self.start_time, 2)
+        if self.no_of_states == 2:
+            filename = "Ising-{0}".format(
+                time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(end_time)))
+        elif self.no_of_states == 3:
+            filename = "Potts-{0}".format(
+                time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(end_time)))
+        with open("{0}.json".format(filename), "w") as file:
+            json.dump(collections.OrderedDict((
+                ("no_of_states", self.no_of_states),
+                ("status", status),
+                ("seed", self.rng_seed),
+                ("start_time", start_time_human),
+                ("end_time", end_time_human),
+                ("elapsed_time", elapsed_time)
+            )), file, indent=4)
+        logging.info("Simulation ran for {0} seconds.".format(elapsed_time))
+        logging.info("Simulation was {0}.".format(status))
 
 
 def argument_parser():
@@ -121,6 +153,10 @@ def argument_parser():
     """
     parser = argparse.ArgumentParser(
         description="Simulate the Ising model in 2D.")
+    parser.add_argument(
+        "no_of_states",
+        help="number of states of Potts model (2 for Ising, 3 for 3-state)",
+        type=int)
     parser.add_argument(
         "xsize",
         help="specify x extent",
@@ -140,8 +176,9 @@ def argument_parser():
         action="store_true")
     parser.add_argument(
         "-s", "--seed",
-        help="specify seed for random rumber generator")
+        help="specify seed for random rumber generator (accepts only floats)",
+        type=float)
     arguments = parser.parse_args()
     return arguments
 
-# TODO: Implement json save
+# TODO: Add bound cheching for commandline arguments
