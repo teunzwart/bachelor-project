@@ -31,22 +31,24 @@ class Simulation():
             xsize: Extent of simulation in x-direction.
             ysize: Extent of simulation in y-direction.
             initial_temperature: Initial temperature of the lattice.
-            debug: Whether debugging info has to be shown.
             rng_seed: Optional seed for the random number generator.
+            debug: Whether debugging info has to be shown.
+            save_to_json: Whether information about the simulation has to be
+                          saved in a json file.
         """
         self._argument_bound_check(no_of_states, xsize, ysize,
                                    initial_temperature, rng_seed)
-        self.start_time = time.time()
         self._logging_config(debug)
         logging.debug("Initializing simulation.")
+        self.start_time = time.time()
         self.rng_seed = rng_seed
-        self._set_rng_seed()
         self.no_of_states = no_of_states
-        self.states = self._initialize_states()
-        self.save_to_json = save_to_json
         self.xsize = xsize
         self.ysize = ysize
         self.initial_temperature = initial_temperature
+        self.save_to_json = save_to_json
+        self._set_rng_seed()
+        self.states = self._initialize_states()
         self.lattice = self._initialize_lattice()
         signal.signal(signal.SIGINT, self._interrupt_handler)
         logging.info("Simulation started.")
@@ -111,6 +113,7 @@ class Simulation():
         sys.exit(1)
 
     def _initialize_states(self):
+        """Initialize the possible states a point on the lattice may take."""
         if self.no_of_states == 2:
             states = [-1, 1]
         elif self.no_of_states == 3:
@@ -123,7 +126,7 @@ class Simulation():
 
     def _initialize_lattice(self):
         """
-        Initiate the lattice at either high or low temperature limits.
+        Initialize the lattice at either high or low temperature limits.
 
         High temperature means completly random distribution of spins, low
         temperature means completly ordered distribution.
@@ -137,6 +140,12 @@ class Simulation():
         return initial_lattice
 
     def save_simulation_run(self, status, **kwargs):
+        """
+        Save simulation information to a json file.
+
+        Args:
+            status: how the simulation finished (SUCCES, INTERRUPTED)
+        """
         start_time_human = time.strftime("%Y-%m-%d %H:%M:%S",
                                          time.localtime(self.start_time))
         end_time = time.time()
@@ -144,8 +153,9 @@ class Simulation():
                                        time.localtime(end_time))
         elapsed_time = round(end_time - self.start_time, 2)
 
-        filename = "{0}-state-Potts-{1}".format(
+        filename = "{0}state-{1}-{2}.json".format(
             self.no_of_states,
+            status,
             time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(end_time)))
 
         plt.axis('off')
@@ -153,7 +163,7 @@ class Simulation():
         plt.show()
 
         if self.save_to_json:
-            with open("{0}.json".format(filename), "w") as json_file:
+            with open(filename, "w") as json_file:
                 json.dump(collections.OrderedDict((
                     ("no_of_states", self.no_of_states),
                     ("status", status),
