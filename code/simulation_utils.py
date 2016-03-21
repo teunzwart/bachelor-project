@@ -5,10 +5,13 @@ import argparse
 import collections
 import json
 import logging
+import math
 import random
 import signal
 import sys
 import time
+
+import matplotlib.pyplot as plt
 
 
 class Simulation():
@@ -18,26 +21,31 @@ class Simulation():
     Classes implementing the actual simulations should inherit from this class.
     """
 
-    def __init__(self, no_of_states, xsize, ysize, initial_temperature, debug,
-                 rng_seed=None):
+    def __init__(self, no_of_states, xsize, ysize, initial_temperature,
+                 debug=False, rng_seed=None, save_to_json=True):
         """
         Initialize q-state Potts model simulation.
 
         Args:
+            no_of_states: 2 signifies Ising, 3 3-state Potts.
             xsize: Extent of simulation in x-direction.
             ysize: Extent of simulation in y-direction.
+            initial_temperature: Initial temperature of the lattice.
             debug: Whether debugging info has to be shown.
             rng_seed: Optional seed for the random number generator.
         """
         self.start_time = time.time()
         self._logging_config(debug)
+        logging.debug("Initializing simulation.")
         self.rng_seed = rng_seed
         self._set_rng_seed()
         self.no_of_states = no_of_states
         self.states = self._initialize_states()
+        self.save_to_json = save_to_json
         self.xsize = xsize
         self.ysize = ysize
-        self.lattice = self._initialize_lattice(initial_temperature)
+        self.initial_temperature = initial_temperature
+        self.lattice = self._initialize_lattice()
         signal.signal(signal.SIGINT, self._interrupt_handler)
         logging.info("Simulation started.")
 
@@ -53,6 +61,8 @@ class Simulation():
             random.seed(self.rng_seed)
         else:
             random.seed(self.rng_seed)
+        logging.debug("RNG seef has type {0}.".format(type(self.rng_seed)))
+        logging.debug("RNG seed is {0}".format(self.rng_seed))
 
     def _logging_config(self, debug):
         """
@@ -62,7 +72,7 @@ class Simulation():
             debug: Whether debugging info has to be shown.
         """
         logging_format = "%(asctime)s %(levelname)s:%(message)s"
-        date_format = "%Y-%m-%d %H:%M:%S"
+        date_format = "%H:%M:%S"
         if debug:
             logging.basicConfig(format=logging_format, datefmt=date_format,
                                 level=logging.DEBUG)
@@ -70,16 +80,12 @@ class Simulation():
             logging.basicConfig(format=logging_format, datefmt=date_format,
                                 level=logging.INFO)
 
-    def _interrupt_handler(self, interrupt_signal, frame):
+    def _interrupt_handler(self, *args):
         """
         Cleanly handle keyboard interrupts.
 
         Cleanup code is called and the program is terminated when cleanup
         finishes.
-
-        Args:
-            interrupt_signal: Signal to handle (2 for KeyBoardInterrupt).
-            frame: Current stack frame.
         """
         # Ignore any subsequent interrupt so cleanup can be performed.
         signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -89,57 +95,58 @@ class Simulation():
 
     def _initialize_states(self):
         if self.no_of_states == 2:
-            return [-1, 1]
+            states = [-1, 1]
         elif self.no_of_states == 3:
-            return [-1, 0, 1]
+            states = [-1, 0, 1]
+        else:
+            states = [-round(math.cos((n*math.pi) / (self.no_of_states-1)), 10) for n in range(self.no_of_states)]
+        logging.debug("States are {0}".format(states))
+        return states
 
-    def _initialize_lattice(self, initial_temperature):
+    def _initialize_lattice(self):
         """
         Initiate the lattice at either high or low temperature limits.
 
         High temperature means completly random distribution of spins, low
         temperature means completly ordered distribution.
-
-        Args:
-            temperature: Initial temperature of simulation.
-
-        Returns:
-            initial_lattice: List of lists describing the lattice.
         """
-        initial_lattice = []
-        for y in range(self.ysize):
-            lattice_row = []
-            for x in range(self.xsize):
-                if initial_temperature == "hi":
-                    lattice_row.append(random.choice(self.states))
-                elif initial_temperature == "lo":
-                    lattice_row.append(1)
-            initial_lattice.append(lattice_row)
-
+        if self.initial_temperature == "hi":
+            initial_lattice = [[random.choice(self.states) for x in
+                                range(self.xsize)] for y in range(self.ysize)]
+        elif self.initial_temperature == "lo":
+            initial_lattice = [[1 for x in range(self.xsize)] for y in
+                               range(self.ysize)]
         return initial_lattice
 
-    def save_simulation_run(self, status):
+    def save_simulation_run(self, status, **kwargs):
         start_time_human = time.strftime("%Y-%m-%d %H:%M:%S",
                                          time.localtime(self.start_time))
         end_time = time.time()
         end_time_human = time.strftime("%Y-%m-%d %H:%M:%S",
                                        time.localtime(end_time))
         elapsed_time = round(end_time - self.start_time, 2)
-        if self.no_of_states == 2:
-            filename = "Ising-{0}".format(
-                time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(end_time)))
-        elif self.no_of_states == 3:
-            filename = "Potts-{0}".format(
-                time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(end_time)))
-        with open("{0}.json".format(filename), "w") as file:
-            json.dump(collections.OrderedDict((
-                ("no_of_states", self.no_of_states),
-                ("status", status),
-                ("seed", self.rng_seed),
-                ("start_time", start_time_human),
-                ("end_time", end_time_human),
-                ("elapsed_time", elapsed_time)
-            )), file, indent=4)
+
+        filename = "{0}-state-Potts-{1}".format(
+            self.no_of_states,
+            time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(end_time)))
+
+        plt.axis('off')
+        plt.imshow(self.lattice, interpolation="nearest")
+        plt.show()
+
+        if self.save_to_json:
+            with open("{0}.json".format(filename), "w") as json_file:
+                json.dump(collections.OrderedDict((
+                    ("no_of_states", self.no_of_states),
+                    ("status", status),
+                    ("seed", self.rng_seed),
+                    ("start_time", start_time_human),
+                    ("end_time", end_time_human),
+                    ("elapsed_time", elapsed_time),
+                    ("initial_temperature", self.initial_temperature),
+                    ("xsize", self.xsize),
+                    ("ysize", self.ysize)
+                )), json_file, indent=4)
         logging.info("Simulation ran for {0} seconds.".format(elapsed_time))
         logging.info("Simulation was {0}.".format(status))
 
@@ -178,7 +185,11 @@ def argument_parser():
         "-s", "--seed",
         help="specify seed for random rumber generator (accepts only floats)",
         type=float)
+    parser.add_argument(
+        "-n", "--nojson",
+        help="do not save information of simulation in a json file",
+        action="store_false")
     arguments = parser.parse_args()
     return arguments
 
-# TODO: Add bound cheching for commandline arguments
+# TODO: Add bound checking for commandline arguments
