@@ -22,7 +22,7 @@ class Simulation():
     """
 
     def __init__(self, no_of_states, xsize, ysize, initial_temperature,
-                 debug=False, rng_seed=None, save_to_json=True):
+                 rng_seed=None, debug=False, save_to_json=True):
         """
         Initialize q-state Potts model simulation.
 
@@ -34,6 +34,8 @@ class Simulation():
             debug: Whether debugging info has to be shown.
             rng_seed: Optional seed for the random number generator.
         """
+        self._argument_bound_check(no_of_states, xsize, ysize,
+                                   initial_temperature, rng_seed)
         self.start_time = time.time()
         self._logging_config(debug)
         logging.debug("Initializing simulation.")
@@ -63,6 +65,21 @@ class Simulation():
             random.seed(self.rng_seed)
         logging.debug("RNG seef has type {0}.".format(type(self.rng_seed)))
         logging.debug("RNG seed is {0}".format(self.rng_seed))
+
+    def _argument_bound_check(self, no_of_states, xsize, ysize,
+                              initial_temperature, rng_seed):
+        """Check whether class arguments have valid values."""
+        if no_of_states < 2 or type(no_of_states) is not int:
+            raise ValueError("no_of_states has to be an integer larger than 2")
+        if xsize < 1 or type(xsize) is not int:
+            raise ValueError("xsize has to be an integer larger than 1")
+        if ysize < 1 or type(ysize) is not int:
+            raise ValueError("ysize has to be an integer larger than 1")
+        if initial_temperature not in ["lo", "hi"]:
+            raise ValueError("initial_temperature has to be either hi or lo")
+        if rng_seed is not None:
+            if type(rng_seed) not in [float, int]:
+                raise TypeError("rng_seed has to be a float or integer")
 
     def _logging_config(self, debug):
         """
@@ -99,7 +116,8 @@ class Simulation():
         elif self.no_of_states == 3:
             states = [-1, 0, 1]
         else:
-            states = [-round(math.cos((n*math.pi) / (self.no_of_states-1)), 10) for n in range(self.no_of_states)]
+            states = [-round(math.cos((n*math.pi) / (self.no_of_states-1)), 10)
+                      for n in range(self.no_of_states)]
         logging.debug("States are {0}".format(states))
         return states
 
@@ -162,7 +180,7 @@ def argument_parser():
         description="Simulate the Ising model in 2D.")
     parser.add_argument(
         "no_of_states",
-        help="number of states of Potts model (2 for Ising, 3 for 3-state)",
+        help="number of states of Potts model (2 for Ising)",
         type=int)
     parser.add_argument(
         "xsize",
@@ -178,18 +196,16 @@ def argument_parser():
         help=('specify initial temperature of simulation ("hi" is infinite, '
               '"lo" is 0)'))
     parser.add_argument(
-        "-d", "--debug",
-        help="print debugging information",
-        action="store_true")
-    parser.add_argument(
         "-s", "--seed",
         help="specify seed for random rumber generator (accepts only floats)",
         type=float)
+    parser.add_argument(
+        "-d", "--debug",
+        help="print debugging information",
+        action="store_true")
     parser.add_argument(
         "-n", "--nojson",
         help="do not save information of simulation in a json file",
         action="store_false")
     arguments = parser.parse_args()
     return arguments
-
-# TODO: Add bound checking for commandline arguments
