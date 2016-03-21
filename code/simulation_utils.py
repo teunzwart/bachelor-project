@@ -22,7 +22,7 @@ class Simulation():
     """
 
     def __init__(self, no_of_states, xsize, ysize, initial_temperature,
-                 rng_seed=None, debug=False, save_to_json=True):
+                 rng_seed=None, debug=False, silent=False, save_to_json=True):
         """
         Initialize q-state Potts model simulation.
 
@@ -33,12 +33,14 @@ class Simulation():
             initial_temperature: Initial temperature of the lattice.
             rng_seed: Optional seed for the random number generator.
             debug: Whether debugging info has to be shown.
+            silent: Whether to run silent (useful for unittests).
             save_to_json: Whether information about the simulation has to be
                           saved in a json file.
         """
         self._argument_bound_check(no_of_states, xsize, ysize,
-                                   initial_temperature, rng_seed)
-        self._logging_config(debug)
+                                   initial_temperature, rng_seed, debug,
+                                   silent)
+        self._logging_config(debug, silent)
         logging.debug("Initializing simulation.")
         self.start_time = time.time()
         self.rng_seed = rng_seed
@@ -65,11 +67,11 @@ class Simulation():
             random.seed(self.rng_seed)
         else:
             random.seed(self.rng_seed)
-        logging.debug("RNG seef has type {0}.".format(type(self.rng_seed)))
+        logging.debug("RNG seed has type {0}.".format(type(self.rng_seed)))
         logging.debug("RNG seed is {0}".format(self.rng_seed))
 
     def _argument_bound_check(self, no_of_states, xsize, ysize,
-                              initial_temperature, rng_seed):
+                              initial_temperature, rng_seed, debug, silent):
         """Check whether class arguments have valid values."""
         if no_of_states < 2 or type(no_of_states) is not int:
             raise ValueError("no_of_states has to be an integer larger than 2")
@@ -82,8 +84,10 @@ class Simulation():
         if rng_seed is not None:
             if type(rng_seed) not in [float, int]:
                 raise TypeError("rng_seed has to be a float or integer")
+        if debug and silent:
+            raise Exception("debug and silent can not both be toggled")
 
-    def _logging_config(self, debug):
+    def _logging_config(self, debug, silent):
         """
         Configure the format of logging messages.
 
@@ -95,6 +99,9 @@ class Simulation():
         if debug:
             logging.basicConfig(format=logging_format, datefmt=date_format,
                                 level=logging.DEBUG)
+        elif silent:
+            logging.basicConfig(format=logging_format, datefmt=date_format,
+                                level=logging.CRITICAL)
         else:
             logging.basicConfig(format=logging_format, datefmt=date_format,
                                 level=logging.INFO)
@@ -160,7 +167,7 @@ class Simulation():
 
         plt.axis('off')
         plt.imshow(self.lattice, interpolation="nearest")
-        plt.show()
+        # plt.show()
 
         if self.save_to_json:
             with open(filename, "w") as json_file:
@@ -212,6 +219,10 @@ def argument_parser():
     parser.add_argument(
         "-d", "--debug",
         help="print debugging information",
+        action="store_true")
+    parser.add_argument(
+        "--silent",
+        help="run silently",
         action="store_true")
     parser.add_argument(
         "-n", "--nojson",
