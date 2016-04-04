@@ -37,9 +37,8 @@ class Simulation():
             save_to_json: Whether information about the simulation has to be
                           saved in a json file.
         """
-        self._argument_bound_check(no_of_states, xsize, ysize,
-                                   initial_temperature, rng_seed, debug,
-                                   silent)
+        self._argument_check(no_of_states, xsize, ysize, initial_temperature,
+                             rng_seed, debug, silent)
         self._logging_config(debug, silent)
         logging.debug("Initializing simulation.")
         self.start_time = time.time()
@@ -52,8 +51,10 @@ class Simulation():
         self._set_rng_seed()
         self.states = self._initialize_states()
         self.lattice = self._initialize_lattice()
+        self.internal_energy = self.calculate_energy()
         signal.signal(signal.SIGINT, self._interrupt_handler)
         logging.info("Simulation started.")
+        logging.info("Initial energy is {0}.".format(self.internal_energy))
 
     def _set_rng_seed(self):
         """
@@ -70,15 +71,15 @@ class Simulation():
         logging.debug("RNG seed has type {0}.".format(type(self.rng_seed)))
         logging.debug("RNG seed is {0}".format(self.rng_seed))
 
-    def _argument_bound_check(self, no_of_states, xsize, ysize,
-                              initial_temperature, rng_seed, debug, silent):
+    def _argument_check(self, no_of_states, xsize, ysize, initial_temperature,
+                        rng_seed, debug, silent):
         """Check whether class arguments have valid values."""
         if no_of_states < 2 or type(no_of_states) is not int:
             raise ValueError("no_of_states has to be an integer larger than 2")
-        if xsize < 1 or type(xsize) is not int:
-            raise ValueError("xsize has to be an integer larger than 1")
-        if ysize < 1 or type(ysize) is not int:
-            raise ValueError("ysize has to be an integer larger than 1")
+        if xsize < 3 or type(xsize) is not int:
+            raise ValueError("xsize has to be an integer and >= 3")
+        if ysize < 3 or type(ysize) is not int:
+            raise ValueError("ysize has to be an integer and >= 3")
         if initial_temperature not in ["lo", "hi"]:
             raise ValueError("initial_temperature has to be either hi or lo")
         if rng_seed is not None:
@@ -142,9 +143,32 @@ class Simulation():
             initial_lattice = [[random.choice(self.states) for x in
                                 range(self.xsize)] for y in range(self.ysize)]
         elif self.initial_temperature == "lo":
-            initial_lattice = [[1 for x in range(self.xsize)] for y in
-                               range(self.ysize)]
+            # Spontaneously broken ground state.
+            ground_state = random.choice(self.states)
+            initial_lattice = [[ground_state for x in range(self.xsize)] for y
+                               in range(self.ysize)]
         return initial_lattice
+
+    def calculate_energy(self):
+        """Calculate the energy of the lattice."""
+        bond_energy = -1
+        lattice_energy = 0
+        for y in range(self.ysize):
+            for x in range(self.xsize):
+                neighbours = []
+                lattice_site = self.lattice[y][x]
+                neighbours.append(self.lattice[(y-1) % self.ysize][x])
+                neighbours.append(self.lattice[(y+1) % self.ysize][x])
+                neighbours.append(self.lattice[y][(x-1) % self.xsize])
+                neighbours.append(self.lattice[y][(x+1) % self.xsize])
+                for n in neighbours:
+                    if lattice_site == n:
+                        # print("Alligned: {0}, {1}".format(x, y))
+                        lattice_energy += bond_energy
+                    else:
+                        lattice_energy -= bond_energy
+
+        return lattice_energy
 
     def save_simulation_run(self, status, **kwargs):
         """
@@ -194,7 +218,7 @@ def argument_parser():
         Namespace containing commandline arguments.
     """
     parser = argparse.ArgumentParser(
-        description="Simulate the Ising model in 2D.")
+        description="Simulate the q-state Potts model in 2D.")
     parser.add_argument(
         "no_of_states",
         help="number of states of Potts model (2 for Ising)",
@@ -230,3 +254,5 @@ def argument_parser():
         action="store_false")
     arguments = parser.parse_args()
     return arguments
+
+# TODO: Add way to set location of json files.
