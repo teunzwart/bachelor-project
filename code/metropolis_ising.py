@@ -42,7 +42,7 @@ class MetropolisIsing:
             else:
                 raise Exception("Bond energy can not be 0.")
 
-            lattice = np.array(ground_state, self.lattice_size_L**2).reshape(self.lattice_size_L, self.lattice_size_L)
+            lattice = np.full((self.lattice_size_L, self.lattice_size_L), ground_state, dtype="int64")
         return lattice
 
     def calculate_lattice_energy(self):
@@ -111,7 +111,7 @@ class MetropolisIsing:
 
 
 if __name__ == "__main__":
-    metropolis_ising = MetropolisIsing(4, 1, 2, "hi", 1000)
+    metropolis_ising = MetropolisIsing(4, 1, 2, "lo", 1000)
     metropolis_ising.metropolis()
     print(metropolis_ising.lattice)
     print(metropolis_ising.energy)
