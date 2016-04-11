@@ -80,8 +80,8 @@ class MetropolisIsing:
     def metropolis(self):
         """Implentation of the Metropolis alogrithm."""
         for t in range(self.sweeps):
-            if t % (self.sweeps / 10) == 0:
-                print("Sweep {0}".format(t))
+            # if t % (self.sweeps / 10) == 0:
+            #     print("Sweep {0}".format(t))
             # Measurement every sweep.
             np.put(self.energy_history, t, self.energy)
             np.put(self.magnet_history, t, np.sum(self.lattice))
@@ -123,12 +123,41 @@ class MetropolisIsing:
 
     def exact_energy(self, temperature):
         """Calculate the exact energy with Boltzmann constant set to 1."""
-        k = 2 * np.sinh((2 / temperature) * self.bond_energy_J) / (np.cosh((2 / temperature) * self.bond_energy_J))**2
-        energy = (- self.bond_energy_J * (1 / np.tanh((2 / temperature) * self.bond_energy_J)) *
-                  (1 + (2 / np.pi) * (2 * np.tanh((2 / temperature) * self.bond_energy_J)**2 - 1) *
-                   scipy.special.ellipk(k)))
+        hyp_arg = (2 / temperature) * self.bond_energy_J # Argument of hyperbolic functions.
+        k = 2 * np.sinh(hyp_arg) / np.cosh(hyp_arg)**2
+        energy = -self.bond_energy_J * (1 / np.tanh(hyp_arg)) * (1 + (2 / np.pi) * (2 * np.tanh(hyp_arg)**2) - 1) * scipy.special.ellipk(k)
 
         return energy
+
+    def autocorrelation(self, data):
+        """
+        Naive (SLOW!) way to calculate the autocorrelation function.
+
+        Results are very similair to fast numpy version.
+        """
+        correlations = []
+        for t in range(len(data)):
+            tmax = len(data)
+            upper_bound = tmax - t
+            first_sum = 0
+            second_sum = 0
+            third_sum = 0
+
+            for n in np.arange(upper_bound):
+                first_sum += data[n] * data[n + t]
+                second_sum += data[n]
+                third_sum += data[n + t]
+
+            correlation = (1 / upper_bound) * (first_sum - (1 / upper_bound) * second_sum * third_sum)
+            correlations.append(correlation)
+
+        return correlations / max(correlations)  # Normalize the data.
+
+    def numpy_autocorrelation(self, data):
+        """Quick autocorrelation calculation."""
+        data = np.asarray([d - np.mean(data) for d in data])
+        acf = np.correlate(data, data, mode="full")[(len(data)-1):] # Only keep the usefull data (correlation is symmetric around index len(data)).
+        return acf / acf.max() # Normalize the data.
 
 if __name__ == "__main__":
     metropolis_ising = MetropolisIsing(4, 1, 2, "lo", 1000)
