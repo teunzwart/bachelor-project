@@ -47,7 +47,6 @@ class MetropolisIsing:
             else:
                 raise Exception("Bond energy can not be 0.")
 
-
         return lattice
 
     def calculate_lattice_energy(self):
@@ -123,7 +122,7 @@ class MetropolisIsing:
 
     def exact_energy(self, temperature):
         """Calculate the exact energy with Boltzmann constant set to 1."""
-        hyp_arg = (2 / temperature) * self.bond_energy_J # Argument of hyperbolic functions.
+        hyp_arg = (2 / temperature) * self.bond_energy_J  # Argument of hyperbolic functions.
         k = 2 * np.sinh(hyp_arg) / np.cosh(hyp_arg)**2
         energy = -self.bond_energy_J * (1 / np.tanh(hyp_arg)) * (1 + (2 / np.pi) * (2 * np.tanh(hyp_arg)**2) - 1) * scipy.special.ellipk(k)
 
@@ -156,8 +155,9 @@ class MetropolisIsing:
     def numpy_autocorrelation(self, data):
         """Quick autocorrelation calculation."""
         data = np.asarray([d - np.mean(data) for d in data])
-        acf = np.correlate(data, data, mode="full")[(len(data)-1):] # Only keep the usefull data (correlation is symmetric around index len(data)).
-        return acf / acf.max() # Normalize the data.
+        acf = np.correlate(data, data, mode="full")[(len(data) - 1):]  # Only keep the usefull data (correlation is symmetric around index len(data)).
+        return acf / acf.max()  # Normalize the data
+
 
 if __name__ == "__main__":
     metropolis_ising = MetropolisIsing(4, 1, 2, "lo", 1000)
