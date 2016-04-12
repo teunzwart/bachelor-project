@@ -67,7 +67,7 @@ class MetropolisIsing:
                     else:
                         energy += self.bond_energy_J
 
-        return energy
+        return energy / 2  # Every bond has been counted twice.
 
     def exponents_init(self):
         """Calculate the exponents once since FPO are expensive."""
