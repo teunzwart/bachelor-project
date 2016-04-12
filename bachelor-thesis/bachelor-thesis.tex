@@ -34,11 +34,14 @@
 
 %%% Personal Information %%%
 \newcommand\TITLE{Monte Carlo Simulations of the 3-State Potts Model in 2D}
-\newcommand\THESISFORM{Bachelor Project Physics and Astronomy, size 15 EC}
+\newcommand\THESISFORM{Bachelor Project Physics and Astronomy, size 15 EC\\conducted between 29-03-2016 and xx-xx-2016}
+\newcommand\INSTITUTE{Instituut voor Theoretische Fysica Amsterdam}
+\newcommand\FACULTY{Faculteit der Natuurwetenschappen, Wiskunde en Informatice}
+\newcommand\UNIVERSITY{Universiteit van Amsterdam}
 \newcommand\AUTHOR{Teun Zwart (10499873)}
 \newcommand\SUPERVISOR{dr. Phillipe Corboz}
 \newcommand\SECONDASSESSOR{dr. Edan Lerner}
-\newcommand\UNIVERSITYLOGO{UvA-logo.jpg} % Uncomment line below and add name of logo file.
+\newcommand\UNIVERSITYLOGO{UvA-logo.png} % Uncomment line below and add name of logo file.
 
 \graphicspath{{./images/}}
 
@@ -47,7 +50,6 @@
 
 \begin{titlepage}
 	\begin{center}
-		\includegraphics[width=\textwidth]{\UNIVERSITYLOGO}
 		\rule{\textwidth}{0.4mm}\\[0.5cm]
 		\huge{\textbf{\TITLE}}
 		\rule{\textwidth}{0.4mm}\\[0.5cm]
@@ -64,7 +66,10 @@
 			\end{flushright}
 		\end{minipage}
 		\vfill
-		\large \today\\
+		\large{\INSTITUTE}\\
+		\large{\FACULTY}\\
+		\large{\UNIVERSITY}\\~\\
+		\includegraphics[width=1.5cm]{\UNIVERSITYLOGO}
 	\end{center}
 \end{titlepage}
 
@@ -80,51 +85,31 @@
 \tableofcontents
 
 
-\chapter{The First Chapter}
+\chapter{Theory}
 
-\section{Introduction}
+\section{The Two-Dimensional Ising Model}
 
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-
-\newpage
-\section{Intriguing Results}
-
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-%
-\begin{equation}
-	E = mc ^ 2
-\end{equation}
-%
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-culpa qui officia deserunt mollit anim id est laborum.
-
-\cite{onsager:1944} showed, \cite{metropolis:1953} showed, \cite{potts:1952} showed
-
-and \cite{landau:2015} showed
-
-\chapter{The Second Chapter}
-
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+The two-dimensional Ising model in zero-field was first solved exactly in 1944 by Lars Onsager.\cite{onsager:1944}
+It describes a square lattice with nearest neighbour interactions, where each lattice point has with it associated a number (which we'll refer to as spin) which may either be +1 or -1 and was originally meant as a model for magnets.
+The Hamiltonian is\cite{mccoy:1973}
+\begin{align}
+	H = -J_{1} \sum_{j=1}^{\mathcal{M}} \sum_{k=1}^{\mathcal{N}} \sigma_{j,k} \sigma_{j,k+1} - J_{2} \sum_{j=1}^{\mathcal{M}} \sum_{k=1}^{\mathcal{N}} \sigma_{j,k} \sigma_{j+1,k},
+\end{align}
+with \(\mathcal{M}\) and \(\mathcal{N}\) the extent of the lattice in the \(x\)- and \(y\)-directions respectively and \(J_{1}\) and \(J_{2}\) the interaction strength between neighbours in respectively the \(x\)- and \(y\)-directions.
+In the case where the interaction strength in both directions is the same the Hamiltonian becomes\cite{newman:1999}
+\begin{align}
+	H = -J \sum_{\langle ij \rangle} \sigma_{i} \sigma_{j},
+\end{align}
+where the bracket denotes summation over nearest neighbours.\footnote{Note that naively applying this Hamiltonian to calculate the lattice energy overcounts the energy by a factor of 2 since each bond is counted twice.}
+In the ferromagnetic ground state (\(J>0\)) all spins on the lattice are aligned in one of two possible directions (the direction is chosen when the mirror symmetry in the lattice plane is spontaneously broken). 
+The Hamiltonian is subject to toroidal boundary conditions in both directions, meaning \(\sigma_{1,k} = \sigma_{\mathcal{M}+1,k}\) and \(\sigma_{j,1} = \sigma_{j,\mathcal{N}+1}\).
+We are interested in the thermodynamic properties of the Ising Model.
+To that end we define the partition function
+\begin{align}
+	Z &= \sum_{\sigma = \pm 1} e^{-\beta H} \\
+	  &= \sum_{\sigma = \pm 1} \prod_{j=1}^{\mathcal{M}} \prod_{k=1}^{\mathcal{N}} e^{\beta J_1 \sigma_{j,k} \sigma_{j,k+1}} \prod_{j=1}^{\mathcal{M}} \prod_{k=1}^{\mathcal{N}} e^{\beta J_2 \sigma_{j,k} \sigma_{j+1,k}},
+\end{align}
+with \(\beta=1/T\) (throughout this work we set the Boltzmann constant \(k_B\) equal to 1) and the sum running over every possible orientation of the spins on the lattice. To get an exact solution for this partition function some work is required.
 
 
 % Set style to abbrv to get Vancouver style citations.
