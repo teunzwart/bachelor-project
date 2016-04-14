@@ -2,6 +2,7 @@
 
 import numpy as np
 import scipy.special
+import matplotlib.pyplot as plt
 
 
 class MetropolisIsing:
@@ -22,6 +23,9 @@ class MetropolisIsing:
         self.exponents = self.exponents_init()
         self.energy_history = np.empty(self.sweeps)
         self.magnet_history = np.empty(self.sweeps)
+        self.rng_seed = int(self.lattice_size_L * self.temperature_T * 1000)
+        np.random.seed(self.rng_seed)
+
 
     def init_lattice(self):
         """
@@ -120,14 +124,6 @@ class MetropolisIsing:
             return 0
         return M
 
-    def exact_energy(self, temperature):
-        """Calculate the exact energy with Boltzmann constant set to 1."""
-        hyp_arg = (2 / temperature) * self.bond_energy_J  # Argument of hyperbolic functions.
-        k = 2 * np.sinh(hyp_arg) / np.cosh(hyp_arg)**2
-        energy = -self.bond_energy_J * (1 / np.tanh(hyp_arg)) * (1 + (2 / np.pi) * (2 * np.tanh(hyp_arg)**2) - 1) * scipy.special.ellipk(k)
-
-        return energy
-
     def autocorrelation(self, data):
         """
         Naive (SLOW!) way to calculate the autocorrelation function.
@@ -150,13 +146,106 @@ class MetropolisIsing:
             correlation = (1 / upper_bound) * (first_sum - (1 / upper_bound) * second_sum * third_sum)
             correlations.append(correlation)
 
-        return correlations / max(correlations)  # Normalize the data.
+        normalized_acf = correlations / max(correlations)
 
-    def numpy_autocorrelation(self, data):
+        plt.title("Autocorrelation Function")
+        plt.xlabel("Monte Carlo Sweeps")
+        plt.plot(range(len(normalized_acf)), normalized_acf)
+        plt.show()
+        plt.title("Autocorrelation Function")
+        plt.xlabel("Monte Carlo Sweeps")
+        plt.plot(range(2500), normalized_acf[:2500])
+        plt.show()
+
+        correlation_time = np.ceil(np.trapz(normalized_acf[:500]))
+
+        return correlation_time, normalized_acf
+
+    def numpy_autocorrelation(self, data, plotting=False):
         """Quick autocorrelation calculation."""
         data = np.asarray([d - np.mean(data) for d in data])
         acf = np.correlate(data, data, mode="full")[(len(data) - 1):]  # Only keep the usefull data (correlation is symmetric around index len(data)).
-        return acf / acf.max()  # Normalize the data
+        normalized_acf = acf / acf.max()
+        if plotting:
+            plt.title("Autocorrelation Function")
+            plt.xlabel("Monte Carlo Sweeps")
+            plt.plot(range(len(normalized_acf)), normalized_acf)
+            plt.show()
+
+            plt.title("Autocorrelation Function")
+            plt.xlabel("Monte Carlo Sweeps")
+            plt.plot(range(2500), normalized_acf[:2500])
+            plt.show()
+
+        correlation_time = np.ceil(np.trapz(normalized_acf[:500]))
+
+        return correlation_time, normalized_acf
+
+    def plot_energy(self, data=None):
+        """Plot of the energy per spin."""
+        plt.title("Energy per Spin")
+        plt.xlabel("Monte Carlo Sweeps")
+        if data is None:
+            plt.plot(self.energy_history / self.no_of_sites)
+        else:
+            plt.plot(data)
+        plt.show()
+
+    def plot_magnetization(self, data=None):
+        """Plot the magnetization per spin."""
+        plt.title("Magnetization per Spin")
+        plt.xlabel("Monte Carlo Sweeps")
+        if data is None:
+            plt.plot(self.magnet_history / self.no_of_sites)
+        else:
+            plt.plot(data)
+        plt.show()
+
+    def show_lattice(self):
+        """Plot the lattice."""
+        plt.xticks(range(0, self.lattice_size_L, 1))
+        plt.yticks(range(0, self.lattice_size_L, 1))
+        plt.imshow(self.lattice, interpolation="nearest", extent=[0, self.lattice_size_L, self.lattice_size_L, 0])
+        plt.show()
+
+    def plot_correlation_time_range(self, data, lattice_size, critical_temp=False, show_plot=True):
+        """Plot correlation times for a range of temperatures."""
+        plt.title("Correlation Time in Monte Carlo Sweeps")
+        plt.xlabel("Temperature")
+        plt.ylabel("Monte Carlo Sweeps")
+        plt.plot([d[0] for d in data], [d[1] for d in data], marker='o', linestyle='None', label=lattice_size)
+        if critical_temp:
+            plt.axvline(2.269)
+        if show_plot:
+            plt.legend(loc='upper right')
+            plt.show()
+
+    def plot_quantity_range(self, data, errors, quantity, lattice_size, legend_loc=None, critical_temp=False, exact=None, show_plot=True):
+        """Plot quantity over temperature range."""
+        plt.title(quantity)
+        plt.xlabel("Temperature")
+        plt.ylabel(quantity)
+        plt.plot([d[0] for d in data], [d[1] for d in data], label=lattice_size, linestyle='None', marker='o')
+        plt.errorbar([d[0] for d in data], [d[1] for d in data], [e[1] for e in errors], linestyle='None')
+        if critical_temp:
+            plt.axvline(2.269)
+        if exact is not None:
+            plt.plot([e[0] for e in exact], [e[1] for e in exact])
+        plt.xlim(0, data[len(data) - 1][0] + 0.2)
+        ymin, ymax = plt.ylim()
+        print(ymin, ymax)
+        data_min = min(data, key=lambda x: x[1])[1]
+        data_max = max(data, key=lambda x: x[1])[1]
+
+        if data_min < ymin and data_max > ymax:
+            plt.ylim(data_min * 1.15, data_max * 1.15)
+        if data_min < ymin:
+            plt.ylim(data_min * 1.15, 0)
+        elif data_max > ymax:
+            plt.ylim(0, data_max * 1.15)
+        if show_plot:
+            plt.legend(loc=legend_loc)
+            plt.show()
 
 
 if __name__ == "__main__":
