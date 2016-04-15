@@ -9,14 +9,15 @@ import matplotlib.pyplot as plt
 class MetropolisIsing:
     """An Implementation of the Metropolis algorithm for the Ising model."""
 
-    def __init__(self, lattice_size_L, bond_energy_J, temperature_T,
+    def __init__(self, lattice_size, bond_energy, temperature,
                  initial_temperature, sweeps):
         """Initialize variables and the lattice."""
-        self.lattice_size_L = lattice_size_L
-        self.no_of_sites = lattice_size_L**2
-        self.bond_energy_J = bond_energy_J
-        self.temperature_T = temperature_T
-        self.beta = 1 / self.temperature_T
+        print("Temperature is {0}".format(round(temperature, 2)))
+        self.lattice_size = lattice_size
+        self.no_of_sites = lattice_size**2
+        self.bond_energy = bond_energy
+        self.temperature = temperature
+        self.beta = 1 / self.temperature
         self.initial_temperature = initial_temperature
         self.sweeps = sweeps
         self.lattice = self.init_lattice()
@@ -24,7 +25,7 @@ class MetropolisIsing:
         self.exponents = self.exponents_init()
         self.energy_history = np.empty(self.sweeps)
         self.magnet_history = np.empty(self.sweeps)
-        self.rng_seed = int(self.lattice_size_L * self.temperature_T * 1000)
+        self.rng_seed = int(self.lattice_size * self.temperature * 1000)
         np.random.seed(self.rng_seed)
 
     def init_lattice(self):
@@ -36,18 +37,18 @@ class MetropolisIsing:
         "hi" corresponds to infinte temperature, "lo" to T=0.
         """
         if self.initial_temperature == "hi":
-            lattice = np.random.choice([-1, 1], self.no_of_sites).reshape(self.lattice_size_L, self.lattice_size_L)
+            lattice = np.random.choice([-1, 1], self.no_of_sites).reshape(self.lattice_size, self.lattice_size)
 
         elif self.initial_temperature == "lo":
-            if self.bond_energy_J > 0:
+            if self.bond_energy > 0:
                 # Broken ground state energy.
                 ground_state = np.random.choice([-1, 1])
-                lattice = np.full((self.lattice_size_L, self.lattice_size_L), ground_state, dtype="int64")
-            elif self.bond_energy_J < 0:
+                lattice = np.full((self.lattice_size, self.lattice_size), ground_state, dtype="int64")
+            elif self.bond_energy < 0:
                 # Set lattice to alternating pattern.
-                row1 = np.hstack([1, -1] * self.lattice_size_L)
-                row2 = np.hstack([-1, 1] * self.lattice_size_L)
-                lattice = np.vstack([row1, row2] * self.lattice_size_L)
+                row1 = np.hstack([1, -1] * self.lattice_size)
+                row2 = np.hstack([-1, 1] * self.lattice_size)
+                lattice = np.vstack([row1, row2] * self.lattice_size)
             else:
                 raise Exception("Bond energy can not be 0.")
 
@@ -56,20 +57,20 @@ class MetropolisIsing:
     def calculate_lattice_energy(self):
         """Calculate the energy of the lattice using the Ising model Hamiltonian in zero-field."""
         energy = 0
-        for y in range(self.lattice_size_L):
-            for x in range(self.lattice_size_L):
+        for y in range(self.lattice_size):
+            for x in range(self.lattice_size):
                 center = self.lattice[y][x]
                 # Toroidal boundary conditions, lattice wraps around
                 neighbours = [
-                    (y, (x - 1) % self.lattice_size_L),
-                    (y, (x + 1) % self.lattice_size_L),
-                    ((y - 1) % self.lattice_size_L, x),
-                    ((y + 1) % self.lattice_size_L, x)]
+                    (y, (x - 1) % self.lattice_size),
+                    (y, (x + 1) % self.lattice_size),
+                    ((y - 1) % self.lattice_size, x),
+                    ((y + 1) % self.lattice_size, x)]
                 for n in neighbours:
                     if self.lattice[n] == center:
-                        energy -= self.bond_energy_J
+                        energy -= self.bond_energy
                     else:
-                        energy += self.bond_energy_J
+                        energy += self.bond_energy
 
         return energy / 2  # Every bond has been counted twice.
 
@@ -77,7 +78,7 @@ class MetropolisIsing:
         """Calculate the exponents once since FPO are expensive."""
         exponents = {}
         for x in range(-4, 5, 2):
-            exponents[2 * self.bond_energy_J * x] = np.exp(-self.beta * 2 * self.bond_energy_J * x)
+            exponents[2 * self.bond_energy * x] = np.exp(-self.beta * 2 * self.bond_energy * x)
         return exponents
 
     def metropolis(self, optimize=True):
@@ -93,23 +94,23 @@ class MetropolisIsing:
             # Measurement every sweep.
             np.put(self.energy_history, t, self.energy)
             np.put(self.magnet_history, t, np.sum(self.lattice))
-            for k in range(self.lattice_size_L ** 2):
+            for k in range(self.lattice_size ** 2):
                 # Pick a random location on the lattice.
-                rand_y = np.random.randint(0, self.lattice_size_L)
-                rand_x = np.random.randint(0, self.lattice_size_L)
+                rand_y = np.random.randint(0, self.lattice_size)
+                rand_x = np.random.randint(0, self.lattice_size)
 
                 spin = self.lattice[rand_y, rand_x]  # Get spin at the random location.
 
                 # Determine the energy delta from flipping that spin.
                 neighbours = [
-                    (rand_y, (rand_x - 1) % self.lattice_size_L),
-                    (rand_y, (rand_x + 1) % self.lattice_size_L),
-                    ((rand_y - 1) % self.lattice_size_L, rand_x),
-                    ((rand_y + 1) % self.lattice_size_L, rand_x)]
+                    (rand_y, (rand_x - 1) % self.lattice_size),
+                    (rand_y, (rand_x + 1) % self.lattice_size),
+                    ((rand_y - 1) % self.lattice_size, rand_x),
+                    ((rand_y + 1) % self.lattice_size, rand_x)]
                 spin_sum = 0
                 for n in neighbours:
                     spin_sum += self.lattice[n]
-                energy_delta = 2 * self.bond_energy_J * spin * spin_sum
+                energy_delta = 2 * self.bond_energy * spin * spin_sum
 
                 # Energy may always be lowered.
                 if energy_delta <= 0:
@@ -127,7 +128,7 @@ class MetropolisIsing:
         exact_magnetization = []
 
         for t in np.arange(lower_temperature, higher_temperature, step):
-            M = (1 - np.sinh((2 / t) * self.bond_energy_J)**(-4))**(1 / 8)
+            M = (1 - np.sinh((2 / t) * self.bond_energy)**(-4))**(1 / 8)
             if np.isnan(M):
                 M = 0
             exact_magnetization.append((t, M))
@@ -215,8 +216,8 @@ class MetropolisIsing:
 
     def show_lattice(self, show_ticks=True):
         """Plot the lattice."""
-        plt.xticks(range(0, self.lattice_size_L, 1))
-        plt.yticks(range(0, self.lattice_size_L, 1))
+        plt.xticks(range(0, self.lattice_size, 1))
+        plt.yticks(range(0, self.lattice_size, 1))
         if not show_ticks:
             for tic in plt.gca().xaxis.get_major_ticks():
                 tic.tick1On = tic.tick2On = False
@@ -225,7 +226,7 @@ class MetropolisIsing:
                 tic.tick1On = tic.tick2On = False
                 tic.label1On = tic.label2On = False
             plt.gca().grid(False)
-        plt.imshow(self.lattice, interpolation="nearest", extent=[0, self.lattice_size_L, self.lattice_size_L, 0])
+        plt.imshow(self.lattice, interpolation="nearest", extent=[0, self.lattice_size, self.lattice_size, 0])
         plt.show()
 
     def plot_correlation_time_range(self, data, lattice_size, quantity, critical_temp=False, show_plot=True):
@@ -240,7 +241,7 @@ class MetropolisIsing:
             plt.legend(loc='upper right')
             plt.show()
 
-    def plot_quantity_range(self, data, errors, quantity, lattice_size, legend_loc=None, critical_temp=False, exact=None, show_plot=True, save=False):
+    def plot_quantity_range(self, data, errors, quantity, lattice_size, legend_loc="upper right", critical_temp=False, exact=None, show_plot=True, save=False):
         """Plot quantity over temperature range."""
         plt.title(quantity)
         plt.xlabel("Temperature")
@@ -272,6 +273,14 @@ class MetropolisIsing:
         """Calculate the error on a data set."""
         return np.std(data) / np.sqrt(len(data))
 
+    def heat_capacity(self, energy_data, temperature):
+        """
+        Calculate the heat capacity for a given energy data set and temperature.
+
+        Multiply by the number of sites, because the data has been normalised to the number of sites.
+        """
+        return self.no_of_sites / temperature**2 * (np.mean(energy_data**2) - np.mean(energy_data)**2)
+
     def binning_method(self, data, L, quantity, plotting=False):
         """
         Calculate autocorrelation time, mean and error for a quantity using the binning method.
@@ -282,6 +291,8 @@ class MetropolisIsing:
         errors = []
         errors.append((original_length, self.calculate_error(data)))
         for n in range(L):
+            if len(data) < 32:
+                break
             data = np.asarray([(a + b) / 2 for a, b in zip(data[::2], data[1::2])])
             errors.append((len(data), self.calculate_error(data)))
 
@@ -308,6 +319,43 @@ class MetropolisIsing:
 
         return autocorrelation_time, np.mean(data), max(errors, key=lambda x: x[1])[1]
 
+    def bootstrap_method(self, data, no_of_resamples, temperature, operation):
+        """Calculate error using the bootstrap method."""
+        resamples = np.empty(no_of_resamples)
+        for k in range(no_of_resamples):
+            random_picks = np.random.choice(data, len(data))
+            resamples.put(k, operation(random_picks, temperature))
+
+        error = np.sqrt((np.mean(resamples**2) - np.mean(resamples)**2)) / no_of_resamples
+        return error
+
+    def sample_every_two_correlation_times(self, energy_data, magnetization_data, correlation_time):
+        """Sample the given data every 2 correlation times and determine value and error."""
+        magnet_samples = []
+        energy_samples = []
+
+        for t in np.arange(0, len(energy_data), 2 * int(correlation_time)):
+            magnet_samples.append(magnetization_data[t])
+            energy_samples.append(energy_data[t])
+
+        magnet_samples = np.asarray(magnet_samples)
+        energy_samples = np.asarray(energy_samples)
+
+        abs_magnetization = np.mean(np.absolute(magnet_samples))
+        abs_magnetization_error = self.calculate_error(magnet_samples)
+        print("<m> (<|M|/N>) = {0} +/- {1}".format(abs_magnetization, abs_magnetization_error))
+
+        magnetization = np.mean(magnet_samples)
+        magnetization_error = self.calculate_error(magnet_samples)
+        print("<M/N> = {0} +/- {1}".format(magnetization, magnetization_error))
+
+        energy = np.mean(energy_samples)
+        energy_error = self.calculate_error(energy_samples)
+        print("<E/N> = {0} +/- {1}".format(energy, energy_error))
+
+        magnetization_squared = np.mean((magnet_samples * self.no_of_sites)**2)
+        magnetization_squared_error = self.calculate_error((magnet_samples * self.no_of_sites)**2)
+        print("<M^2> = {0} +/- {1}".format(magnetization_squared, magnetization_squared_error))
 
 if __name__ == "__main__":
     metropolis_ising = MetropolisIsing(4, 1, 2, "lo", 1000)
