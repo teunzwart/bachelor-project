@@ -1,7 +1,8 @@
 """An implementation of the Metropolis algorithm for the Ising model."""
 
+import time
+
 import numpy as np
-import scipy.special
 import matplotlib.pyplot as plt
 
 
@@ -25,7 +26,6 @@ class MetropolisIsing:
         self.magnet_history = np.empty(self.sweeps)
         self.rng_seed = int(self.lattice_size_L * self.temperature_T * 1000)
         np.random.seed(self.rng_seed)
-
 
     def init_lattice(self):
         """
@@ -80,8 +80,13 @@ class MetropolisIsing:
             exponents[2 * self.bond_energy_J * x] = np.exp(-self.beta * 2 * self.bond_energy_J * x)
         return exponents
 
-    def metropolis(self):
-        """Implentation of the Metropolis alogrithm."""
+    def metropolis(self, optimize=True):
+        """
+        Implentation of the Metropolis alogrithm.
+
+        If optimize is False, the naive way to calculate the energy delta
+        using the Hamiltonian is used.
+        """
         for t in range(self.sweeps):
             # if t % (self.sweeps / 10) == 0:
             #     print("Sweep {0}".format(t))
@@ -95,34 +100,39 @@ class MetropolisIsing:
 
                 spin = self.lattice[rand_y, rand_x]  # Get spin at the random location.
 
-            # Determine the energy delta from flipping that spin.
-            neighbours = [
-                (rand_y, (rand_x - 1) % self.lattice_size_L),
-                (rand_y, (rand_x + 1) % self.lattice_size_L),
-                ((rand_y - 1) % self.lattice_size_L, rand_x),
-                ((rand_y + 1) % self.lattice_size_L, rand_x)]
-            spin_sum = 0
-            for n in neighbours:
-                spin_sum += self.lattice[n]
-            energy_delta = 2 * self.bond_energy_J * spin * spin_sum
+                # Determine the energy delta from flipping that spin.
+                neighbours = [
+                    (rand_y, (rand_x - 1) % self.lattice_size_L),
+                    (rand_y, (rand_x + 1) % self.lattice_size_L),
+                    ((rand_y - 1) % self.lattice_size_L, rand_x),
+                    ((rand_y + 1) % self.lattice_size_L, rand_x)]
+                spin_sum = 0
+                for n in neighbours:
+                    spin_sum += self.lattice[n]
+                energy_delta = 2 * self.bond_energy_J * spin * spin_sum
 
-            # Energy may always be lowered.
-            if energy_delta <= 0:
-                acceptance_probability = 1
-            # Energy is increased with probability proportional to Boltzmann distribution.
-            else:
-                acceptance_probability = self.exponents[energy_delta]
-            if np.random.random() <= acceptance_probability:
-                # Flip the spin and change the energy.
-                self.lattice[rand_y, rand_x] = -1 * spin
-                self.energy += energy_delta
+                # Energy may always be lowered.
+                if energy_delta <= 0:
+                    acceptance_probability = 1
+                # Energy is increased with probability proportional to Boltzmann distribution.
+                else:
+                    acceptance_probability = self.exponents[energy_delta]
+                if np.random.random() <= acceptance_probability:
+                    # Flip the spin and change the energy.
+                    self.lattice[rand_y, rand_x] = -1 * spin
+                    self.energy += energy_delta
 
-    def exact_magnetization(self, temperature):
+    def exact_magnetization(self, lower_temperature, higher_temperature, step=0.1):
         """Calculate the exact magnetization. Boltzmann constant is set to 1."""
-        M = (1 - np.sinh((2 / temperature) * self.bond_energy_J)**(-4))**(1 / 8)
-        if np.isnan(M):
-            return 0
-        return M
+        exact_magnetization = []
+
+        for t in np.arange(lower_temperature, higher_temperature, step):
+            M = (1 - np.sinh((2 / t) * self.bond_energy_J)**(-4))**(1 / 8)
+            if np.isnan(M):
+                M = 0
+            exact_magnetization.append((t, M))
+
+        return exact_magnetization
 
     def autocorrelation(self, data):
         """
@@ -177,7 +187,7 @@ class MetropolisIsing:
             plt.plot(range(2500), normalized_acf[:2500])
             plt.show()
 
-        correlation_time = np.ceil(np.trapz(normalized_acf[:500]))
+        correlation_time = np.trapz(normalized_acf[:500])
 
         return correlation_time, normalized_acf
 
@@ -185,6 +195,7 @@ class MetropolisIsing:
         """Plot of the energy per spin."""
         plt.title("Energy per Spin")
         plt.xlabel("Monte Carlo Sweeps")
+        plt.ylabel("Energy per Spin")
         if data is None:
             plt.plot(self.energy_history / self.no_of_sites)
         else:
@@ -195,57 +206,107 @@ class MetropolisIsing:
         """Plot the magnetization per spin."""
         plt.title("Magnetization per Spin")
         plt.xlabel("Monte Carlo Sweeps")
+        plt.ylabel("Magnetization per Spin")
         if data is None:
             plt.plot(self.magnet_history / self.no_of_sites)
         else:
             plt.plot(data)
         plt.show()
 
-    def show_lattice(self):
+    def show_lattice(self, show_ticks=True):
         """Plot the lattice."""
         plt.xticks(range(0, self.lattice_size_L, 1))
         plt.yticks(range(0, self.lattice_size_L, 1))
+        if not show_ticks:
+            for tic in plt.gca().xaxis.get_major_ticks():
+                tic.tick1On = tic.tick2On = False
+                tic.label1On = tic.label2On = False
+            for tic in plt.gca().yaxis.get_major_ticks():
+                tic.tick1On = tic.tick2On = False
+                tic.label1On = tic.label2On = False
+            plt.gca().grid(False)
         plt.imshow(self.lattice, interpolation="nearest", extent=[0, self.lattice_size_L, self.lattice_size_L, 0])
         plt.show()
 
-    def plot_correlation_time_range(self, data, lattice_size, critical_temp=False, show_plot=True):
-        """Plot correlation times for a range of temperatures."""
-        plt.title("Correlation Time in Monte Carlo Sweeps")
+    def plot_correlation_time_range(self, data, lattice_size, quantity, critical_temp=False, show_plot=True):
+        """Plot autocorrelation times for a range of temperatures."""
+        plt.title("{0} Autocorrelation Time in Monte Carlo Sweeps".format(quantity))
         plt.xlabel("Temperature")
         plt.ylabel("Monte Carlo Sweeps")
-        plt.plot([d[0] for d in data], [d[1] for d in data], marker='o', linestyle='None', label=lattice_size)
+        plt.plot([d[0] for d in data], [d[1] for d in data], marker='o', linestyle='None', label="{0} by {0} Lattice".format(lattice_size))
         if critical_temp:
             plt.axvline(2.269)
         if show_plot:
             plt.legend(loc='upper right')
             plt.show()
 
-    def plot_quantity_range(self, data, errors, quantity, lattice_size, legend_loc=None, critical_temp=False, exact=None, show_plot=True):
+    def plot_quantity_range(self, data, errors, quantity, lattice_size, legend_loc=None, critical_temp=False, exact=None, show_plot=True, save=False):
         """Plot quantity over temperature range."""
         plt.title(quantity)
         plt.xlabel("Temperature")
         plt.ylabel(quantity)
-        plt.plot([d[0] for d in data], [d[1] for d in data], label=lattice_size, linestyle='None', marker='o')
+        plt.plot([d[0] for d in data], [d[1] for d in data], label="{0} by {0} Lattice".format(lattice_size), linestyle='None', marker='o')
         plt.errorbar([d[0] for d in data], [d[1] for d in data], [e[1] for e in errors], linestyle='None')
         if critical_temp:
             plt.axvline(2.269)
         if exact is not None:
-            plt.plot([e[0] for e in exact], [e[1] for e in exact])
-        plt.xlim(0, data[len(data) - 1][0] + 0.2)
+            plt.plot([e[0] for e in exact], [e[1] for e in exact], label="Exact Solution")
+
+        plt.xlim(0, data[-1][0] + 0.2)
         ymin, ymax = plt.ylim()
-        print(ymin, ymax)
         data_min = min(data, key=lambda x: x[1])[1]
         data_max = max(data, key=lambda x: x[1])[1]
-
-        if data_min < ymin and data_max > ymax:
-            plt.ylim(data_min * 1.15, data_max * 1.15)
-        if data_min < ymin:
-            plt.ylim(data_min * 1.15, 0)
-        elif data_max > ymax:
-            plt.ylim(0, data_max * 1.15)
+        if data_max <= 0:
+            if data_min <= ymin:
+                plt.ylim(data_min * 1.15, 0)
+        else:
+            if data_max >= ymax:
+                plt.ylim(0, data_max * 1.15)
+        plt.legend(loc=legend_loc)
+        if save:
+            plt.savefig("../bachelor-thesis/images/{0}-{1}.pdf".format(quantity.replace(" ", "_"), int(np.rint(time.time()))), bbox_inches='tight')
         if show_plot:
-            plt.legend(loc=legend_loc)
             plt.show()
+
+    def calculate_error(self, data):
+        """Calculate the error on a data set."""
+        return np.std(data) / np.sqrt(len(data))
+
+    def binning_method(self, data, L, quantity, plotting=False):
+        """
+        Calculate autocorrelation time, mean and error for a quantity using the binning method.
+
+        L is the number of halfings of the data.
+        """
+        original_length = len(data)
+        errors = []
+        errors.append((original_length, self.calculate_error(data)))
+        for n in range(L):
+            data = np.asarray([(a + b) / 2 for a, b in zip(data[::2], data[1::2])])
+            errors.append((len(data), self.calculate_error(data)))
+
+        if plotting:
+            plt.title("Binning Method {0} Error, Log Scale".format(quantity))
+            plt.xlabel("Data Points")
+            plt.ylabel("Error")
+            plt.xlim(original_length, 1)
+            plt.ylim(ymin=0, ymax=max(errors, key=lambda x: x[1])[1] * 1.15)
+            plt.semilogx([e[0] for e in errors], [e[1] for e in errors[::1]], basex=2)
+            plt.show()
+
+            plt.title("Binning Method {0} Error".format(quantity))
+            plt.xlabel("Data Points")
+            plt.ylabel("Error")
+            plt.xlim(original_length, 1)
+            plt.ylim(ymin=0, ymax=max(errors, key=lambda x: x[1])[1] * 1.15)
+            plt.plot([e[0] for e in errors], [e[1] for e in errors[::1]])
+            plt.show()
+
+        autocorrelation_time = 0.5 * ((max(errors, key=lambda x: x[1])[1] / errors[0][1])**2 - 1)
+        if np.isnan(autocorrelation_time):
+            autocorrelation_time = 1
+
+        return autocorrelation_time, np.mean(data), max(errors, key=lambda x: x[1])[1]
 
 
 if __name__ == "__main__":
