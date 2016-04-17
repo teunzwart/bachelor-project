@@ -4,6 +4,7 @@ import time
 
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.special
 
 
 class MetropolisIsing:
@@ -128,12 +129,26 @@ class MetropolisIsing:
         exact_magnetization = []
 
         for t in np.arange(lower_temperature, higher_temperature, step):
-            M = (1 - np.sinh((2 / t) * self.bond_energy)**(-4))**(1 / 8)
-            if np.isnan(M):
-                M = 0
-            exact_magnetization.append((t, M))
+            m = (1 - np.sinh((2 / t) * self.bond_energy)**(-4))**(1 / 8)
+            if np.isnan(m):
+                m = 0
+            exact_magnetization.append((t, m))
 
         return exact_magnetization
+
+    def exact_internal_energy(self, lower_temperature, higher_temperature, step=0.1):
+        """Calculate the exact internal energy. Boltzmann constant is set to 1."""
+        # Shorter variable name to ease formula writing.
+        j = self.bond_energy
+        exact_internal_energy = []
+        for t in np.arange(lower_temperature, higher_temperature, step):
+            b = 1 / t
+            k = 2 * np.sinh(2 * b * j) / np.cosh(2 * b * j)**2
+            u = -j * (1 / np.tanh(2 * b * j)) * (1 + (2 / np.pi) * (2 * np.tanh(2 * b * j)**2 - 1) * scipy.special.ellipk(k**2))
+            exact_internal_energy.append((t, u))
+
+        return exact_internal_energy
+
 
     def autocorrelation(self, data):
         """
@@ -172,12 +187,12 @@ class MetropolisIsing:
 
         return correlation_time, normalized_acf
 
-    def numpy_autocorrelation(self, data, plotting=False):
+    def numpy_autocorrelation(self, data, show_plot=False):
         """Quick autocorrelation calculation."""
         data = np.asarray([d - np.mean(data) for d in data])
         acf = np.correlate(data, data, mode="full")[(len(data) - 1):]  # Only keep the usefull data (correlation is symmetric around index len(data)).
         normalized_acf = acf / acf.max()
-        if plotting:
+        if show_plot:
             plt.title("Autocorrelation Function")
             plt.xlabel("Monte Carlo Sweeps")
             plt.plot(range(len(normalized_acf)), normalized_acf)
@@ -238,10 +253,10 @@ class MetropolisIsing:
         if critical_temp:
             plt.axvline(2.269)
         if show_plot:
-            plt.legend(loc='upper right')
+            plt.legend(loc='best')
             plt.show()
 
-    def plot_quantity_range(self, data, errors, quantity, lattice_size, legend_loc="upper right", critical_temp=False, exact=None, show_plot=True, save=False):
+    def plot_quantity_range(self, data, errors, quantity, lattice_size, legend_loc="best", critical_temp=False, exact=None, show_plot=True, save=False):
         """Plot quantity over temperature range."""
         plt.title(quantity)
         plt.xlabel("Temperature")
@@ -281,7 +296,7 @@ class MetropolisIsing:
         """
         return self.no_of_sites / temperature**2 * (np.mean(energy_data**2) - np.mean(energy_data)**2)
 
-    def binning_method(self, data, L, quantity, plotting=False):
+    def binning_method(self, data, L, quantity, show_plot=False):
         """
         Calculate autocorrelation time, mean and error for a quantity using the binning method.
 
@@ -296,7 +311,7 @@ class MetropolisIsing:
             data = np.asarray([(a + b) / 2 for a, b in zip(data[::2], data[1::2])])
             errors.append((len(data), self.calculate_error(data)))
 
-        if plotting:
+        if show_plot:
             plt.title("Binning Method {0} Error, Log Scale".format(quantity))
             plt.xlabel("Data Points")
             plt.ylabel("Error")
