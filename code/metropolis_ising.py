@@ -77,9 +77,7 @@ class MetropolisIsing:
 
     def exponents_init(self):
         """Calculate the exponents once since FPO are expensive."""
-        exponents = {}
-        for x in range(-4, 5, 2):
-            exponents[2 * self.bond_energy * x] = np.exp(-self.beta * 2 * self.bond_energy * x)
+        exponents = {2 * self.bond_energy * x: np.exp(-self.beta * 2 * self.bond_energy * x) for x in range(-4, 5, 2)}
         return exponents
 
     def metropolis(self, optimize=True):
@@ -90,8 +88,6 @@ class MetropolisIsing:
         using the Hamiltonian is used.
         """
         for t in range(self.sweeps):
-            # if t % (self.sweeps / 10) == 0:
-            #     print("Sweep {0}".format(t))
             # Measurement every sweep.
             np.put(self.energy_history, t, self.energy)
             np.put(self.magnet_history, t, np.sum(self.lattice))
@@ -233,7 +229,7 @@ class MetropolisIsing:
         return correlation_time, normalized_acf
 
     def plot_energy(self, data=None):
-        """Plot of the energy per spin."""
+        """Plot the energy per spin for a run at a given temperature."""
         plt.title("Energy per Spin")
         plt.xlabel("Monte Carlo Sweeps")
         plt.ylabel("Energy per Spin")
@@ -244,7 +240,7 @@ class MetropolisIsing:
         plt.show()
 
     def plot_magnetization(self, data=None):
-        """Plot the magnetization per spin."""
+        """Plot magnetization per spin for a run at a given temperature."""
         plt.title("Magnetization per Spin")
         plt.xlabel("Monte Carlo Sweeps")
         plt.ylabel("Magnetization per Spin")
@@ -254,7 +250,7 @@ class MetropolisIsing:
             plt.plot(data)
         plt.show()
 
-    def show_lattice(self, show_ticks=True):
+    def show_lattice(self, show_ticks=False):
         """Plot the lattice."""
         plt.xticks(range(0, self.lattice_size, 1))
         plt.yticks(range(0, self.lattice_size, 1))
@@ -269,27 +265,25 @@ class MetropolisIsing:
         plt.imshow(self.lattice, interpolation="nearest", extent=[0, self.lattice_size, self.lattice_size, 0])
         plt.show()
 
-    def plot_correlation_time_range(self, data, lattice_size, quantity, critical_temp=False, show_plot=True):
+    def plot_correlation_time_range(self, data, lattice_size, quantity, show_plot=True, save=False):
         """Plot autocorrelation times for a range of temperatures."""
         plt.title("{0} Autocorrelation Time in Monte Carlo Sweeps".format(quantity))
         plt.xlabel("Temperature")
         plt.ylabel("Monte Carlo Sweeps")
         plt.plot([d[0] for d in data], [d[1] for d in data], marker='o', linestyle='None', label="{0} by {0} Lattice".format(lattice_size))
-        if critical_temp:
-            plt.axvline(2.269)
+        plt.legend(loc='best')
+        if save:
+            plt.savefig("../bachelor-thesis/images/{0}-Autocorrelation-Time-{1}.pdf".format(quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
         if show_plot:
-            plt.legend(loc='best')
             plt.show()
 
-    def plot_quantity_range(self, data, errors, quantity, lattice_size, legend_loc="best", critical_temp=False, exact=None, show_plot=True, save=False):
+    def plot_quantity_range(self, data, errors, quantity, lattice_size, exact=None, show_plot=True, save=False):
         """Plot quantity over temperature range."""
         plt.title(quantity)
         plt.xlabel("Temperature")
         plt.ylabel(quantity)
         plt.plot([d[0] for d in data], [d[1] for d in data], label="{0} by {0} Lattice".format(lattice_size), linestyle='None', marker='o')
         plt.errorbar([d[0] for d in data], [d[1] for d in data], [e[1] for e in errors], linestyle='None')
-        if critical_temp:
-            plt.axvline(2.269)
         if exact is not None:
             plt.plot([e[0] for e in exact], [e[1] for e in exact], label="Exact Solution")
 
@@ -303,9 +297,9 @@ class MetropolisIsing:
         else:
             if data_max >= ymax:
                 plt.ylim(0, data_max * 1.15)
-        plt.legend(loc=legend_loc)
+        plt.legend(loc="best")
         if save:
-            plt.savefig("../bachelor-thesis/images/{0}-{1}.pdf".format(quantity.replace(" ", "_"), int(np.rint(time.time()))), bbox_inches='tight')
+            plt.savefig("../bachelor-thesis/images/{0}-{1}.pdf".format(quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
         if show_plot:
             plt.show()
 
@@ -331,7 +325,7 @@ class MetropolisIsing:
         errors = []
         errors.append((original_length, self.calculate_error(data)))
         for n in range(L):
-            if len(data) < 32:
+            if len(data) < 64:
                 break
             data = np.asarray([(a + b) / 2 for a, b in zip(data[::2], data[1::2])])
             errors.append((len(data), self.calculate_error(data)))
@@ -345,13 +339,13 @@ class MetropolisIsing:
             plt.semilogx([e[0] for e in errors], [e[1] for e in errors[::1]], basex=2)
             plt.show()
 
-            plt.title("Binning Method {0} Error".format(quantity))
-            plt.xlabel("Data Points")
-            plt.ylabel("Error")
-            plt.xlim(original_length, 1)
-            plt.ylim(ymin=0, ymax=max(errors, key=lambda x: x[1])[1] * 1.15)
-            plt.plot([e[0] for e in errors], [e[1] for e in errors[::1]])
-            plt.show()
+            # plt.title("Binning Method {0} Error".format(quantity))
+            # plt.xlabel("Data Points")
+            # plt.ylabel("Error")
+            # plt.xlim(original_length, 1)
+            # plt.ylim(ymin=0, ymax=max(errors, key=lambda x: x[1])[1] * 1.15)
+            # plt.plot([e[0] for e in errors], [e[1] for e in errors[::1]])
+            # plt.show()
 
         autocorrelation_time = 0.5 * ((max(errors, key=lambda x: x[1])[1] / errors[0][1])**2 - 1)
         if np.isnan(autocorrelation_time):
@@ -374,7 +368,7 @@ class MetropolisIsing:
         magnet_samples = []
         energy_samples = []
 
-        for t in np.arange(0, len(energy_data), 2 * int(correlation_time)):
+        for t in np.arange(0, len(energy_data), 2 * int(np.ceil(correlation_time))):
             magnet_samples.append(magnetization_data[t])
             energy_samples.append(energy_data[t])
 
@@ -396,6 +390,10 @@ class MetropolisIsing:
         magnetization_squared = np.mean((magnet_samples * self.no_of_sites)**2)
         magnetization_squared_error = self.calculate_error((magnet_samples * self.no_of_sites)**2)
         print("<M^2> = {0} +/- {1}".format(magnetization_squared, magnetization_squared_error))
+
+    def temperature_range():
+        """Run simulation over a range of temperatures."""
+        pass
 
 if __name__ == "__main__":
     metropolis_ising = MetropolisIsing(4, 1, 2, "lo", 1000)
