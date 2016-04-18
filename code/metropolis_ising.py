@@ -4,7 +4,6 @@ import time
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.special import ellipk, ellipe
 
 
 class MetropolisIsing:
@@ -13,7 +12,7 @@ class MetropolisIsing:
     def __init__(self, lattice_size, bond_energy, temperature,
                  initial_temperature, sweeps):
         """Initialize variables and the lattice."""
-        print("Temperature is {0}".format(round(temperature, 2)))
+        print("\nTemperature is {0}".format(round(temperature, 2)))
         self.lattice_size = lattice_size
         self.no_of_sites = lattice_size**2
         self.bond_energy = bond_energy
@@ -27,6 +26,7 @@ class MetropolisIsing:
         self.energy_history = np.empty(self.sweeps)
         self.magnet_history = np.empty(self.sweeps)
         self.rng_seed = int(self.lattice_size * self.temperature * 1000)
+        print("RNG Seed is {0}".format(self.rng_seed))
         np.random.seed(self.rng_seed)
 
     def init_lattice(self):
@@ -177,7 +177,7 @@ class MetropolisIsing:
 
         return correlation_time, normalized_acf
 
-    def plot_energy(self, data=None):
+    def plot_energy(self, data):
         """Plot the energy per spin for a run at a given temperature."""
         plt.title("Energy per Spin")
         plt.xlabel("Monte Carlo Sweeps")
@@ -199,19 +199,16 @@ class MetropolisIsing:
             plt.plot(data)
         plt.show()
 
-    def show_lattice(self, show_ticks=False):
+    def show_lattice(self):
         """Plot the lattice."""
-        plt.xticks(range(0, self.lattice_size, 1))
-        plt.yticks(range(0, self.lattice_size, 1))
-        if not show_ticks:
-            for tic in plt.gca().xaxis.get_major_ticks():
-                tic.tick1On = tic.tick2On = False
-                tic.label1On = tic.label2On = False
-            for tic in plt.gca().yaxis.get_major_ticks():
-                tic.tick1On = tic.tick2On = False
-                tic.label1On = tic.label2On = False
-            plt.gca().grid(False)
-        plt.imshow(self.lattice, interpolation="nearest", extent=[0, self.lattice_size, self.lattice_size, 0])
+        for tic in plt.gca().xaxis.get_major_ticks():
+            tic.tick1On = tic.tick2On = False
+            tic.label1On = tic.label2On = False
+        for tic in plt.gca().yaxis.get_major_ticks():
+            tic.tick1On = tic.tick2On = False
+            tic.label1On = tic.label2On = False
+        plt.gca().grid(False)
+        plt.imshow(self.lattice, interpolation="nearest")
         plt.show()
 
     def plot_correlation_time_range(self, data, lattice_size, quantity, show_plot=True, save=False):
@@ -264,16 +261,14 @@ class MetropolisIsing:
         """
         return self.no_of_sites / temperature**2 * (np.mean(energy_data**2) - np.mean(energy_data)**2)
 
-    def binning_method(self, data, L, quantity, show_plot=False):
+    def binning_method(self, data, halfings, quantity, show_plot=False):
         """
         Calculate autocorrelation time, mean and error for a quantity using the binning method.
-
-        L is the number of halfings of the data.
         """
         original_length = len(data)
         errors = []
         errors.append((original_length, self.calculate_error(data)))
-        for n in range(L):
+        for n in range(halfings):
             if len(data) < 64:
                 break
             data = np.asarray([(a + b) / 2 for a, b in zip(data[::2], data[1::2])])
