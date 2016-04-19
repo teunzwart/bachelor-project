@@ -27,6 +27,7 @@
 \usepackage[colorinlistoftodos]{todonotes} % Add todo notes.
 \usepackage{varioref} % Automatically put reference to page in reference. Use \vref.
 \usepackage{cleveref} % Automate "equation (...)" reference. Use \vref.
+\usepackage{breqn}
 
 %%% Additional options %%%
 \pagestyle{fancy} % Set header style.
@@ -90,7 +91,7 @@
 \section{The Two-Dimensional Ising Model}
 
 The two-dimensional Ising model in zero-field was first solved exactly in 1944 by Lars Onsager.\cite{onsager:1944}
-It describes a square lattice with nearest neighbour interactions, where each lattice point has with it associated a number (which we'll refer to as spin) which may either be +1 or -1 and was originally meant as a model for magnets.
+It describes a square lattice with nearest neighbour interactions, where each lattice point has with it associated a number (which we will refer to as spin) which may either be +1 or -1 and was originally meant as a model for magnets.
 The Hamiltonian is\cite{mccoy:1973}
 \begin{align}
 	H = -J_{1} \sum_{j=1}^{\mathcal{M}} \sum_{k=1}^{\mathcal{N}} \sigma_{j,k} \sigma_{j,k+1} - J_{2} \sum_{j=1}^{\mathcal{M}} \sum_{k=1}^{\mathcal{N}} \sigma_{j,k} \sigma_{j+1,k},
@@ -101,7 +102,7 @@ In the case where the interaction strength in both directions is the same the Ha
 	H = -J \sum_{\langle ij \rangle} \sigma_{i} \sigma_{j},
 \end{align}
 where the bracket denotes summation over nearest neighbours.\footnote{Note that naively applying this Hamiltonian to calculate the lattice energy overcounts the energy by a factor of 2 since each bond is counted twice.}
-In the ferromagnetic ground state (\(J>0\)) all spins on the lattice are aligned in one of two possible directions (the direction is chosen when the mirror symmetry in the lattice plane is spontaneously broken). 
+In the ferromagnetic ground state (\(J>0\)) all spins on the lattice are aligned in one of two possible directions (the direction is chosen when the mirror symmetry in the lattice plane is spontaneously broken as the lattice cools).
 The Hamiltonian is subject to toroidal boundary conditions in both directions, meaning \(\sigma_{1,k} = \sigma_{\mathcal{M}+1,k}\) and \(\sigma_{j,1} = \sigma_{j,\mathcal{N}+1}\).
 We are interested in the thermodynamic properties of the Ising Model.
 To that end we define the partition function
@@ -109,7 +110,45 @@ To that end we define the partition function
 	Z &= \sum_{\sigma = \pm 1} e^{-\beta H} \\
 	  &= \sum_{\sigma = \pm 1} \prod_{j=1}^{\mathcal{M}} \prod_{k=1}^{\mathcal{N}} e^{\beta J_1 \sigma_{j,k} \sigma_{j,k+1}} \prod_{j=1}^{\mathcal{M}} \prod_{k=1}^{\mathcal{N}} e^{\beta J_2 \sigma_{j,k} \sigma_{j+1,k}},
 \end{align}
-with \(\beta=1/T\) (throughout this work we set the Boltzmann constant \(k_B\) equal to 1) and the sum running over every possible orientation of the spins on the lattice. To get an exact solution for this partition function some work is required.
+with \(\beta=1/k_B T\) and the sum running over every possible orientation of the spins on the lattice. Solving this requires a non-trivial amount of effort and it is best to refer to either Onsager\cite{onsager:1944}, who systemically added one-dimensional Ising models together to create a two dimensional lattice, or Kasteleyn as described in \cite{mccoy:1973}, who considerably simplified the derivation by reducing it to a combinatorial problem.
+
+The derivation introduces a sign ambiguity in \(Z\) which takes some additional care to resolve, but this can be avoided by considering the free energy \(F\) in the thermodynamic limit\footnote{This is the limit in which the number of particles on the lattice tends to infinity.}
+\begin{dmath}
+	F ={}& -\frac{1}{\beta} \lim_{\substack{\mathcal{N} \to \infty \\ \mathcal{M} \to \infty}} \frac{1}{\mathcal{M} \mathcal{N}} \log({Z_{\mathcal{M}, \mathcal{N}}}) \\
+	={}& -\frac{1}{\beta} \left[ \log(2) + \frac{1}{2} \frac{1}{(2\pi)^2} \int_{0}^{2\pi} \diff \theta_{1} \int_{0}^{2\pi} \diff \theta_2 \log \left{ \cosh(2\beta J_1) \cosh(2\beta J_2) \\& - \sinh(2\beta J_1) \cos(\theta_1) - \sinh(2\beta J_2) \cos(\theta_2)  \right}\right].
+\end{dmath}
+\(F\) is an analytic function of the temperature \(T\), except at one value, which we will call the critical temperature \(T_c\). At this temperature we can define the equality
+\begin{align}
+	\left|z_1\right| &= \frac{1 - \left| z_2 \right|}{1+\left| z_2 \right}, \text{ with } z_1 = \tanh(2\beta J_1), z_2 = \tanh(2\beta J_2).
+\end{align}
+Rewritting and squaring this gives
+\begin{align}
+	1 - \left|z_1 z_2\right| &= \left|z_1\right| + \left|z_2\right|\rightarrow\\
+	\left(1 - z_1^2 \right) \left(1 - z_2^2 \right) &= 4 \left| z_1 z_2 \right|
+\end{align}
+Finally, using
+\begin{align}
+	\frac{1}{2 z_k}\left(1 - z_k^2\right) = \frac{1}{\sinh(2 \beta J_k)}, \text{ with } k \in \{{1, 2}\}
+\end{align}
+we get the equality
+\begin{align}
+	1 = \sinh(2\beta J_1) \sinh(2\beta J_2).
+\end{align}
+In the case where interaction strength in both the x- and y-directions is the same (\(\left|J_1\right| = \left|J_2\right| = J\)) we get an expression for the critical temperature in terms of the bond energy
+\begin{align}
+	1 &= \sinh(2\beta J) \to \\
+	k_B T_c &= \frac{2}{\text{asinh}(1)}J = \frac{2}{\log(1+\sqrt{2})}J \approx 2.269 J
+\end{align}
+Onsager \cite{onsager:1944} also calculated the values of the free energy, internal energy and entropy at the critical temperature\footnote{We use lowercase letters to denote the thermodynamic properties of a single spin on the lattice and uppercase letters when refering to the entire lattice. Taking as an example the internal energy, \(U/N = u\) with \(N\) the number of spins on the lattice.}:
+\begin{align}
+	-\frac{f_c}{k_B T} &= \frac{1}{2} \log{2} + \frac{2}{\pi} G \approx 0.929, \\
+	u_c &= - \sqrt{2} J \approx - 1.414 J,\\
+	\frac{s_c}{k_B} &= \log{(\sqrt{2} e^{2G/\pi})} - \sqrt{2} \frac{J}{k_B T} \approx 0.306
+\end{align}
+with \(G\) Catalan's constant.\footnote{\(G = 1^{-2} - 3^{-2} + 5^{-2} - 7^{-2} \approx 0.916\)}
+
+\subsection{Thermodynamic Properties of the Two-Dimensional Ising Model}
+Now that we have defined the free energy it is relatively simple to determine the specific heat per spin and the internal energy per spin by taking the appropriate derivatives of the free energy. We work in the isotropic case where \(\left|J_1\right| = \left|J_2\right| = J\), \(z_1 = z_2 = z = \tanh(2)
 
 
 % Set style to abbrv to get Vancouver style citations.
