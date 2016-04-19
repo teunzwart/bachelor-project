@@ -27,6 +27,7 @@
 \usepackage[colorinlistoftodos]{todonotes} % Add todo notes.
 \usepackage{varioref} % Automatically put reference to page in reference. Use \vref.
 \usepackage{cleveref} % Automate "equation (...)" reference. Use \vref.
+\usepackage{commath}
 \usepackage{breqn}
 
 %%% Additional options %%%
@@ -99,6 +100,7 @@ The Hamiltonian is\cite{mccoy:1973}
 with \(\mathcal{M}\) and \(\mathcal{N}\) the extent of the lattice in the \(x\)- and \(y\)-directions respectively and \(J_{1}\) and \(J_{2}\) the interaction strength between neighbours in respectively the \(x\)- and \(y\)-directions.
 In the case where the interaction strength in both directions is the same the Hamiltonian becomes\cite{newman:1999}
 \begin{align}
+	\label{eq:isotropic_hamiltonian}
 	H = -J \sum_{\langle ij \rangle} \sigma_{i} \sigma_{j},
 \end{align}
 where the bracket denotes summation over nearest neighbours.\footnote{Note that naively applying this Hamiltonian to calculate the lattice energy overcounts the energy by a factor of 2 since each bond is counted twice.}
@@ -112,14 +114,19 @@ To that end we define the partition function
 \end{align}
 with \(\beta=1/k_B T\) and the sum running over every possible orientation of the spins on the lattice. Solving this requires a non-trivial amount of effort and it is best to refer to either Onsager\cite{onsager:1944}, who systemically added one-dimensional Ising models together to create a two dimensional lattice, or Kasteleyn as described in \cite{mccoy:1973}, who considerably simplified the derivation by reducing it to a combinatorial problem.
 
-The derivation introduces a sign ambiguity in \(Z\) which takes some additional care to resolve, but this can be avoided by considering the free energy \(F\) in the thermodynamic limit\footnote{This is the limit in which the number of particles on the lattice tends to infinity.}
-\begin{dmath}
-	F ={}& -\frac{1}{\beta} \lim_{\substack{\mathcal{N} \to \infty \\ \mathcal{M} \to \infty}} \frac{1}{\mathcal{M} \mathcal{N}} \log({Z_{\mathcal{M}, \mathcal{N}}}) \\
-	={}& -\frac{1}{\beta} \left[ \log(2) + \frac{1}{2} \frac{1}{(2\pi)^2} \int_{0}^{2\pi} \diff \theta_{1} \int_{0}^{2\pi} \diff \theta_2 \log \left{ \cosh(2\beta J_1) \cosh(2\beta J_2) \\& - \sinh(2\beta J_1) \cos(\theta_1) - \sinh(2\beta J_2) \cos(\theta_2)  \right}\right].
-\end{dmath}
+The derivation introduces a sign ambiguity in \(Z\) which takes some additional care to resolve, but this can be avoided by considering the free energy \(F\) instead of the partition function in the thermodynamic limit\footnote{This is the limit in which the number of particles on the lattice tends to infinity.}
+\begin{dgroup*}
+	\begin{dmath*}
+		F = -\frac{1}{\beta} \lim_{\substack{\mathcal{N} \to \infty \\ \mathcal{M} \to \infty}} \frac{1}{\mathcal{M} \mathcal{N}} \log({Z_{\mathcal{M}, \mathcal{N}}})
+	\end{dmath*}
+	\begin{dmath}
+		= -\frac{1}{\beta} \left[ \log(2) + \frac{1}{2} \frac{1}{(2\pi)^2} \int_{0}^{2\pi} \dif \theta_{1} \int_{0}^{2\pi} \dif \theta_2 \log \bigg(\cosh{(2\beta J_1)} \cosh{(2\beta J_2)} - \sinh{(2\beta J_1)} \cos{(\theta_1)} - \sinh{(2\beta J_2)} \cos{(\theta_2)}\bigg) \right].
+	\end{dmath}
+\end{dgroup*}
+
 \(F\) is an analytic function of the temperature \(T\), except at one value, which we will call the critical temperature \(T_c\). At this temperature we can define the equality
 \begin{align}
-	\left|z_1\right| &= \frac{1 - \left| z_2 \right|}{1+\left| z_2 \right}, \text{ with } z_1 = \tanh(2\beta J_1), z_2 = \tanh(2\beta J_2).
+	\left|z_1\right| &= \frac{1 - \left| z_2 \right|}{1+\left| z_2 \right|}, \text{ with } z_1 = \tanh(2\beta J_1), z_2 = \tanh(2\beta J_2).
 \end{align}
 Rewritting and squaring this gives
 \begin{align}
@@ -147,9 +154,79 @@ Onsager \cite{onsager:1944} also calculated the values of the free energy, inter
 \end{align}
 with \(G\) Catalan's constant.\footnote{\(G = 1^{-2} - 3^{-2} + 5^{-2} - 7^{-2} \approx 0.916\)}
 
-\subsection{Thermodynamic Properties of the Two-Dimensional Ising Model}
-Now that we have defined the free energy it is relatively simple to determine the specific heat per spin and the internal energy per spin by taking the appropriate derivatives of the free energy. We work in the isotropic case where \(\left|J_1\right| = \left|J_2\right| = J\), \(z_1 = z_2 = z = \tanh(2)
+\subsection{Thermodynamic Properties of the Two-Dimensional Ising Model}\todo{Check the formula in this part with \cite{mccoy:1973}, with special attention to factors of two and exponents!}
+From the free energy it is relatively simple to determine the specific heat per spin and the internal energy per spin by taking the appropriate derivatives of the free energy\cite{mccoy:1973}. We work with the isotropic case where \(\left|J_1\right| = \left|J_2\right| = J\) and \(z_1 = z_2 = z = \tanh(\beta J)\), corresponding to \cref{eq:isotropic_hamiltonian}.
+Then the expression for the free energy becomes
+\begin{dmath}
+	F = -\frac{1}{\beta} \left[\log(2\cosh^2(\beta J)) + \log(1+z^2) + \frac{1}{(2\pi)^2} \int_0^{\pi}\dif \theta_1 \int_0^{\pi} \dif \theta_2 \log(1-\frac{1}{2}k \Big\{\cos(\theta_1) + \cos(\theta_2)\Big\})\right],
+\end{dmath}
+with
+\begin{align}
+	k = \frac{4z(1-z^2)}{(1+z^2)^2} = \frac{2\sinh(2\beta J)}{\cosh^2{(2\beta J)}}.
+\end{align}
+Performing the substitutions \(\omega_1 = \frac{1}{2}(\theta_1 + \theta_2)\) and \(\omega_2 = \frac{1}{2}(\theta_1 - \theta_2)\) and integrating over \(\omega_1\) the free energy becomes
+\begin{align}
+		F &= -\frac{1}{\beta} \left[\log(2\cosh(2\beta J)) + \frac{1}{\pi^2} \int_0^{\frac{\pi}{2}} \dif \omega_1 \int_0^{\frac{\pi}{2}} \dif \omega_2 \log(1- k \Big\{\cos(\omega_1) + \cos(\omega_2)\Big\})\right]\\
+		&= -\frac{1}{\beta} \left[\log(\sqrt{2}\cosh(2\beta J)) + \frac{1}{\pi} \int_0^{\frac{\pi}{2}} \dif \omega \log(1+\left\{1-k^2 \cos^2(\omega)\right\}^{\frac{1}{2}}) \right]
+\end{align}
 
+We will take derivatives from this expression. The internal energy per spin is
+\begin{align}
+	\label{eq:internal_energy}
+	u &= \frac{\partial \beta F}{\partial \beta}\\
+	&= -2 J \tanh(2\beta J) + k \frac{\dif k}{\dif \beta} \frac{1}{\pi} \int_0^{\frac{\pi}{2}} \dif \omega \frac{\sin^2(\omega)}{\Delta (1+\Delta)}
+\end{align}
+with
+\begin{align}
+	\Delta = \left( 1 - k^2 \sin^2(\omega) \right)^{\frac{1}{2}}.
+\end{align}
+
+Note that the argument of the integral in \cref{eq:internal_energy} can be rewritten as
+\begin{align}
+	\frac{\sin^2(\omega)}{\Delta (1+\Delta)} = \frac{(1 - \Delta) \sin^2(\omega)}{\Delta(1-\Delta^2)} = \frac{1}{k^2}\left(\frac{1}{\Delta} - 1\right),
+\end{align}
+from which it follows that
+\begin{align}
+	u = - 2 J \tanh(2\beta J) + \frac{1}{\pi} \frac{1}{k} \frac{\dif k}{\dif \beta} \left[ K(k) - \frac{\pi}{2}\right].
+\end{align}
+Here \(K(k)\) is the complete elliptic integral of the first kind
+\begin{align}
+	K(k) = \int_0^{\frac{\pi}{2}} \frac{\dif \phi}{\left(1-k^2 \sin^2(\phi)\right)^{\frac{1}{2}}}.
+\end{align}
+Taking the derivative of \(k\)
+\begin{align}
+	\label{eq:k_derivative}
+	\frac{1}{k}\frac{\dif k}{\dif \beta} = \frac{2 J}{\tanh(2\beta J)} (1 - 2\tanh^2(2 \beta J)),
+\end{align}
+the internal energy per spin becomes
+\begin{align}
+	u = \frac{-J}{\tanh(2\beta J)} \left[1 + \frac{2}{\pi} \left\{2 \tanh^2(2\beta J) -1 \right\} K(k) \right].
+\end{align}
+
+For the specific heat per spin we take the derivative of the internal energy per spin with respect to the temperature
+\begin{dgroup}
+	\begin{dmath}
+		c = \frac{\partial u}{\partial T} \hiderel{=} \frac{-1}{k_B T^2}\frac{\partial u}{\partial \beta}
+	\end{dmath}
+	\begin{dmath}
+		= \frac{J}{k_B T^2} \left[\frac{-2J}{\cosh^2(2\beta J)}\left\{ 1 + \frac{2}{\pi} \left(2 \tanh^2(2\beta J) -1 \right) K(k) \right\}\right]
+		+ \frac{16}{\pi} \frac{J}{\tanh^2{2\beta J}} K(k) + {\frac{2}{\pi}\frac{\left(2 \tanh^2(2\beta J) -1 \right)}{\tanh(2\beta J)}\\
+		 \frac{\dif k}{\dif \beta} \frac{\dif K(k)}{\dif k}}.
+	\end{dmath}
+\end{dgroup}
+For the derivative of the elliptic integral we use the identity\cite{mccoy:1973}
+\begin{align}
+	\frac{\dif K(k)}{\dif k} = \frac{1}{k (1-k^2)} \left[E(k) - (1-k^2) K(k) \right],
+\end{align}
+where \(E(k)\) is the complete elliptic integral of the second kind
+\begin{align}
+	\label{eq:elliptic_identity}
+	\int_0^{\frac{\pi}{2}} \dif \phi \left(1-k^2 \sin^2(\phi)\right)^{\frac{1}{2}}.
+\end{align}
+Using \cref{eq:k_derivative} and \cref{eq:elliptic_identity} the expression for the specific heat per spin becomes \todo{Use k prime here anyway?}
+\begin{align}
+	c = k_B \left[ \frac{\beta J}{\tanh(2\beta J)} \right]^{2} \frac{2}{\pi} \left[ 2 K(k) -2 E(k) - \left(1- \sqrt{1-k^2} \right) \left\{ \frac{\pi}{2} + \sqrt{1-k^2} K(k) \right\}\right]
+\end{align}
 
 % Set style to abbrv to get Vancouver style citations.
 \bibliographystyle{abbrv}
