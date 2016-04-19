@@ -218,14 +218,14 @@ For the derivative of the elliptic integral we use the identity\cite{mccoy:1973}
 \begin{align}
 	\frac{\dif K(k)}{\dif k} = \frac{1}{k (1-k^2)} \left[E(k) - (1-k^2) K(k) \right],
 \end{align}
-where \(E(k)\) is the complete elliptic integral of the second kind
+where \(E(k)\) is the complete elliptic integral of the second kind:
 \begin{align}
 	\label{eq:elliptic_identity}
-	\int_0^{\frac{\pi}{2}} \dif \phi \left(1-k^2 \sin^2(\phi)\right)^{\frac{1}{2}}.
+	E(k) = \int_0^{\frac{\pi}{2}} \dif \phi \left(1-k^2 \sin^2(\phi)\right)^{\frac{1}{2}}.
 \end{align}
 Using \cref{eq:k_derivative} and \cref{eq:elliptic_identity} the expression for the specific heat per spin becomes \todo{Use k prime here anyway?}
 \begin{align}
-	c = k_B \left[ \frac{\beta J}{\tanh(2\beta J)} \right]^{2} \frac{2}{\pi} \left[ 2 K(k) -2 E(k) - \left(1- \sqrt{1-k^2} \right) \left\{ \frac{\pi}{2} + \sqrt{1-k^2} K(k) \right\}\right]
+	c = k_B \left[ \frac{\beta J}{\tanh(2\beta J)} \right]^{2} \frac{2}{\pi} \left[ 2 K(k) -2 E(k) - \left(1- \sqrt{1-k^2} \right) \left\{ \frac{\pi}{2} + \sqrt{1-k^2} K(k) \right\}\right].
 \end{align}
 
 % Set style to abbrv to get Vancouver style citations.
