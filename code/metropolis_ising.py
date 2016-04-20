@@ -1,7 +1,5 @@
 """An implementation of the Metropolis algorithm for the Ising model."""
 
-import time
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -22,9 +20,8 @@ class MetropolisIsing:
         self.sweeps = sweeps
         self.lattice = self.init_lattice()
         self.energy = self.calculate_lattice_energy()
-        self.exponents = self.exponents_init()
         self.energy_history = np.empty(self.sweeps)
-        self.magnet_history = np.empty(self.sweeps)
+        self.magnetization_history = np.empty(self.sweeps)
         self.rng_seed = int(self.lattice_size * self.temperature * 1000)
         print("RNG Seed is {0}".format(self.rng_seed))
         np.random.seed(self.rng_seed)
@@ -75,11 +72,6 @@ class MetropolisIsing:
 
         return energy / 2  # Every bond has been counted twice.
 
-    def exponents_init(self):
-        """Calculate the exponents once since FPO are expensive."""
-        exponents = {2 * self.bond_energy * x: np.exp(-self.beta * 2 * self.bond_energy * x) for x in range(-4, 5, 2)}
-        return exponents
-
     def metropolis(self, optimize=True):
         """
         Implentation of the Metropolis alogrithm.
@@ -87,10 +79,12 @@ class MetropolisIsing:
         If optimize is False, the naive way to calculate the energy delta
         using the Hamiltonian is used.
         """
+        # Precalculate the exponenents because floating point operations are expensive.
+        exponents = {2 * self.bond_energy * x: np.exp(-self.beta * 2 * self.bond_energy * x) for x in range(-4, 5, 2)}
         for t in range(self.sweeps):
             # Measurement every sweep.
             np.put(self.energy_history, t, self.energy)
-            np.put(self.magnet_history, t, np.sum(self.lattice))
+            np.put(self.magnetization_history, t, np.sum(self.lattice))
             for k in range(self.lattice_size ** 2):
                 # Pick a random location on the lattice.
                 rand_y = np.random.randint(0, self.lattice_size)
@@ -114,7 +108,7 @@ class MetropolisIsing:
                     acceptance_probability = 1
                 # Energy is increased with probability proportional to Boltzmann distribution.
                 else:
-                    acceptance_probability = self.exponents[energy_delta]
+                    acceptance_probability = exponents[energy_delta]
                 if np.random.random() <= acceptance_probability:
                     # Flip the spin and change the energy.
                     self.lattice[rand_y, rand_x] = -1 * spin
@@ -176,78 +170,6 @@ class MetropolisIsing:
         correlation_time = np.trapz(normalized_acf[:500])
 
         return correlation_time, normalized_acf
-
-    def plot_energy(self, data):
-        """Plot the energy per spin for a run at a given temperature."""
-        plt.title("Energy per Spin")
-        plt.xlabel("Monte Carlo Sweeps")
-        plt.ylabel("Energy per Spin")
-        if data is None:
-            plt.plot(self.energy_history / self.no_of_sites)
-        else:
-            plt.plot(data)
-        plt.show()
-
-    def plot_magnetization(self, data=None):
-        """Plot magnetization per spin for a run at a given temperature."""
-        plt.title("Magnetization per Spin")
-        plt.xlabel("Monte Carlo Sweeps")
-        plt.ylabel("Magnetization per Spin")
-        if data is None:
-            plt.plot(self.magnet_history / self.no_of_sites)
-        else:
-            plt.plot(data)
-        plt.show()
-
-    def show_lattice(self):
-        """Plot the lattice."""
-        for tic in plt.gca().xaxis.get_major_ticks():
-            tic.tick1On = tic.tick2On = False
-            tic.label1On = tic.label2On = False
-        for tic in plt.gca().yaxis.get_major_ticks():
-            tic.tick1On = tic.tick2On = False
-            tic.label1On = tic.label2On = False
-        plt.gca().grid(False)
-        plt.imshow(self.lattice, interpolation="nearest")
-        plt.show()
-
-    def plot_correlation_time_range(self, data, lattice_size, quantity, show_plot=True, save=False):
-        """Plot autocorrelation times for a range of temperatures."""
-        plt.title("{0} Autocorrelation Time in Monte Carlo Sweeps".format(quantity))
-        plt.xlabel("Temperature")
-        plt.ylabel("Monte Carlo Sweeps")
-        plt.plot([d[0] for d in data], [d[1] for d in data], marker='o', linestyle='None', label="{0} by {0} Lattice".format(lattice_size))
-        plt.legend(loc='best')
-        if save:
-            plt.savefig("../bachelor-thesis/images/{0}-Autocorrelation-Time-{1}.pdf".format(quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
-        if show_plot:
-            plt.show()
-
-    def plot_quantity_range(self, data, errors, quantity, lattice_size, exact=None, show_plot=True, save=False):
-        """Plot quantity over temperature range."""
-        plt.title(quantity)
-        plt.xlabel("Temperature")
-        plt.ylabel(quantity)
-        plt.plot([d[0] for d in data], [d[1] for d in data], label="{0} by {0} Lattice".format(lattice_size), linestyle='None', marker='o')
-        plt.errorbar([d[0] for d in data], [d[1] for d in data], [e[1] for e in errors], linestyle='None')
-        if exact is not None:
-            plt.plot([e[0] for e in exact], [e[1] for e in exact], label="Exact Solution")
-
-        plt.xlim(0, data[-1][0] + 0.2)
-        ymin, ymax = plt.ylim()
-        data_min = min(data, key=lambda x: x[1])[1]
-        data_max = max(data, key=lambda x: x[1])[1]
-        if data_max <= 0:
-            if data_min <= ymin:
-                plt.ylim(data_min * 1.15, 0)
-        else:
-            if data_max >= ymax:
-                plt.ylim(0, data_max * 1.15)
-        plt.legend(loc="best")
-        if save:
-            plt.savefig("../bachelor-thesis/images/{0}-{1}.pdf".format(quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
-        if show_plot:
-            plt.show()
 
     def calculate_error(self, data):
         """Calculate the error on a data set."""
