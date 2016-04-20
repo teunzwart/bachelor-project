@@ -72,16 +72,13 @@ class MetropolisIsing:
 
         return energy / 2  # Every bond has been counted twice.
 
-    def metropolis(self, optimize=True):
-        """
-        Implentation of the Metropolis alogrithm.
-
-        If optimize is False, the naive way to calculate the energy delta
-        using the Hamiltonian is used.
-        """
+    def metropolis(self, show_progress=False):
+        """Implentation of the Metropolis alogrithm."""
         # Precalculate the exponenents because floating point operations are expensive.
         exponents = {2 * self.bond_energy * x: np.exp(-self.beta * 2 * self.bond_energy * x) for x in range(-4, 5, 2)}
         for t in range(self.sweeps):
+            if t % 100 == 0 and show_progress:
+                print("Sweep {0}".format(t))
             # Measurement every sweep.
             np.put(self.energy_history, t, self.energy)
             np.put(self.magnetization_history, t, np.sum(self.lattice))
@@ -147,7 +144,7 @@ class MetropolisIsing:
         plt.plot(range(2500), normalized_acf[:2500])
         plt.show()
 
-        correlation_time = np.ceil(np.trapz(normalized_acf[:500]))
+        correlation_time = np.ceil(np.trapz(normalized_acf[:4000]))
 
         return correlation_time, normalized_acf
 
@@ -164,10 +161,10 @@ class MetropolisIsing:
 
             plt.title("Autocorrelation Function")
             plt.xlabel("Monte Carlo Sweeps")
-            plt.plot(range(2500), normalized_acf[:2500])
+            plt.plot(range(10), normalized_acf[:10])
             plt.show()
 
-        correlation_time = np.trapz(normalized_acf[:500])
+        correlation_time = np.trapz(normalized_acf)
 
         return correlation_time, normalized_acf
 
@@ -183,51 +180,8 @@ class MetropolisIsing:
         """
         return self.no_of_sites / temperature**2 * (np.mean(energy_data**2) - np.mean(energy_data)**2)
 
-    def binning_method(self, data, halfings, quantity, show_plot=False):
-        """
-        Calculate autocorrelation time, mean and error for a quantity using the binning method.
-        """
-        original_length = len(data)
-        errors = []
-        errors.append((original_length, self.calculate_error(data)))
-        for n in range(halfings):
-            if len(data) < 64:
-                break
-            data = np.asarray([(a + b) / 2 for a, b in zip(data[::2], data[1::2])])
-            errors.append((len(data), self.calculate_error(data)))
 
-        if show_plot:
-            plt.title("Binning Method {0} Error, Log Scale".format(quantity))
-            plt.xlabel("Data Points")
-            plt.ylabel("Error")
-            plt.xlim(original_length, 1)
-            plt.ylim(ymin=0, ymax=max(errors, key=lambda x: x[1])[1] * 1.15)
-            plt.semilogx([e[0] for e in errors], [e[1] for e in errors[::1]], basex=2)
-            plt.show()
 
-            # plt.title("Binning Method {0} Error".format(quantity))
-            # plt.xlabel("Data Points")
-            # plt.ylabel("Error")
-            # plt.xlim(original_length, 1)
-            # plt.ylim(ymin=0, ymax=max(errors, key=lambda x: x[1])[1] * 1.15)
-            # plt.plot([e[0] for e in errors], [e[1] for e in errors[::1]])
-            # plt.show()
-
-        autocorrelation_time = 0.5 * ((max(errors, key=lambda x: x[1])[1] / errors[0][1])**2 - 1)
-        if np.isnan(autocorrelation_time):
-            autocorrelation_time = 1
-
-        return autocorrelation_time, np.mean(data), max(errors, key=lambda x: x[1])[1]
-
-    def bootstrap_method(self, data, no_of_resamples, temperature, operation):
-        """Calculate error using the bootstrap method."""
-        resamples = np.empty(no_of_resamples)
-        for k in range(no_of_resamples):
-            random_picks = np.random.choice(data, len(data))
-            resamples.put(k, operation(random_picks, temperature))
-
-        error = np.sqrt((np.mean(resamples**2) - np.mean(resamples)**2)) / no_of_resamples
-        return error
 
     def sample_every_two_correlation_times(self, energy_data, magnetization_data, correlation_time):
         """Sample the given data every 2 correlation times and determine value and error."""
