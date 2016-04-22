@@ -11,6 +11,9 @@ class MetropolisIsing:
                  initial_temperature, sweeps):
         """Initialize variables and the lattice."""
         print("\nTemperature is {0}".format(round(temperature, 2)))
+        self.rng_seed = int(lattice_size * temperature * 1000)
+        print("RNG Seed is {0}".format(self.rng_seed))
+        np.random.seed(self.rng_seed)
         self.lattice_size = lattice_size
         self.no_of_sites = lattice_size**2
         self.bond_energy = bond_energy
@@ -22,9 +25,6 @@ class MetropolisIsing:
         self.energy = self.calculate_lattice_energy()
         self.energy_history = np.empty(self.sweeps)
         self.magnetization_history = np.empty(self.sweeps)
-        self.rng_seed = int(self.lattice_size * self.temperature * 1000)
-        print("RNG Seed is {0}".format(self.rng_seed))
-        np.random.seed(self.rng_seed)
 
     def init_lattice(self):
         """
@@ -171,15 +171,6 @@ class MetropolisIsing:
     def calculate_error(self, data):
         """Calculate the error on a data set."""
         return np.std(data) / np.sqrt(len(data))
-
-    def heat_capacity(self, energy_data, temperature):
-        """
-        Calculate the heat capacity for a given energy data set and temperature.
-
-        Multiply by the number of sites, because the data has been normalised to the number of sites.
-        """
-        return self.no_of_sites / temperature**2 * (np.mean(energy_data**2) - np.mean(energy_data)**2)
-
 
 
 

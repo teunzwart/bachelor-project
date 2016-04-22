@@ -8,10 +8,9 @@ SAVE_LOCATION = "../bachelor-thesis/images/"
 
 
 def show_history(data, quantity):
-    """Plot the quantity per spin for a run at a given temperature."""
-    plt.title("{0} per Spin".format(quantity))
+    """Plot a quantity for a run at a given temperature."""
     plt.xlabel("Monte Carlo Sweeps")
-    plt.ylabel("{0} per Spin".format(quantity))
+    plt.ylabel(quantity)
     plt.plot(data)
     plt.show()
 
@@ -31,9 +30,8 @@ def show_lattice(lattice):
 
 def plot_correlation_time_range(data, lattice_size, quantity, show_plot=True, save=False):
     """Plot autocorrelation times for a range of temperatures."""
-    plt.title("{0} Autocorrelation Time in Monte Carlo Sweeps".format(quantity))
     plt.xlabel("Temperature")
-    plt.ylabel("Monte Carlo Sweeps")
+    plt.ylabel("{0} Autocorrelation Time in Monte Carlo Sweeps".format(quantity))
     plt.plot([d[0] for d in data], [d[1] for d in data], marker='o', linestyle='None', label="{0} by {0} Lattice".format(lattice_size))
     plt.legend(loc='best')
     if save:
@@ -44,7 +42,6 @@ def plot_correlation_time_range(data, lattice_size, quantity, show_plot=True, sa
 
 def plot_quantity_range(data, errors, lattice_size, quantity, exact=None, show_plot=True, save=False):
     """Plot quantity over a temperature range."""
-    plt.title(quantity)
     plt.xlabel("Temperature")
     plt.ylabel(quantity)
     plt.plot([d[0] for d in data], [d[1] for d in data], label="{0} by {0} Lattice".format(lattice_size), linestyle='None', marker='o')
@@ -64,6 +61,6 @@ def plot_quantity_range(data, errors, lattice_size, quantity, exact=None, show_p
             plt.ylim(0, data_max * 1.15)
     plt.legend(loc="best")
     if save:
-        plt.savefig("{0}{1}-{2}.pdf".format(SAVE_LOCATION, quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
+        plt.savefig("{0}{1}_{2}.pdf".format(SAVE_LOCATION, quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
     if show_plot:
         plt.show()
