@@ -1,6 +1,7 @@
 """A Monte Carlo simulation of the Ising model."""
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class IsingModel:
@@ -116,6 +117,7 @@ class IsingModel:
         for t in range(self.sweeps):
             if t % 100 == 0 and show_progress:
                 print("Sweep {0}".format(t))
+                print(self.lattice)
             # Measurement every sweep.
             np.put(self.energy_history, t, self.energy)
             np.put(self.magnetization_history, t, np.sum(self.lattice))
@@ -141,8 +143,34 @@ class IsingModel:
                         to_consider.append(n)
 
             while to_consider:
-                neighbours_to_consider = to_consider.pop()
-                print(neighbours_to_consider)
+                neighbour_y, neighbour_x = to_consider.pop()
+                neighbours = [
+                    (neighbour_y, (neighbour_x - 1) % self.lattice_size),
+                    (neighbour_y, (neighbour_x + 1) % self.lattice_size),
+                    ((neighbour_y - 1) % self.lattice_size, neighbour_x),
+                    ((neighbour_y + 1) % self.lattice_size, neighbour_x)]
+
+                for n in neighbours:
+                    if n in cluster:
+                        continue
+                    if self.lattice[n] == seed_spin:
+                        if np.random.random() < padd:
+                            cluster.append(n)
+                            to_consider.append(n)
+
+            # Flip all spins in the cluster.
+            for spin in cluster:
+                self.lattice[spin] *= -1
+
+            # print(cluster)
+            # cluster_image = np.zeros((self.lattice_size, self.lattice_size))
+            # for k in cluster:
+            #     cluster_image[k] = 1
+            # print(cluster_image)
+            #
+            # plt.imshow(cluster_image, interpolation='nearest')
+            # plt.show()
+
 
 
 if __name__ == "__main__":
