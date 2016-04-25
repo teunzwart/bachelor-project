@@ -54,24 +54,25 @@ def binning_method(data, halfings, quantity, show_plot=False):
     return np.mean(data), max_error[1], autocorrelation_time, data_sets[max_error_index]
 
 
-def jackknife(data, operation, **kwargs):
+def jackknife(data, no_of_bins, operation, **kwargs):
     """
     Calculate errors using jackknife resampling.
 
-    Data argument should be a list or array of numbers.
+    no_of_bins should divide len(data)
     """
     data_length = len(data)
     all_bin_estimate = operation(data, kwargs)
     calculated_values = []
+    split_data = np.split(data, no_of_bins)
     # From https://stackoverflow.com/questions/28056195/python-leave-one-out-estimation
-    mask = np.arange(1, data_length) - np.tri(data_length, data_length - 1, k=-1, dtype=bool)
-    leave_one_out = data[mask]
+    mask = np.arange(1, no_of_bins) - np.tri(no_of_bins, no_of_bins - 1, k=-1, dtype=bool)
+    leave_one_out = np.asarray(split_data)[mask]
     for m in leave_one_out:
-        value = operation(m, kwargs)
+        value = operation(np.concatenate(m), kwargs)
         calculated_values.append(value)
-    mean = np.sum(calculated_values) / data_length
+    mean = np.sum(calculated_values) / no_of_bins
     standard_error = np.sqrt((1 - 1 / data_length) * (np.sum(np.asarray(calculated_values)**2 - mean**2)))
-    bias = (data_length - 1) * (mean - all_bin_estimate)
+    bias = (no_of_bins - 1) * (mean - all_bin_estimate)
     return all_bin_estimate, standard_error, bias
 
 
