@@ -1,11 +1,10 @@
-"""An implementation of the Metropolis algorithm for the Ising model."""
+"""A Monte Carlo simulation of the Ising model."""
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-class MetropolisIsing:
-    """An Implementation of the Metropolis algorithm for the Ising model."""
+class IsingModel:
+    """A Monte Carlo simulation of the Ising model."""
 
     def __init__(self, lattice_size, bond_energy, temperature,
                  initial_temperature, sweeps):
@@ -111,105 +110,45 @@ class MetropolisIsing:
                     self.lattice[rand_y, rand_x] = -1 * spin
                     self.energy += energy_delta
 
-    def autocorrelation(self, data):
-        """
-        Naive (SLOW!) way to calculate the autocorrelation function.
+    def wolff(self, show_progress=False):
+        """Simulate the lattice using the Wolff algorithm."""
+        padd = 1 - np.exp(-2 * self.beta * self.bond_energy)
+        for t in range(self.sweeps):
+            if t % 100 == 0 and show_progress:
+                print("Sweep {0}".format(t))
+            # Measurement every sweep.
+            np.put(self.energy_history, t, self.energy)
+            np.put(self.magnetization_history, t, np.sum(self.lattice))
 
-        Results are very similair to fast numpy version.
-        """
-        correlations = []
-        for t in range(len(data)):
-            tmax = len(data)
-            upper_bound = tmax - t
-            first_sum = 0
-            second_sum = 0
-            third_sum = 0
+            cluster = []
+            to_consider = []  # Locations for which the neighbours still have to be checked.
 
-            for n in np.arange(upper_bound):
-                first_sum += data[n] * data[n + t]
-                second_sum += data[n]
-                third_sum += data[n + t]
+            # Pick a random location on the lattice as the seed.
+            seed_y = np.random.randint(0, self.lattice_size)
+            seed_x = np.random.randint(0, self.lattice_size)
 
-            correlation = (1 / upper_bound) * (first_sum - (1 / upper_bound) * second_sum * third_sum)
-            correlations.append(correlation)
+            seed_spin = self.lattice[seed_y, seed_x]  # Get spin at the seed location.
+            neighbours = [
+                (seed_y, (seed_x - 1) % self.lattice_size),
+                (seed_y, (seed_x + 1) % self.lattice_size),
+                ((seed_y - 1) % self.lattice_size, seed_x),
+                ((seed_y + 1) % self.lattice_size, seed_x)]
 
-        normalized_acf = correlations / max(correlations)
+            for n in neighbours:
+                if self.lattice[n] == seed_spin:
+                    if np.random.random() < padd:
+                        cluster.append(n)
+                        to_consider.append(n)
 
-        plt.title("Autocorrelation Function")
-        plt.xlabel("Monte Carlo Sweeps")
-        plt.plot(range(len(normalized_acf)), normalized_acf)
-        plt.show()
-        plt.title("Autocorrelation Function")
-        plt.xlabel("Monte Carlo Sweeps")
-        plt.plot(range(2500), normalized_acf[:2500])
-        plt.show()
+            while to_consider:
+                neighbours_to_consider = to_consider.pop()
+                print(neighbours_to_consider)
 
-        correlation_time = np.ceil(np.trapz(normalized_acf[:4000]))
-
-        return correlation_time, normalized_acf
-
-    def numpy_autocorrelation(self, data, show_plot=False):
-        """Quick autocorrelation calculation."""
-        data = np.asarray([d - np.mean(data) for d in data])
-        acf = np.correlate(data, data, mode="full")[(len(data) - 1):]  # Only keep the usefull data (correlation is symmetric around index len(data)).
-        normalized_acf = acf / acf.max()
-        if show_plot:
-            plt.title("Autocorrelation Function")
-            plt.xlabel("Monte Carlo Sweeps")
-            plt.plot(range(len(normalized_acf)), normalized_acf)
-            plt.show()
-
-            plt.title("Autocorrelation Function")
-            plt.xlabel("Monte Carlo Sweeps")
-            plt.plot(range(10), normalized_acf[:10])
-            plt.show()
-
-        correlation_time = np.trapz(normalized_acf)
-
-        return correlation_time, normalized_acf
-
-    def calculate_error(self, data):
-        """Calculate the error on a data set."""
-        return np.std(data) / np.sqrt(len(data))
-
-
-
-    def sample_every_two_correlation_times(self, energy_data, magnetization_data, correlation_time):
-        """Sample the given data every 2 correlation times and determine value and error."""
-        magnet_samples = []
-        energy_samples = []
-
-        for t in np.arange(0, len(energy_data), 2 * int(np.ceil(correlation_time))):
-            magnet_samples.append(magnetization_data[t])
-            energy_samples.append(energy_data[t])
-
-        magnet_samples = np.asarray(magnet_samples)
-        energy_samples = np.asarray(energy_samples)
-
-        abs_magnetization = np.mean(np.absolute(magnet_samples))
-        abs_magnetization_error = self.calculate_error(magnet_samples)
-        print("<m> (<|M|/N>) = {0} +/- {1}".format(abs_magnetization, abs_magnetization_error))
-
-        magnetization = np.mean(magnet_samples)
-        magnetization_error = self.calculate_error(magnet_samples)
-        print("<M/N> = {0} +/- {1}".format(magnetization, magnetization_error))
-
-        energy = np.mean(energy_samples)
-        energy_error = self.calculate_error(energy_samples)
-        print("<E/N> = {0} +/- {1}".format(energy, energy_error))
-
-        magnetization_squared = np.mean((magnet_samples * self.no_of_sites)**2)
-        magnetization_squared_error = self.calculate_error((magnet_samples * self.no_of_sites)**2)
-        print("<M^2> = {0} +/- {1}".format(magnetization_squared, magnetization_squared_error))
-
-    def temperature_range():
-        """Run simulation over a range of temperatures."""
-        pass
 
 if __name__ == "__main__":
-    metropolis_ising = MetropolisIsing(4, 1, 2, "lo", 1000)
-    metropolis_ising.metropolis()
-    print(metropolis_ising.lattice)
-    print(metropolis_ising.energy)
-    print(metropolis_ising.magnet_history)
-    print(metropolis_ising.energy_history)
+    ising = IsingModel(4, 1, 2, "lo", 1000)
+    ising.metropolis()
+    print(ising.lattice)
+    print(ising.energy)
+    print(ising.magnet_history)
+    print(ising.energy_history)
