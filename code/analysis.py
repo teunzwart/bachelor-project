@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def bootstrap_method(data, no_of_resamples, operation, **kwargs):
+def bootstrap(data, no_of_resamples, operation, **kwargs):
     """Calculate error using the bootstrap method."""
     resamples = np.empty(no_of_resamples)
     for k in range(no_of_resamples):
@@ -22,7 +22,7 @@ def calculate_error(data):
     return np.std(data) / np.sqrt(len(data))
 
 
-def binning_method(data, halfings, quantity, show_plot=False):
+def binning(data, halfings, quantity, show_plot=False):
     """Calculate autocorrelation time, mean and error for a quantity using the binning method."""
     original_length = len(data)
     errors = []
@@ -73,6 +73,8 @@ def jackknife(data, no_of_bins, operation, **kwargs):
     mean = np.sum(calculated_values) / no_of_bins
     standard_error = np.sqrt((1 - 1 / data_length) * (np.sum(np.asarray(calculated_values)**2 - mean**2)))
     bias = (no_of_bins - 1) * (mean - all_bin_estimate)
+    if bias >= 0.5 * standard_error and bias != 0:
+        print("Bias is large for {0}: error is {1}, bias is {2} ".format(operation, standard_error, bias))
     return all_bin_estimate, standard_error, bias
 
 

@@ -1,7 +1,8 @@
 """A Monte Carlo simulation of the Ising model."""
 
 import numpy as np
-import matplotlib.pyplot as plt
+
+import plotting
 
 
 class IsingModel:
@@ -10,9 +11,7 @@ class IsingModel:
     def __init__(self, lattice_size, bond_energy, temperature,
                  initial_temperature, sweeps):
         """Initialize variables and the lattice."""
-        print("\nTemperature is {0}".format(round(temperature, 2)))
         self.rng_seed = int(lattice_size * temperature * 1000)
-        print("RNG Seed is {0}".format(self.rng_seed))
         np.random.seed(self.rng_seed)
         self.lattice_size = lattice_size
         self.no_of_sites = lattice_size**2
@@ -114,10 +113,8 @@ class IsingModel:
     def wolff(self, show_progress=False):
         """Simulate the lattice using the Wolff algorithm."""
         padd = 1 - np.exp(-2 * self.beta * self.bond_energy)
+        cluster_sizes = []
         for t in range(self.sweeps):
-            if t % 100 == 0 and show_progress:
-                print("Sweep {0}".format(t))
-                print(self.lattice)
             # Measurement every sweep.
             np.put(self.energy_history, t, self.energy)
             np.put(self.magnetization_history, t, np.sum(self.lattice))
@@ -128,6 +125,7 @@ class IsingModel:
             # Pick a random location on the lattice as the seed.
             seed_y = np.random.randint(0, self.lattice_size)
             seed_x = np.random.randint(0, self.lattice_size)
+            cluster.append((seed_y, seed_x))
 
             seed_spin = self.lattice[seed_y, seed_x]  # Get spin at the seed location.
             neighbours = [
@@ -161,15 +159,15 @@ class IsingModel:
             # Flip all spins in the cluster.
             for spin in cluster:
                 self.lattice[spin] *= -1
+            self.energy = self.calculate_lattice_energy()
 
-            # print(cluster)
-            # cluster_image = np.zeros((self.lattice_size, self.lattice_size))
-            # for k in cluster:
-            #     cluster_image[k] = 1
-            # print(cluster_image)
-            #
-            # plt.imshow(cluster_image, interpolation='nearest')
-            # plt.show()
+            cluster_sizes.append(len(cluster))
+
+            if t % 100 == 0 and show_progress:
+                print("Sweep {0}".format(t))
+                plotting.show_cluster(cluster, self.lattice_size)
+
+        return cluster_sizes
 
 
 
