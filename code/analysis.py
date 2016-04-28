@@ -1,7 +1,10 @@
 """Tools for (statistical) analysis of Monte Carlo simulation."""
 
+import copy
+
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy
 
 
 def bootstrap(data, no_of_resamples, operation, **kwargs):
@@ -87,5 +90,33 @@ def heat_capacity(energy_data, kwargs):
     return kwargs['no_of_sites'] / kwargs['temperature']**2 * (np.mean(energy_data**2) - np.mean(energy_data)**2)
 
 
-def binder_cumulant(magnetization_data):
+def magnetizability(magnetization_data, kwargs):
+    """Calculate the magnetizability."""
+    return kwargs['no_of_sites'] / kwargs['temperature'] * (np.mean(magnetization_data**2) - np.mean(np.absolute(magnetization_data))**2)
+
+
+def binder_cumulant(magnetization_data, kwargs):
+    """Calculate the binder cumulant."""
     return 1 - np.mean(magnetization_data**4) / (3 * np.mean(magnetization_data**2)**2)
+
+
+def find_binder_intersection(data):
+    """Find the intersection of Binder cumulant data series for different lattice sizes."""
+    # Adapted from http://stackoverflow.com/questions/8094374/
+    intersections = []
+    # We do not want to operate on the original list.
+    data = copy.deepcopy(data)
+    while len(data) >= 2:
+        data_set = data.pop(0)[1]
+        x1, y1, _ = zip(*data_set)
+        x1, y1 = np.asarray(x1), np.asarray(y1)
+        p1 = scipy.interpolate.PiecewisePolynomial(x1, y1[:, np.newaxis])
+        for p in data:
+            x2, y2, _ = zip(*p[1])
+            x2, y2 = np.asarray(x2), np.asarray(y2)
+            p2 = scipy.interpolate.PiecewisePolynomial(x2, y2[:, np.newaxis])
+            intersections.append(scipy.optimize.fsolve(lambda x: p1(x) - p2(x), 2)[0])
+
+    intersection = np.mean(intersections)
+    intersection_error = calculate_error(intersections)
+    return intersection, intersection_error
