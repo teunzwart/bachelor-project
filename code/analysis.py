@@ -85,3 +85,7 @@ def heat_capacity(energy_data, kwargs):
     Multiply by the number of sites, because the data has been normalised to the number of sites.
     """
     return kwargs['no_of_sites'] / kwargs['temperature']**2 * (np.mean(energy_data**2) - np.mean(energy_data)**2)
+
+
+def binder_cumulant(magnetization_data):
+    return 1 - np.mean(magnetization_data**4) / (3 * np.mean(magnetization_data**2)**2)
