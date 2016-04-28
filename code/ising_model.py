@@ -149,6 +149,7 @@ class IsingModel:
                     ((neighbour_y + 1) % self.lattice_size, neighbour_x)]
 
                 for n in neighbours:
+                    # Ignore locations already in the cluster.
                     if n in cluster:
                         continue
                     if self.lattice[n] == seed_spin:

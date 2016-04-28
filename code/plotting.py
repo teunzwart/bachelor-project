@@ -46,15 +46,17 @@ def show_cluster(cluster, lattice_size):
     plt.show()
 
 
-def plot_correlation_time_range(data_range, lattice_sizes, quantity, show_plot=True, save=False):
+def plot_correlation_time_range(data_range, quantity, show_plot=True, save=False):
     """Plot autocorrelation times for a range of temperatures."""
     plt.xlabel("Temperature")
     plt.ylabel("{0} Autocorrelation Time in Monte Carlo Sweeps".format(quantity))
-    for p in range(len(lattice_sizes)):
-        plt.plot([d[0] for d in data_range[p]], [d[1] for d in data_range[p]], marker='o', linestyle='None', label="{0} by {0} Lattice".format(lattice_sizes[p]))
+    for p in data_range:
+        lattice_size = p[0]
+        data = p[1]
+        plt.plot([d[0] for d in data], [d[1] for d in data], marker='o', linestyle='None', label="{0} by {0} Lattice".format(lattice_size))
     plt.legend(loc='best')
     # We put all data together so it is easy to find the maximum and minimum values.
-    zipped_data = list(itertools.chain(*data_range))
+    zipped_data = list(itertools.chain(*[k[1] for k in data_range]))
     max_x = max(zipped_data, key=lambda x: x[0])[0]
     plt.xlim(0, max_x + 0.2)
     data_max = max(zipped_data, key=lambda x: x[1])[1]
@@ -65,15 +67,17 @@ def plot_correlation_time_range(data_range, lattice_sizes, quantity, show_plot=T
         plt.show()
 
 
-def plot_quantity_range(data_range, lattice_sizes, quantity, exact=None, show_plot=True, save=False):
+def plot_quantity_range(data_range, quantity, exact=None, show_plot=True, save=False):
     """Plot quantity over a temperature range."""
-    for p in range(len(lattice_sizes)):
-        plt.errorbar([d[0] for d in data_range[p]], [d[1] for d in data_range[p]], [d[2] for d in data_range[p]], linestyle='None', label="{0} by {0} Lattice".format(lattice_sizes[p]), marker='o')
+    for p in data_range:
+        lattice_size = p[0]
+        data = p[1]
+        plt.errorbar([d[0] for d in data], [d[1] for d in data], [d[2] for d in data], linestyle='None', label="{0} by {0} Lattice".format(lattice_size), marker='o')
     if exact is not None:
         plt.plot([e[0] for e in exact], [e[1] for e in exact], label="Thermodynamic Limit")
 
     # We put all data together so it is easy to find the maximum and minimum values.
-    zipped_data = list(itertools.chain(*data_range))
+    zipped_data = list(itertools.chain(*[k[1] for k in data_range]))
     max_x = max(zipped_data, key=lambda x: x[0])[0]
     plt.xlim(0, max_x + 0.2)
     data_min = min(zipped_data, key=lambda x: x[1])[1]
