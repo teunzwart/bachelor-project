@@ -52,16 +52,17 @@ class IsingModel:
         """Calculate the energy of the lattice using the Ising model Hamiltonian in zero-field."""
         energy = 0
         for y in range(self.lattice_size):
+            offset_y = (y + 1) % self.lattice_size
+            current_row = self.lattice[y]
+            next_row = self.lattice[offset_y]
             for x in range(self.lattice_size):
-                center = self.lattice[y][x]
+                center = current_row[x]
                 offset_x = (x + 1) % self.lattice_size
-                offset_y = (y + 1) % self.lattice_size
-                # Toroidal boundary conditions, lattice wraps around
-                if self.lattice[y][offset_x] == center:
+                if current_row[offset_x] == center:
                     energy -= self.bond_energy
                 else:
                     energy += self.bond_energy
-                if self.lattice[offset_y][x] == center:
+                if next_row[x] == center:
                     energy -= self.bond_energy
                 else:
                     energy += self.bond_energy
@@ -71,13 +72,14 @@ class IsingModel:
         """Implentation of the Metropolis alogrithm."""
         # Precalculate the exponenents because floating point operations are expensive.
         exponents = {2 * self.bond_energy * x: np.exp(-self.beta * 2 * self.bond_energy * x) for x in range(-4, 5, 2)}
+        energy = self.calculate_lattice_energy()
+        magnetization = np.sum(self.lattice)
         for t in range(self.sweeps):
-            energy = self.calculate_lattice_energy()
             if t % 100 == 0 and show_progress:
                 print("Sweep {0}".format(t))
             # Measurement every sweep.
             np.put(self.energy_history, t, energy)
-            np.put(self.magnetization_history, t, np.sum(self.lattice))
+            np.put(self.magnetization_history, t, magnetization)
             for k in range(self.lattice_size**2):
                 # Pick a random location on the lattice.
                 rand_y = np.random.randint(0, self.lattice_size)
@@ -106,6 +108,7 @@ class IsingModel:
                     # Flip the spin and change the energy.
                     self.lattice[rand_y, rand_x] = -1 * spin
                     energy += energy_delta
+                    magnetization += -2 * spin
 
     def wolff(self, show_progress=False):
         """Simulate the lattice using the Wolff algorithm."""
@@ -148,13 +151,3 @@ class IsingModel:
             cluster_sizes.append(cluster_size)
 
         return cluster_sizes
-
-
-
-if __name__ == "__main__":
-    ising = IsingModel(4, 1, 2, "lo", 1000)
-    ising.metropolis()
-    print(ising.lattice)
-    print(ising.energy)
-    print(ising.magnet_history)
-    print(ising.energy_history)
