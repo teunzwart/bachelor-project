@@ -25,23 +25,20 @@ def calculate_error(data):
     return np.std(data) / np.sqrt(len(data))
 
 
-def binning(data, halfings, quantity, show_plot=False):
-    """Calculate autocorrelation time, mean and error for a quantity using the binning method."""
+def binning(data, quantity, show_plot=False):
+    """
+    Calculate autocorrelation time, mean and error for a quantity using the binning method.
+
+    The bins become uncorrelated when the error approaches a constant.
+    These uncorrelated bins can be used for jackknife resampling.
+    """
     original_length = len(data)
     errors = []
-    data_sets = []
     errors.append((original_length, calculate_error(data)))
-    data_sets.append(data)
-    for n in range(halfings):
-        if len(data) < 64:
-            break
+    while len(data) > 128:
         data = np.asarray([(a + b) / 2 for a, b in zip(data[::2], data[1::2])])
         errors.append((len(data), calculate_error(data)))
-        data_sets.append(data)
-    max_error = max(errors, key=lambda x: x[1])
-    max_error_index = errors.index(max_error)
-
-    autocorrelation_time = 0.5 * ((max_error[1] / errors[0][1])**2 - 1)
+    autocorrelation_time = 0.5 * ((errors[-1][1] / errors[0][1])**2 - 1)
     if np.isnan(autocorrelation_time):
         autocorrelation_time = 1
 
@@ -50,11 +47,11 @@ def binning(data, halfings, quantity, show_plot=False):
         plt.xlabel("Data Points")
         plt.ylabel("Error")
         plt.xlim(original_length, 1)
-        plt.ylim(ymin=0, ymax=max_error[1] * 1.15)
+        plt.ylim(ymin=0, ymax=max(errors, key=lambda x: x[1])[1] * 1.15)
         plt.semilogx([e[0] for e in errors], [e[1] for e in errors], basex=2)
         plt.show()
 
-    return np.mean(data), max_error[1], autocorrelation_time, data_sets[max_error_index]
+    return np.mean(data), errors[-1][1], autocorrelation_time, data
 
 
 def jackknife(data, no_of_bins, operation, **kwargs):
@@ -67,7 +64,7 @@ def jackknife(data, no_of_bins, operation, **kwargs):
     all_bin_estimate = operation(data, kwargs)
     calculated_values = []
     split_data = np.split(data, no_of_bins)
-    # From https://stackoverflow.com/questions/28056195/python-leave-one-out-estimation
+    # From https://stackoverflow.com/questions/28056195/
     mask = np.arange(1, no_of_bins) - np.tri(no_of_bins, no_of_bins - 1, k=-1, dtype=bool)
     leave_one_out = np.asarray(split_data)[mask]
     for m in leave_one_out:
