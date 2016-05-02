@@ -43,8 +43,8 @@ class IsingModel:
                 row1 = np.hstack([1, -1] * self.lattice_size)
                 row2 = np.hstack([-1, 1] * self.lattice_size)
                 lattice = np.vstack([row1, row2] * self.lattice_size)
-            else:
-                raise Exception("Bond energy can not be 0.")
+        else:
+            raise Exception("{0} is not a valid bond energy.".format(self.initial_temperature))
 
         return lattice
 
