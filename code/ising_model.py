@@ -2,8 +2,6 @@
 
 import numpy as np
 
-import plotting
-
 
 class IsingModel:
     """A Monte Carlo simulation of the Ising model."""
@@ -21,7 +19,6 @@ class IsingModel:
         self.initial_temperature = initial_temperature
         self.sweeps = sweeps
         self.lattice = self.init_lattice()
-        self.energy = self.calculate_lattice_energy()
         self.energy_history = np.empty(self.sweeps)
         self.magnetization_history = np.empty(self.sweeps)
 
@@ -59,9 +56,7 @@ class IsingModel:
                 center = self.lattice[y][x]
                 # Toroidal boundary conditions, lattice wraps around
                 neighbours = [
-                    (y, (x - 1) % self.lattice_size),
                     (y, (x + 1) % self.lattice_size),
-                    ((y - 1) % self.lattice_size, x),
                     ((y + 1) % self.lattice_size, x)]
                 for n in neighbours:
                     if self.lattice[n] == center:
@@ -69,17 +64,18 @@ class IsingModel:
                     else:
                         energy += self.bond_energy
 
-        return energy / 2  # Every bond has been counted twice.
+        return energy
 
     def metropolis(self, show_progress=False):
         """Implentation of the Metropolis alogrithm."""
         # Precalculate the exponenents because floating point operations are expensive.
         exponents = {2 * self.bond_energy * x: np.exp(-self.beta * 2 * self.bond_energy * x) for x in range(-4, 5, 2)}
         for t in range(self.sweeps):
+            energy = self.calculate_lattice_energy()
             if t % 100 == 0 and show_progress:
                 print("Sweep {0}".format(t))
             # Measurement every sweep.
-            np.put(self.energy_history, t, self.energy)
+            np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, np.sum(self.lattice))
             for k in range(self.lattice_size ** 2):
                 # Pick a random location on the lattice.
@@ -108,65 +104,47 @@ class IsingModel:
                 if np.random.random() <= acceptance_probability:
                     # Flip the spin and change the energy.
                     self.lattice[rand_y, rand_x] = -1 * spin
-                    self.energy += energy_delta
+                    energy += energy_delta
 
     def wolff(self, show_progress=False):
         """Simulate the lattice using the Wolff algorithm."""
         padd = 1 - np.exp(-2 * self.beta * self.bond_energy)
         cluster_sizes = []
+        energy = self.calculate_lattice_energy()
         for t in range(self.sweeps):
             # Measurement every sweep.
-            np.put(self.energy_history, t, self.energy)
+            np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, np.sum(self.lattice))
 
-            cluster = []
-            to_consider = []  # Locations for which the neighbours still have to be checked.
+            stack = []  # Locations for which the neighbours still have to be checked.
 
             # Pick a random location on the lattice as the seed.
             seed_y = np.random.randint(0, self.lattice_size)
             seed_x = np.random.randint(0, self.lattice_size)
-            cluster.append((seed_y, seed_x))
 
             seed_spin = self.lattice[seed_y, seed_x]  # Get spin at the seed location.
-            neighbours = [
-                (seed_y, (seed_x - 1) % self.lattice_size),
-                (seed_y, (seed_x + 1) % self.lattice_size),
-                ((seed_y - 1) % self.lattice_size, seed_x),
-                ((seed_y + 1) % self.lattice_size, seed_x)]
+            stack.append((seed_y, seed_x))
+            self.lattice[seed_y, seed_x] *= -1  # Flip the spin.
+            cluster_size = 1
 
-            for n in neighbours:
-                if self.lattice[n] == seed_spin:
-                    if np.random.random() < padd:
-                        cluster.append(n)
-                        to_consider.append(n)
-
-            while to_consider:
-                neighbour_y, neighbour_x = to_consider.pop()
+            while stack:
+                current_y, current_x = stack.pop()
                 neighbours = [
-                    (neighbour_y, (neighbour_x - 1) % self.lattice_size),
-                    (neighbour_y, (neighbour_x + 1) % self.lattice_size),
-                    ((neighbour_y - 1) % self.lattice_size, neighbour_x),
-                    ((neighbour_y + 1) % self.lattice_size, neighbour_x)]
+                    (current_y, (current_x - 1) % self.lattice_size),
+                    (current_y, (current_x + 1) % self.lattice_size),
+                    ((current_y - 1) % self.lattice_size, current_x),
+                    ((current_y + 1) % self.lattice_size, current_x)]
 
                 for n in neighbours:
-                    # Ignore locations already in the cluster.
-                    if n in cluster:
-                        continue
                     if self.lattice[n] == seed_spin:
                         if np.random.random() < padd:
-                            cluster.append(n)
-                            to_consider.append(n)
+                            stack.append(n)
+                            self.lattice[n] *= -1
+                            cluster_size += 1
 
-            # Flip all spins in the cluster.
-            for spin in cluster:
-                self.lattice[spin] *= -1
-            self.energy = self.calculate_lattice_energy()
+            energy = self.calculate_lattice_energy()
 
-            cluster_sizes.append(len(cluster))
-
-            if t % 100 == 0 and show_progress:
-                print("Sweep {0}".format(t))
-                plotting.show_cluster(cluster, self.lattice_size)
+            cluster_sizes.append(cluster_size)
 
         return cluster_sizes
 
