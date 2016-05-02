@@ -54,16 +54,17 @@ class IsingModel:
         for y in range(self.lattice_size):
             for x in range(self.lattice_size):
                 center = self.lattice[y][x]
+                offset_x = (x + 1) % self.lattice_size
+                offset_y = (y + 1) % self.lattice_size
                 # Toroidal boundary conditions, lattice wraps around
-                neighbours = [
-                    (y, (x + 1) % self.lattice_size),
-                    ((y + 1) % self.lattice_size, x)]
-                for n in neighbours:
-                    if self.lattice[n] == center:
-                        energy -= self.bond_energy
-                    else:
-                        energy += self.bond_energy
-
+                if self.lattice[y][offset_x] == center:
+                    energy -= self.bond_energy
+                else:
+                    energy += self.bond_energy
+                if self.lattice[offset_y][x] == center:
+                    energy -= self.bond_energy
+                else:
+                    energy += self.bond_energy
         return energy
 
     def metropolis(self, show_progress=False):
@@ -77,7 +78,7 @@ class IsingModel:
             # Measurement every sweep.
             np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, np.sum(self.lattice))
-            for k in range(self.lattice_size ** 2):
+            for k in range(self.lattice_size**2):
                 # Pick a random location on the lattice.
                 rand_y = np.random.randint(0, self.lattice_size)
                 rand_x = np.random.randint(0, self.lattice_size)
