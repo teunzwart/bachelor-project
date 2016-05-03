@@ -31,7 +31,7 @@ def single_temperature_simulation(model, algorithm, lattice_size, bond_energy, t
         cluster_sizes = simulation.wolff()
         # We need to correct for the different way in which correlation time is defined for Wolff.
         correlation_correction = np.mean(cluster_sizes) / simulation.no_of_sites
-        correlation_correction_error = analysis.calculate_error(cluster_sizes)
+        correlation_correction_error = analysis.calculate_error(cluster_sizes) / simulation.no_of_sites
     else:
         raise Exception("Invalid algorithm.")
 
@@ -69,7 +69,8 @@ def simulation_range(model, algorithm, lattice_sizes, bond_energy, initial_tempe
     """Run a given model over a range of temperature."""
     for k in lattice_sizes:
         simulations = []
-        for t in np.arange(lower, upper, step):
+        num_of_samples = ((upper - lower) / step) + 1
+        for t in np.linspace(lower, upper, num_of_samples):
             data = single_temperature_simulation(model, algorithm, k, bond_energy, t, initial_temperature,
                                                  thermalization_sweeps, measurement_sweeps, show_plots=False)
             simulations.append(data)
