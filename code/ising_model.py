@@ -1,6 +1,7 @@
 """A Monte Carlo simulation of the Ising model."""
 
 import numpy as np
+import cy_ising_model
 
 
 class IsingModel:
@@ -146,8 +147,9 @@ class IsingModel:
                             self.lattice[n] *= -1
                             cluster_size += 1
 
-            energy = self.calculate_lattice_energy()
-
+            # Pure Python is very slow here.
+            # energy = self.calculate_lattice_energy()
+            energy = cy_ising_model.calculate_lattice_energy(self.lattice, self.lattice_size, self.bond_energy)
             cluster_sizes.append(cluster_size)
 
         return cluster_sizes
