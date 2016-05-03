@@ -57,8 +57,9 @@ def plot_correlation_time_range(data_range, quantity, show_plot=True, save=False
     plt.legend(loc='best')
     # We put all data together so it is easy to find the maximum and minimum values.
     zipped_data = list(itertools.chain(*[k[1] for k in data_range]))
+    min_x = min(zipped_data, key=lambda x: x[0])[0]
     max_x = max(zipped_data, key=lambda x: x[0])[0]
-    plt.xlim(0, max_x + 0.2)
+    plt.xlim(min_x - 0.2, max_x + 0.2)
     data_max = max(zipped_data, key=lambda x: x[1])[1]
     plt.ylim(0, data_max * 1.15)
     if save:
@@ -78,8 +79,9 @@ def plot_quantity_range(data_range, quantity, exact=None, show_plot=True, save=F
 
     # We put all data together so it is easy to find the maximum and minimum values.
     zipped_data = list(itertools.chain(*[k[1] for k in data_range]))
+    min_x = min(zipped_data, key=lambda x: x[0])[0]
     max_x = max(zipped_data, key=lambda x: x[0])[0]
-    plt.xlim(0, max_x + 0.2)
+    plt.xlim(min_x - 0.2, max_x + 0.2)
     data_min = min(zipped_data, key=lambda x: x[1])[1]
     data_max = max(zipped_data, key=lambda x: x[1])[1]
     if data_max <= 0:
