@@ -75,5 +75,5 @@ def simulation_range(model, algorithm, lattice_sizes, bond_energy, initial_tempe
                                                  thermalization_sweeps, measurement_sweeps, show_plots=False)
             simulations.append(data)
 
-        with open("{0}/{1}_{2}_{3}_{4}_{5}_[{6}-{7}].pickle".format(SIMULATION_FOLDER, time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time())), model, algorithm, k, thermalization_sweeps + measurement_sweeps, lower, upper), 'wb+') as f:
+        with open("{0}/{1}_{2}_{3}_{4}_{5}_[{6}-{7}]_{8}.pickle".format(SIMULATION_FOLDER, time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time())), model, algorithm, k, thermalization_sweeps + measurement_sweeps, lower, upper, step), 'wb+') as f:
             pickle.dump(simulations, f, pickle.HIGHEST_PROTOCOL)
