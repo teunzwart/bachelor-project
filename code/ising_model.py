@@ -41,9 +41,11 @@ class IsingModel:
                 lattice = np.full((self.lattice_size, self.lattice_size), ground_state, dtype="int64")
             elif self.bond_energy < 0:
                 # Set lattice to alternating pattern.
+                # From http://telliott99.blogspot.nl/2010/01/heres-question-on-so-about-how-to-make.html
                 row1 = np.hstack([1, -1] * self.lattice_size)
                 row2 = np.hstack([-1, 1] * self.lattice_size)
                 lattice = np.vstack([row1, row2] * self.lattice_size)
+                lattice = lattice[:self.lattice_size, :self.lattice_size]
         else:
             raise Exception("{0} is not a valid bond energy.".format(self.initial_temperature))
 
@@ -69,15 +71,13 @@ class IsingModel:
                     energy += self.bond_energy
         return energy
 
-    def metropolis(self, show_progress=False):
+    def metropolis(self):
         """Implentation of the Metropolis alogrithm."""
         # Precalculate the exponenents because floating point operations are expensive.
         exponents = {2 * self.bond_energy * x: np.exp(-self.beta * 2 * self.bond_energy * x) for x in range(-4, 5, 2)}
         energy = self.calculate_lattice_energy()
         magnetization = np.sum(self.lattice)
         for t in range(self.sweeps):
-            if t % 100 == 0 and show_progress:
-                print("Sweep {0}".format(t))
             # Measurement every sweep.
             np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, magnetization)
@@ -111,7 +111,7 @@ class IsingModel:
                     energy += energy_delta
                     magnetization += -2 * spin
 
-    def wolff(self, show_progress=False):
+    def wolff(self):
         """Simulate the lattice using the Wolff algorithm."""
         padd = 1 - np.exp(-2 * self.beta * self.bond_energy)
         cluster_sizes = []
