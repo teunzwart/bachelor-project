@@ -6,7 +6,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 
-SAVE_LOCATION = "../bachelor-thesis/images/"
+SAVE_LOCATION = "../bachelor-thesis/images"
 
 
 def show_history(data, quantity):
@@ -17,7 +17,7 @@ def show_history(data, quantity):
     plt.show()
 
 
-def show_lattice(lattice):
+def show_lattice(lattice, lattice_size, save=False):
     """Show the lattice."""
     for tic in plt.gca().xaxis.get_major_ticks():
         tic.tick1On = tic.tick2On = False
@@ -27,6 +27,8 @@ def show_lattice(lattice):
         tic.label1On = tic.label2On = False
     plt.gca().grid(False)
     plt.imshow(lattice, interpolation="nearest")
+    if save:
+        plt.savefig("{0}/{1}_{2}_by_{2}_Lattice.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time())), lattice_size), bbox_inches='tight')
     plt.show()
 
 
@@ -63,7 +65,7 @@ def plot_correlation_time_range(data_range, quantity, show_plot=True, save=False
     data_max = max(zipped_data, key=lambda x: x[1])[1]
     plt.ylim(0, data_max * 1.15)
     if save:
-        plt.savefig("{0}{1}_Autocorrelation_Time_{2}.pdf".format(SAVE_LOCATION, quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
+        plt.savefig("{0}/{1}_Autocorrelation_Time_{2}.pdf".format(SAVE_LOCATION, quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
     if show_plot:
         plt.show()
 
@@ -92,6 +94,6 @@ def plot_quantity_range(data_range, quantity, exact=None, show_plot=True, save=F
     plt.ylabel(quantity)
     plt.legend(loc="best")
     if save:
-        plt.savefig("{0}{1}_{2}.pdf".format(SAVE_LOCATION, quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
+        plt.savefig("{0}/{1}_{2}.pdf".format(SAVE_LOCATION, quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
     if show_plot:
         plt.show()
