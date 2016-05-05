@@ -1,11 +1,9 @@
 """Tools for (statistical) analysis of Monte Carlo simulation."""
 
-import copy
 import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy
 
 import exact_ising_model as exact
 import plotting
@@ -20,12 +18,10 @@ def open_simulation_files(data_files):
             data.append(pickle.load(f))
     print(sorted(list(data[0][1][1].keys())))
 
-    # print(measured_values)
-
     return data
 
 
-def data_analysis(data_files, save=False):
+def data_analysis(data_files, alpha, gamma, beta, nu, save=False, show_plots=True):
     data = open_simulation_files(data_files)
     energies = []
     energy_correlations = []
@@ -84,20 +80,28 @@ def data_analysis(data_files, save=False):
         binder_cumulants.append([lattice_size, binder_cumulant_at_size])
 
     # Find the critical temperature.
-    find_binder_intersection(binder_cumulants)
+    critical_temperature, critical_temperature_error = find_binder_intersection(binder_cumulants)
+
+    data_collapse(magnetizabilities, critical_temperature, gamma, nu, "Gamma", "Nu")
+    data_collapse(magnetizations, critical_temperature, beta, nu, "Beta", "Nu")
+    data_collapse(heat_capacities, critical_temperature, alpha, nu, "Alpha", "Nu")
+
+    critical_exponent_consistency(gamma, alpha, beta, nu)
 
     bond_energy = data[0][0][0][1]
     exact_heat = exact.heat_capacity(bond_energy, 0, 10 * np.absolute(bond_energy))
     exact_energy = exact.internal_energy(bond_energy, 0, 10 * np.absolute(bond_energy))
     exact_magnetization = exact.magnetization(bond_energy, 0, 10 * np.absolute(bond_energy))
 
-    plotting.plot_quantity_range(energies, "Energy per Site", exact=exact_energy, save=save)
-    plotting.plot_quantity_range(cluster_fractions, "Mean Cluster Size as fraction of Lattice", save=save)
-    plotting.plot_quantity_range(magnetizations, "Absolute Magnetization per Site", exact=exact_magnetization, save=save)
-    plotting.plot_quantity_range(heat_capacities, "Heat Capacity per Site", exact=exact_heat, save=save)
-    plotting.plot_quantity_range(magnetizabilities, "Magnetizability per Site", save=save)
-    plotting.plot_quantity_range(binder_cumulants, "Binder Cumulant", save=save)
-    plotting.plot_correlation_time_range(magnetization_correlations, "Absolute Magnetization", save=save)
+    if show_plots:
+        plotting.plot_quantity_range(energies, "Energy per Site", exact=exact_energy, save=save)
+        plotting.plot_quantity_range(cluster_fractions, "Mean Cluster Size as fraction of Lattice", save=save)
+        plotting.plot_quantity_range(magnetizations, "Absolute Magnetization per Site", exact=exact_magnetization, save=save)
+        plotting.plot_quantity_range(heat_capacities, "Heat Capacity per Site", exact=exact_heat, save=save)
+        plotting.plot_quantity_range(magnetizabilities, "Magnetizability per Site", save=save)
+        plotting.plot_quantity_range(binder_cumulants, "Binder Cumulant", save=save)
+        plotting.plot_correlation_time_range(energy_correlations, "Energy per Site", save=save)
+        plotting.plot_correlation_time_range(magnetization_correlations, "Absolute Magnetization", save=save)
 
 
 def bootstrap(data1, data2, no_of_resamples, operation, **kwargs):
@@ -194,21 +198,77 @@ def binder_cumulant(magnetization_sq_data, magnetization_4th_data, kwargs):
 
 def find_binder_intersection(data):
     """Find the intersection of Binder cumulant data series for different lattice sizes."""
+    # We use Cramers rule, adapted from http://stackoverflow.com/questions/20677795/
+    intersections = []
+    # Inerate over datasets.
     for k in range(len(data) - 1):
-        d1 = data[k][1]
-        d2 = data[k + 1][1]
-        for z in range(len(d1) - 1):
-            p1a = d1[z]
-            p1b = d1[z + 1]
-            dx1 = p1b[0] - p1a[0]
-            dy1 = p1b[1] - p1a[1]
-            p2a = d2[z]
-            p2b = d2[z + 1]
-            dx2 = p2b[0] - p2a[0]
-            dy2 = p2b[1] - p2a[1]
+        data1 = data[k][1]
+        data2 = data[k + 1][1]
+        # Iterate over temperatures.
+        for z in range(len(data1) - 1):
+            intersection_error = []
+            # Also calculate the intersection when the error has been added or subtracted.
+            for e in [-1, 0, 1]:
+                p1a = data1[z]
+                p1b = data1[z + 1]
+                dx1 = p1b[0] - p1a[0]
+                dy1 = p1b[1] + e * p1b[2] - (p1a[1] + e * p1a[2])
+                dydx1 = dy1 / dx1
+                c1 = -dydx1 * p1a[0] + p1a[1]
 
-            print(dx1, dy1)
-            print(dx2, dy2)
+                p2a = data2[z]
+                p2b = data2[z + 1]
+                dx2 = p2b[0] - p2a[0]
+                dy2 = p2b[1] + e * p2b[2] - (p2a[1] + e * p2a[2])
+                dydx2 = dy2 / dx2
+                c2 = -dydx2 * p2a[0] + p2a[1]
 
-            det = dx1 * dy2 - dx2 * dy1
-            print(det, '\n')
+                det = -dydx1 + dydx2
+                if det == 0:
+                    continue
+                intersection_x = (c1 - c2) / det
+                intersection_y = (dydx2 * c1 - dydx1 * c2) / det
+                # The intersection should lie within the area of interest.
+                if p1a[0] <= intersection_x <= p1b[0]:
+                    intersection_error.append((intersection_x, intersection_y))
+
+            if intersection_error:
+                x_intersection = np.mean([i[0] for i in intersection_error])
+                x_intersection_error = calculate_error([i[0] for i in intersection_error])
+                y_intersection = np.mean([i[1] for i in intersection_error])
+                y_intersection_error = calculate_error([i[1] for i in intersection_error])
+                intersections.append(((x_intersection, x_intersection_error), (y_intersection, y_intersection_error)))
+    # print(intersections)
+    critical_temperature = np.mean([p[0][0] for p in intersections])
+    critical_temperature_error = (1 / len(intersections)) * np.sqrt(sum([p[0][1]**2 for p in intersections]))
+    print("Critical temperature is {0} +/- {1}". format(critical_temperature, critical_temperature_error))
+
+    return critical_temperature, critical_temperature_error
+
+
+def data_collapse(data, critical_temperature, critical_exponent1, critical_exponent2, name1, name2):
+    scaling_functions = []
+    for d in data:
+        scaling_function_at_size = []
+        lattice_size = d[0]
+        values = d[1]
+        for v in values:
+            t = (v[0] - critical_temperature) / critical_temperature
+            scaling_variable = lattice_size**(1 / critical_exponent2) * t
+            v_tilde = lattice_size**(-critical_exponent1 / critical_exponent2) * v[1]
+            scaling_function_at_size.append((scaling_variable, v_tilde))
+        scaling_functions.append([lattice_size, scaling_function_at_size])
+    for p in scaling_functions:
+        plt.xlabel("L^(1/nu)t")
+        plt.plot([k[0] for k in p[1]], [k[1] for k in p[1]], linestyle='None', marker='o', label="{0} by {0} Lattice".format(p[0]))
+    print("{0} = {1}, {2} = {3}".format(name1, critical_exponent1, name2, critical_exponent2))
+    plt.legend(loc='best')
+    plt.show()
+
+def critical_exponent_consistency(gamma, alpha, beta, nu):
+    delta = (2 - alpha) / beta - 1
+    eta = 2 - gamma / nu
+    print("Eta = {0}, Delta = {1}".format(eta, delta))
+
+    print("2 nu + alpha = {0}, should be 2".format(2* nu + alpha))
+    print("alpha + 2 beta + gamma = {0}, should be 2".format(alpha + 2 * beta + gamma))

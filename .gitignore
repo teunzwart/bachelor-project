@@ -1,3 +1,6 @@
 sources/
 etc/
+build/
 .ipynb_checkpoints/
+*.so
+*.c
