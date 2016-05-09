@@ -7,6 +7,7 @@ import numpy as np
 
 import analysis
 import ising_model
+import potts_model
 
 SIMULATION_FOLDER = "./simulation_runs"
 
@@ -18,6 +19,8 @@ def single_temperature_simulation(model, algorithm, lattice_size, bond_energy, t
 
     if model == "ising":
         model = ising_model.IsingModel
+    elif model == "potts":
+        model = potts_model.PottsModel
     else:
         raise Exception("{0} is an invalid model choice.".format(model))
 
@@ -69,7 +72,7 @@ def simulation_range(model, algorithm, lattice_sizes, bond_energy, initial_tempe
     """Run a given model over a range of temperature."""
     for k in lattice_sizes:
         simulations = []
-        num_of_samples = ((upper - lower) / step) + 1
+        num_of_samples = round(((upper - lower) / step) + 1)
         for t in np.linspace(lower, upper, num_of_samples):
             data = single_temperature_simulation(model, algorithm, k, bond_energy, t, initial_temperature,
                                                  thermalization_sweeps, measurement_sweeps, show_plots=False)
