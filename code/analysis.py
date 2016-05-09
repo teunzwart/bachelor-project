@@ -21,7 +21,7 @@ def open_simulation_files(data_files):
     return data
 
 
-def data_analysis(data_files, alpha, gamma, beta, nu, save=False, show_plots=True):
+def data_analysis(data_files, alpha, gamma, beta, nu, save=False, show_plots=True, exact_ising=True):
     data = open_simulation_files(data_files)
     energies = []
     energy_correlations = []
@@ -81,17 +81,22 @@ def data_analysis(data_files, alpha, gamma, beta, nu, save=False, show_plots=Tru
 
     # Find the critical temperature.
     critical_temperature, critical_temperature_error = find_binder_intersection(binder_cumulants)
+    if critical_temperature and critical_temperature_error:
+        data_collapse(magnetizabilities, critical_temperature, gamma, nu, "Gamma", "Nu")
+        data_collapse(magnetizations, critical_temperature, beta, nu, "Beta", "Nu")
+        data_collapse(heat_capacities, critical_temperature, alpha, nu, "Alpha", "Nu")
 
-    data_collapse(magnetizabilities, critical_temperature, gamma, nu, "Gamma", "Nu")
-    data_collapse(magnetizations, critical_temperature, beta, nu, "Beta", "Nu")
-    data_collapse(heat_capacities, critical_temperature, alpha, nu, "Alpha", "Nu")
-
-    critical_exponent_consistency(gamma, alpha, beta, nu)
+        critical_exponent_consistency(gamma, alpha, beta, nu)
 
     bond_energy = data[0][0][0][1]
-    exact_heat = exact.heat_capacity(bond_energy, 0, 10 * np.absolute(bond_energy))
-    exact_energy = exact.internal_energy(bond_energy, 0, 10 * np.absolute(bond_energy))
-    exact_magnetization = exact.magnetization(bond_energy, 0, 10 * np.absolute(bond_energy))
+    if exact_ising:
+        exact_heat = exact.heat_capacity(bond_energy, 0, 10 * np.absolute(bond_energy))
+        exact_energy = exact.internal_energy(bond_energy, 0, 10 * np.absolute(bond_energy))
+        exact_magnetization = exact.magnetization(bond_energy, 0, 10 * np.absolute(bond_energy))
+    else:
+        exact_heat = None
+        exact_energy = None
+        exact_magnetization = None
 
     if show_plots:
         plotting.plot_quantity_range(energies, "Energy per Site", exact=exact_energy, save=save)
@@ -238,9 +243,12 @@ def find_binder_intersection(data):
                 y_intersection = np.mean([i[1] for i in intersection_error])
                 y_intersection_error = calculate_error([i[1] for i in intersection_error])
                 intersections.append(((x_intersection, x_intersection_error), (y_intersection, y_intersection_error)))
-    # print(intersections)
-    critical_temperature = np.mean([p[0][0] for p in intersections])
-    critical_temperature_error = (1 / len(intersections)) * np.sqrt(sum([p[0][1]**2 for p in intersections]))
+    if intersections:
+        critical_temperature = np.mean([p[0][0] for p in intersections])
+        critical_temperature_error = (1 / len(intersections)) * np.sqrt(sum([p[0][1]**2 for p in intersections]))
+    else:
+        critical_temperature = None
+        critical_temperature_error = None
     print("Critical temperature is {0} +/- {1}". format(critical_temperature, critical_temperature_error))
 
     return critical_temperature, critical_temperature_error
