@@ -21,7 +21,8 @@ def open_simulation_files(data_files):
     return data
 
 
-def data_analysis(data_files, alpha, gamma, beta, nu, save=False, show_plots=True, exact_ising=True):
+def data_analysis(data_files, save=False, show_plots=True, exact_ising=True):
+    """If save=True, save plots."""
     data = open_simulation_files(data_files)
     energies = []
     energy_correlations = []
@@ -42,7 +43,7 @@ def data_analysis(data_files, alpha, gamma, beta, nu, save=False, show_plots=Tru
         binder_cumulant_at_size = []
 
         for t in d:
-            (lattice_size, bond_energy, initial_temperature, sweeps,
+            (lattice_size, bond_energy, initial_temperature, thermalization_sweeps, measurement_sweeps,
              temperature, correction_factor, correction_factor_error) = t[0]
             measurements = t[1]
             heat_cap_jack, heat_cap_error_jack, _ = jackknife(measurements['energy bins'], measurements['energy sq bins'], 8, heat_capacity, temperature=temperature, no_of_sites=lattice_size**2)
@@ -81,12 +82,6 @@ def data_analysis(data_files, alpha, gamma, beta, nu, save=False, show_plots=Tru
 
     # Find the critical temperature.
     critical_temperature, critical_temperature_error = find_binder_intersection(binder_cumulants)
-    if critical_temperature and critical_temperature_error:
-        data_collapse(magnetizabilities, critical_temperature, gamma, nu, "Gamma", "Nu")
-        data_collapse(magnetizations, critical_temperature, beta, nu, "Beta", "Nu")
-        data_collapse(heat_capacities, critical_temperature, alpha, nu, "Alpha", "Nu")
-
-        critical_exponent_consistency(gamma, alpha, beta, nu)
 
     bond_energy = data[0][0][0][1]
     if exact_ising:
@@ -108,6 +103,22 @@ def data_analysis(data_files, alpha, gamma, beta, nu, save=False, show_plots=Tru
         plotting.plot_correlation_time_range(energy_correlations, "Energy per Site", save=save)
         plotting.plot_correlation_time_range(magnetization_correlations, "Absolute Magnetization", save=save)
 
+    return critical_temperature, critical_temperature_error, magnetizabilities, magnetizations, heat_capacities
+
+def find_critical_exponents(critical_temperature, critical_temperature_error, magnetizabilities, magnetizations, heat_capacities, alpha, beta, gamma, nu):
+    # Sanity check.
+    if not 0 <= alpha < 1:
+        raise ValueError("Alpha should be in the interval [0, 1), alpha is {0}".format(alpha))
+    if critical_temperature and critical_temperature_error:
+        data_collapse(magnetizabilities, "Magnetizability", critical_temperature, gamma, nu, "Gamma", "Nu")
+        data_collapse(magnetizations, "Magnetization", critical_temperature, beta, nu, "Beta", "Nu")
+        data_collapse(heat_capacities, "Heat Capacity", critical_temperature, alpha, nu, "Alpha", "Nu")
+
+        critical_exponent_consistency(gamma, alpha, beta, nu)
+
+    else:
+        print("No data collapse could be performed.")
+
 
 def bootstrap(data1, data2, no_of_resamples, operation, **kwargs):
     """Calculate error using the bootstrap method."""
@@ -117,7 +128,6 @@ def bootstrap(data1, data2, no_of_resamples, operation, **kwargs):
         random_picks2 = np.random.choice(data2, len(data2))
         resamples.put(k, operation(random_picks1, random_picks2, kwargs))
 
-    # TODO: Check this with literature.
     error = calculate_error(resamples)
     return np.mean(resamples), error
 
@@ -249,12 +259,13 @@ def find_binder_intersection(data):
     else:
         critical_temperature = None
         critical_temperature_error = None
+    print([i[0] for i in intersections])
     print("Critical temperature is {0} +/- {1}". format(critical_temperature, critical_temperature_error))
 
     return critical_temperature, critical_temperature_error
 
 
-def data_collapse(data, critical_temperature, critical_exponent1, critical_exponent2, name1, name2):
+def data_collapse(data, quantity, critical_temperature, critical_exponent1, critical_exponent2, name1, name2):
     scaling_functions = []
     for d in data:
         scaling_function_at_size = []
@@ -268,6 +279,7 @@ def data_collapse(data, critical_temperature, critical_exponent1, critical_expon
         scaling_functions.append([lattice_size, scaling_function_at_size])
     for p in scaling_functions:
         plt.xlabel("L^(1/nu)t")
+        plt.ylabel("{0} Scaling Function".format(quantity))
         plt.plot([k[0] for k in p[1]], [k[1] for k in p[1]], linestyle='None', marker='o', label="{0} by {0} Lattice".format(p[0]))
     print("{0} = {1}, {2} = {3}".format(name1, critical_exponent1, name2, critical_exponent2))
     plt.legend(loc='best')
