@@ -53,7 +53,7 @@ def single_temperature_simulation(model, algorithm, lattice_size, bond_energy, t
     mag_sq, mag_sq_error, _, mag_sq_bins = analysis.binning(equi_magnetization**2, "Magnetization Squared per site", False)
     mag_4th, mag_4th_error, _, mag_4th_bins = analysis.binning(equi_magnetization**4, "Magnetization^4 per Site", False)
 
-    data = ((lattice_size, bond_energy, initial_temperature, total_no_of_sweeps,
+    data = ((lattice_size, bond_energy, initial_temperature, thermalization_sweeps, measurement_sweeps,
              temperature, correlation_correction, correlation_correction_error),
             {"energy": energy, "energy error": energy_error,
              "energy bins": energy_bins, "energy correlation": energy_correlation * correlation_correction,
@@ -75,8 +75,10 @@ def simulation_range(model, algorithm, lattice_sizes, bond_energy, initial_tempe
         num_of_samples = round(((upper - lower) / step) + 1)
         for t in np.linspace(lower, upper, num_of_samples):
             data = single_temperature_simulation(model, algorithm, k, bond_energy, t, initial_temperature,
-                                                 thermalization_sweeps, measurement_sweeps, show_plots=False)
+                                                 thermalization_sweeps, measurement_sweeps, show_plots)
             simulations.append(data)
 
-        with open("{0}/{1}_{2}_{3}_{4}_{5}_[{6}-{7}]_{8}.pickle".format(SIMULATION_FOLDER, time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time())), model, algorithm, k, thermalization_sweeps + measurement_sweeps, lower, upper, step), 'wb+') as f:
+        with open("{0}/{1}_{2}_{3}_{4}_{5}_[{6}-{7}]_{8}.pickle".format(SIMULATION_FOLDER, time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time())), model, algorithm, k, measurement_sweeps, lower, upper, step), 'wb+') as f:
             pickle.dump(simulations, f, pickle.HIGHEST_PROTOCOL)
+
+    print("Done.")
