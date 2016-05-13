@@ -1,4 +1,10 @@
-"""Calculate autocorrelation functions."""
+"""
+Calculate autocorrelation functions.
+
+See the following links for more implementation ideas:
+- https://stackoverflow.com/questions/643699/how-can-i-use-numpy-correlate-to-do-autocorrelation
+- https://stackoverflow.com/questions/12269834/is-there-any-numpy-autocorrellation-function-with-standardized-output
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
