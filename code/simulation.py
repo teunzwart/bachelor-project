@@ -59,7 +59,7 @@ def single_temperature_simulation(model, algorithm, lattice_size, bond_energy, t
              "energy bins": energy_bins, "energy correlation": energy_correlation * correlation_correction,
              "energy sq": energy_sq, "energy sq error": energy_sq_error, "energy sq bins": energy_sq_bins,
              "energy 4th": energy_4th, "energy 4th error": energy_4th_error, "energy 4th bins": energy_4th_bins,
-             "m": m, "m error": m_error, "m correlation": m_correlation, "m bins": m_bins,
+             "m": m, "m error": m_error, "m correlation": m_correlation * correlation_correction, "m bins": m_bins,
              "mag": mag, "mag error": mag_error, "mag bins": mag_bins,
              "mag sq": mag_sq, "mag sq error": mag_sq_error, "mag sq bins": mag_sq_bins,
              "mag fourth": mag_4th, "mag 4th error": mag_4th_error, "mag 4th bins": mag_4th_bins})
