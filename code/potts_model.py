@@ -36,7 +36,11 @@ class PottsModel:
             lattice = np.random.choice([-1, 0, 1], self.no_of_sites).reshape(self.lattice_size, self.lattice_size)
 
         elif self.initial_temperature == "lo":
-            raise NotImplementedError("Low temperature starting lattices are not implemented.")
+            if self.bond_energy > 0:
+                ground_state = np.random.choice([-1, 0, 1])
+                lattice = np.full((self.lattice_size, self.lattice_size), ground_state, dtype="int64")
+            else:
+                raise NotImplementedError("Low temperature anti-ferromagnetic starting lattices are not implemented.")
         else:
             raise Exception("{0} is not a valid bond energy.".format(self.initial_temperature))
 
