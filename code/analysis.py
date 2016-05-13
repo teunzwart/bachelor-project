@@ -1,5 +1,6 @@
 """Tools for (statistical) analysis of Monte Carlo simulation."""
 
+import itertools
 import pickle
 
 import matplotlib.pyplot as plt
@@ -16,7 +17,8 @@ def open_simulation_files(data_files):
     for d in data_files:
         with open("{0}/{1}".format(SIMULATION_FOLDER, d), 'rb') as f:
             data.append(pickle.load(f))
-    print(sorted(list(data[0][1][1].keys())))
+    # print(sorted(list(data[0][1][1].keys())))
+    print(sorted(list(data[0][0][1].keys())))
 
     return data
 
@@ -104,6 +106,7 @@ def data_analysis(data_files, save=False, show_plots=True, exact_ising=True):
         plotting.plot_correlation_time_range(magnetization_correlations, "Absolute Magnetization", save=save)
 
     return critical_temperature, critical_temperature_error, magnetizabilities, magnetizations, heat_capacities
+
 
 def find_critical_exponents(critical_temperature, critical_temperature_error, magnetizabilities, magnetizations, heat_capacities, alpha, beta, gamma, nu):
     # Sanity check.
@@ -265,6 +268,48 @@ def find_binder_intersection(data):
     return critical_temperature, critical_temperature_error
 
 
+def chi_squared_data_collapse(data, critical_temperature,
+                              critical_temperature_error):
+    """Find the critical exponents for the magnetizability."""
+    lowest_residual = np.inf
+    best_nu = 0
+    best_gamma = 0
+    for gamma in np.linspace(0, 2, 201):
+        for nu in np.linspace(0.1, 1, 91):
+            scaling_functions = []
+            for d in data:
+                scaling_function_at_size = []
+                lattice_size = d[0]
+                values = d[1]
+                for v in values:
+                    t = (v[0] - critical_temperature) / critical_temperature
+                    scaling_variable = lattice_size**(1 / nu) * t
+                    v_tilde = lattice_size**(-gamma / nu) * v[1]
+                    # print(v_tilde, lattice_size**(gamma / nu), v[1])
+                    scaling_function_at_size.append((scaling_variable, v_tilde))
+                scaling_functions.append([lattice_size, scaling_function_at_size])
+
+            # print("alpha={0}, nu={1}".format(alpha, nu))
+            # print(scaling_functions)
+            at_interval = [a for a in list(itertools.chain(*[s[1] for s in scaling_functions])) if -0.5 <= a[0] <= 0.5]
+            if len(at_interval) >= 25:
+                at_interval_x, at_interval_y = zip(*at_interval)
+                polynomial, residuals, _, _, _ = np.polyfit(at_interval_x, at_interval_y, 1, full=True)
+                if residuals < lowest_residual:
+                    lowest_residual = residuals
+                    best_gamma = gamma
+                    best_nu = nu
+                    print("gamma={0}, nu={1}, residual={2}".format(best_gamma, best_nu, residuals))
+                    f = np.poly1d(polynomial)
+
+                    x_new = np.linspace(min(at_interval_x), max(at_interval_x), 50)
+                    y_new = f(x_new)
+
+                    plt.plot(at_interval_x, at_interval_y, 'o', x_new, y_new)
+                    plt.show()
+    print("best gamma = {0}, best nu = {1}".format(best_gamma, best_nu))
+
+
 def data_collapse(data, quantity, critical_temperature, critical_exponent1, critical_exponent2, name1, name2):
     scaling_functions = []
     for d in data:
@@ -285,10 +330,11 @@ def data_collapse(data, quantity, critical_temperature, critical_exponent1, crit
     plt.legend(loc='best')
     plt.show()
 
+
 def critical_exponent_consistency(gamma, alpha, beta, nu):
     delta = (2 - alpha) / beta - 1
     eta = 2 - gamma / nu
     print("Eta = {0}, Delta = {1}".format(eta, delta))
 
-    print("2 nu + alpha = {0}, should be 2".format(2* nu + alpha))
+    print("2 nu + alpha = {0}, should be 2".format(2 * nu + alpha))
     print("alpha + 2 beta + gamma = {0}, should be 2".format(alpha + 2 * beta + gamma))
