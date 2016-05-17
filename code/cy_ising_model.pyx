@@ -15,6 +15,12 @@ def calculate_lattice_energy(np.ndarray[np.int_t, ndim=2] lattice, int lattice_s
     (1.64 ms vs 660 ms for 1024**2 lattice)
     To increase performance only the bonds between x and x + 1 for the same y and
     y and y + 1 for the same x are calculated.
+    Plain function: 1 loop, best of 3: 669 ms per loop
+    Class method: 1 loop, best of 3: 760 ms per loop
+    Simple Cython: 1 loop, best of 3: 500 ms per loop
+    Some typing: 1 loop, best of 3: 420 ms per loop
+    Full cython solution: 100 loops, best of 3: 3.57 ms per loop
+    Including parallel execution: 100 loops, best of 3: 1.64 ms per loop Both plain and cython versions give same output, 395 times speedup
     """
     cdef int energy = 0
     cdef int y, x, center, offset_y, offset_x, xnn, ynn
