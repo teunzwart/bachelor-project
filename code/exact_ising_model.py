@@ -4,7 +4,7 @@ import numpy as np
 from scipy.special import ellipe, ellipk
 
 
-def magnetization(bond_energy, lower_temperature, higher_temperature, step=0.02):
+def magnetization(bond_energy, lower_temperature, higher_temperature, step=0.001):
     """
     Calculate the exact magnetization. Boltzmann constant is set to 1.
 
@@ -21,7 +21,7 @@ def magnetization(bond_energy, lower_temperature, higher_temperature, step=0.02)
     return exact_magnetization
 
 
-def internal_energy(bond_energy, lower_temperature, higher_temperature, step=0.02):
+def internal_energy(bond_energy, lower_temperature, higher_temperature, step=0.001):
     """
     Calculate the exact internal energy. Boltzmann constant is set to 1.
 
@@ -39,7 +39,7 @@ def internal_energy(bond_energy, lower_temperature, higher_temperature, step=0.0
     return exact_internal_energy
 
 
-def heat_capacity(bond_energy, lower_temperature, higher_temperature, step=0.02):
+def heat_capacity(bond_energy, lower_temperature, higher_temperature, step=0.001):
     """
     Calculate the exact heat capacity. Boltzmann constant is set to 1.
 
