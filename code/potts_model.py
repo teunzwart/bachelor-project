@@ -6,8 +6,10 @@ import numpy as np
 
 import cy_potts_model
 
+
 class PottsModel:
     """A Monte Carlo simulation of the 3-state Potts model."""
+
     def __init__(self, lattice_size, bond_energy, temperature,
                  initial_temperature, sweeps):
         """Initialize variables and the lattice."""
@@ -33,11 +35,11 @@ class PottsModel:
         "hi" corresponds to infinte temperature, "lo" to T=0.
         """
         if self.initial_temperature == "hi":
-            lattice = np.random.choice([-1, 0, 1], self.no_of_sites).reshape(self.lattice_size, self.lattice_size)
+            lattice = np.random.choice([0, 1, 2], self.no_of_sites).reshape(self.lattice_size, self.lattice_size)
 
         elif self.initial_temperature == "lo":
             if self.bond_energy > 0:
-                ground_state = np.random.choice([-1, 0, 1])
+                ground_state = np.random.choice([0, 1, 2])
                 lattice = np.full((self.lattice_size, self.lattice_size), ground_state, dtype="int64")
             else:
                 raise NotImplementedError("Low temperature anti-ferromagnetic starting lattices are not implemented.")
@@ -65,7 +67,7 @@ class PottsModel:
     def metropolis(self):
         """Implentation of the Metropolis alogrithm."""
         energy = cy_potts_model.calculate_lattice_energy(self.lattice, self.lattice_size, self.bond_energy)
-        magnetization = np.sum(self.lattice)
+        magnetization = self.potts_order_parameter()
         for t in range(self.sweeps):
             # Measurement every sweep.
             np.put(self.energy_history, t, energy)
@@ -82,7 +84,6 @@ class PottsModel:
                 temp_lattice = copy.deepcopy(self.lattice)
                 random_new_spin = np.random.choice(states)
                 temp_lattice[rand_y, rand_x] = random_new_spin
-                # print(temp_lattice[rand_y, rand_x], self.lattice[rand_y, rand_x])
                 assert temp_lattice[rand_y, rand_x] != self.lattice[rand_y, rand_x]
                 new_energy = cy_potts_model.calculate_lattice_energy(temp_lattice, self.lattice_size, self.bond_energy)
                 energy_delta = new_energy - energy
@@ -97,7 +98,7 @@ class PottsModel:
                     # Flip the spin and change the energy.
                     self.lattice[rand_y, rand_x] = random_new_spin
                     energy += energy_delta
-                    magnetization = np.sum(self.lattice)
+                    magnetization = self.potts_order_parameter()
 
     def wolff(self):
         """Simulate the lattice using the Wolff algorithm."""
@@ -105,11 +106,11 @@ class PottsModel:
         cluster_sizes = []
         energy = self.calculate_lattice_energy(self.lattice)
         for t in range(self.sweeps):
-            states = [-1, 0, 1]
+            states = [0, 1, 2]
             # print(t)
             # Measurement every sweep.
             np.put(self.energy_history, t, energy)
-            np.put(self.magnetization_history, t, np.sum(self.lattice))
+            np.put(self.magnetization_history, t, self.potts_order_parameter())
 
             stack = []  # Locations for which the neighbours still have to be checked.
 
@@ -146,3 +147,24 @@ class PottsModel:
             cluster_sizes.append(cluster_size)
 
         return cluster_sizes
+
+    def potts_order_parameter(self):
+        """
+        Calculate the order parameter of the 2d 3-state Potts model.
+
+        Done by considering each of the three possible orientations as an
+        equally space vector on a plane with direction exp(2*pi*i*n/3) with
+        n = 0, 1, 2. The direction of each state is multiplied by the number
+        of spins in that state and the absolute value is taken.
+        To prevent the use of cmath the real and imaginary parts are handled as
+        ordinary numbers.
+        """
+        state1_im = 0.5 * 3**(0.5)
+        state2_im = -0.5 * 3**(0.5)
+        no_of_state0 = len(self.lattice[np.where(self.lattice == 0)])
+        no_of_state1 = len(self.lattice[np.where(self.lattice == 1)])
+        no_of_state2 = len(self.lattice[np.where(self.lattice == 2)])
+        re = no_of_state0 - 0.5 * (no_of_state1 + no_of_state2)
+        im = state1_im * no_of_state1 + state2_im * no_of_state2
+        (re**2 + im**2)**0.5
+        return (re**2 + im**2)**0.5
