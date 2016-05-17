@@ -5,6 +5,7 @@ import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats
 
 import exact_ising_model as exact
 import plotting
@@ -13,12 +14,11 @@ SIMULATION_FOLDER = "./simulation_runs"
 
 
 def open_simulation_files(data_files):
+    """Unpickle simulation data."""
     data = []
     for d in data_files:
         with open("{0}/{1}".format(SIMULATION_FOLDER, d), 'rb') as f:
             data.append(pickle.load(f))
-    # print(sorted(list(data[0][1][1].keys())))
-    print(sorted(list(data[0][0][1].keys())))
 
     return data
 
@@ -154,7 +154,7 @@ def binning(data, quantity, show_plot=False):
         data = np.asarray([(a + b) / 2 for a, b in zip(data[::2], data[1::2])])
         errors.append((len(data), calculate_error(data)))
     autocorrelation_time = 0.5 * ((errors[-1][1] / errors[0][1])**2 - 1)
-    if np.isnan(autocorrelation_time):
+    if np.isnan(autocorrelation_time) or autocorrelation_time <= 0:
         autocorrelation_time = 1
 
     if show_plot:
@@ -258,7 +258,7 @@ def find_binder_intersection(data):
                 intersections.append(((x_intersection, x_intersection_error), (y_intersection, y_intersection_error)))
     if intersections:
         critical_temperature = np.mean([p[0][0] for p in intersections])
-        critical_temperature_error = (1 / len(intersections)) * np.sqrt(sum([p[0][1]**2 for p in intersections]))
+        critical_temperature_error = calculate_error([p[0][0] for p in intersections])#(1 / len(intersections)) * np.sqrt(sum([p[0][1]**2 for p in intersections]))
     else:
         critical_temperature = None
         critical_temperature_error = None
@@ -274,39 +274,39 @@ def chi_squared_data_collapse(data, critical_temperature,
     lowest_residual = np.inf
     best_nu = 0
     best_gamma = 0
-    for gamma in np.linspace(0, 2, 201):
-        for nu in np.linspace(0.1, 1, 91):
-            scaling_functions = []
-            for d in data:
-                scaling_function_at_size = []
-                lattice_size = d[0]
-                values = d[1]
-                for v in values:
-                    t = (v[0] - critical_temperature) / critical_temperature
-                    scaling_variable = lattice_size**(1 / nu) * t
-                    v_tilde = lattice_size**(-gamma / nu) * v[1]
-                    # print(v_tilde, lattice_size**(gamma / nu), v[1])
-                    scaling_function_at_size.append((scaling_variable, v_tilde))
-                scaling_functions.append([lattice_size, scaling_function_at_size])
+    # for gamma in np.linspace(0.01, 2, 200):
+    for nu in np.linspace(0.01, 1, 100):
+        gamma = 1.8 * nu
+        scaling_functions = []
+        for d in data:
+            scaling_function_at_size = []
+            lattice_size = d[0]
+            values = d[1]
+            for v in values:
+                t = (v[0] - critical_temperature) / critical_temperature
+                scaling_variable = lattice_size**(1 / nu) * t
+                v_tilde = lattice_size**(-gamma / nu) * v[1]
+                scaling_function_at_size.append((scaling_variable, v_tilde))
+            scaling_functions.append([lattice_size, scaling_function_at_size])
 
-            # print("alpha={0}, nu={1}".format(alpha, nu))
-            # print(scaling_functions)
-            at_interval = [a for a in list(itertools.chain(*[s[1] for s in scaling_functions])) if -0.5 <= a[0] <= 0.5]
-            if len(at_interval) >= 25:
-                at_interval_x, at_interval_y = zip(*at_interval)
-                polynomial, residuals, _, _, _ = np.polyfit(at_interval_x, at_interval_y, 1, full=True)
-                if residuals < lowest_residual:
-                    lowest_residual = residuals
-                    best_gamma = gamma
-                    best_nu = nu
-                    print("gamma={0}, nu={1}, residual={2}".format(best_gamma, best_nu, residuals))
-                    f = np.poly1d(polynomial)
+        at_interval = [a for a in list(itertools.chain(*[s[1] for s in scaling_functions])) if -1 <= a[0] <= 1]
+        if len(at_interval) >= 15:
 
-                    x_new = np.linspace(min(at_interval_x), max(at_interval_x), 50)
-                    y_new = f(x_new)
+            at_interval_x, at_interval_y = zip(*at_interval)
+            polynomial, residuals, a, b, c = np.polyfit(at_interval_x, at_interval_y, 5, full=True)
 
-                    plt.plot(at_interval_x, at_interval_y, 'o', x_new, y_new)
-                    plt.show()
+            if residuals / (len(at_interval) - 5) < lowest_residual:
+                lowest_residual = residuals / (len(at_interval) - 6)
+                best_gamma = gamma
+                best_nu = nu
+                print("gamma={0}, nu={1}, residual={2}".format(best_gamma, best_nu, residuals))
+                f = np.poly1d(polynomial)
+
+                x_new = np.linspace(min(at_interval_x), max(at_interval_x), 50)
+                y_new = f(x_new)
+                plt.figure()
+                plt.plot(at_interval_x, at_interval_y, 'o', x_new, y_new)
+                plt.show()
     print("best gamma = {0}, best nu = {1}".format(best_gamma, best_nu))
 
 
@@ -329,6 +329,25 @@ def data_collapse(data, quantity, critical_temperature, critical_exponent1, crit
     print("{0} = {1}, {2} = {3}".format(name1, critical_exponent1, name2, critical_exponent2))
     plt.legend(loc='best')
     plt.show()
+
+
+def loglog_exponent_finding(data, quantity):
+    lattice_sizes_log = []
+    magnetizations_log = []
+    for k in data:
+        lattice_size_log = np.log(k[0])
+        magnetization_log = np.log(k[1][0][1])
+        lattice_sizes_log.append(lattice_size_log)
+        magnetizations_log.append(magnetization_log)
+
+    lattice_sizes = np.asarray(lattice_sizes_log)
+    magnetizations_log = np.asarray(magnetizations_log)
+    slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(lattice_sizes, magnetizations_log)
+    plt.xlabel("Log(L)")
+    plt.ylabel("Log({0})".format(quantity))
+    plt.plot(lattice_sizes, magnetizations_log, linestyle='None', marker='o')
+    plt.show()
+    return slope, std_err
 
 
 def critical_exponent_consistency(gamma, alpha, beta, nu):
