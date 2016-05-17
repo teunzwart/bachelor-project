@@ -1,5 +1,6 @@
 """Run Monte Carlo simulation over a range of lattice sizes and temperature."""
 
+import argparse
 import pickle
 import time
 
@@ -78,7 +79,94 @@ def simulation_range(model, algorithm, lattice_sizes, bond_energy, initial_tempe
                                                  thermalization_sweeps, measurement_sweeps, show_plots)
             simulations.append(data)
 
-        with open("{0}/{1}_{2}_{3}_{4}_{5}_[{6}-{7}]_{8}.pickle".format(SIMULATION_FOLDER, time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time())), model, algorithm, k, measurement_sweeps, lower, upper, step), 'wb+') as f:
-            pickle.dump(simulations, f, pickle.HIGHEST_PROTOCOL)
+        if save:
+            with open("{0}/{1}_{2}_{3}_{4}_{5}_[{6}-{7}]_{8}.pickle".format(SIMULATION_FOLDER, time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time())), model, algorithm, k, measurement_sweeps, lower, upper, step), 'wb+') as f:
+                pickle.dump(simulations, f, pickle.HIGHEST_PROTOCOL)
 
     print("Done.")
+
+
+def argument_parser():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Simulate the 2- and 3-state Potts model in 2D.")
+    parser.add_argument(
+        "model",
+        help="Either Ising (q=2) or Potts (q=3)",
+        choices=["ising", "potts"],
+        type=str)
+    parser.add_argument(
+        "algorithm",
+        help="Algorithm to use for simulation",
+        choices=["metropolis", "wolff"],
+        type=str)
+    parser.add_argument(
+        "lattice_sizes",
+        help="Lattice sizes to simulate",
+        nargs='+',
+        type=int
+    )
+    parser.add_argument(
+        "bond_energy",
+        help="Specify the bond energy",
+        type=int
+    )
+    parser.add_argument(
+        "init_temperature",
+        choices=["hi", "lo"],
+        help=('specify initial temperature of simulation ("hi" is infinite, '
+              '"lo" is 0)'))
+    parser.add_argument(
+        "thermalization_sweeps",
+        help="Number of sweeps to perform before measurements start",
+        type=int
+    )
+    parser.add_argument(
+        "measurement_sweeps",
+        help="Number of sweeps to measure",
+        type=int
+    )
+    parser.add_argument(
+        "lower",
+        help="Lower temperature bound",
+        type=float
+    )
+    parser.add_argument(
+        "upper",
+        help="Upper temperature bound",
+        type=float
+    )
+    parser.add_argument(
+        "--step",
+        help="Temperature step, default is 0.2",
+        type=float,
+        default=0.2
+    )
+    parser.add_argument(
+        "--show_plots",
+        help="Show plots on error calculations, default is false because this is a blocking operation",
+        action="store_true"
+    )
+    parser.add_argument(
+        "--nosave",
+        help="Do not save output in a binary pickle file, default is true",
+        action="store_false"
+    )
+    arguments = parser.parse_args()
+    return arguments
+
+if __name__ == '__main__':
+    args = argument_parser()
+    simulation_range(
+        args.model,
+        args.algorithm,
+        args.lattice_sizes,
+        args.bond_energy,
+        args.init_temperature,
+        args.thermalization_sweeps,
+        args.measurement_sweeps,
+        args.lower,
+        args.upper,
+        args.step,
+        args.show_plots,
+        args.nosave)
