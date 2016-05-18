@@ -113,9 +113,9 @@ def find_critical_exponents(critical_temperature, critical_temperature_error, ma
     if not 0 <= alpha < 1:
         raise ValueError("Alpha should be in the interval [0, 1), alpha is {0}".format(alpha))
     if critical_temperature and critical_temperature_error:
-        data_collapse(magnetizabilities, "Magnetizability", critical_temperature, gamma, nu, "Gamma", "Nu")
-        data_collapse(magnetizations, "Magnetization", critical_temperature, beta, nu, "Beta", "Nu")
-        data_collapse(heat_capacities, "Heat Capacity", critical_temperature, alpha, nu, "Alpha", "Nu")
+        data_collapse(magnetizabilities, "Magnetizability", critical_temperature, -gamma, nu, "Gamma")
+        data_collapse(magnetizations, "Magnetization", critical_temperature, beta, nu, "Beta")
+        data_collapse(heat_capacities, "Heat Capacity", critical_temperature, alpha, nu, "Alpha")
 
         critical_exponent_consistency(gamma, alpha, beta, nu)
 
@@ -269,48 +269,58 @@ def find_binder_intersection(data):
 
 
 def chi_squared_data_collapse(data, critical_temperature,
-                              critical_temperature_error):
-    """Find the critical exponents for the magnetizability."""
-    lowest_residual = np.inf
-    best_nu = 0
-    best_gamma = 0
-    # for gamma in np.linspace(0.01, 2, 200):
-    for nu in np.linspace(0.01, 1, 100):
-        gamma = 1.8 * nu
-        scaling_functions = []
-        for d in data:
-            scaling_function_at_size = []
-            lattice_size = d[0]
-            values = d[1]
-            for v in values:
-                t = (v[0] - critical_temperature) / critical_temperature
-                scaling_variable = lattice_size**(1 / nu) * t
-                v_tilde = lattice_size**(-gamma / nu) * v[1]
-                scaling_function_at_size.append((scaling_variable, v_tilde))
-            scaling_functions.append([lattice_size, scaling_function_at_size])
+                              critical_temperature_error, ratio, ratio_error, second_exponent_name, show_plots=False):
+    """Find critical exponents through an iterative data fit."""
+    best_nus = []
+    best_second_exponents = []
+    for k in [-1, 0, 1]:
+        for p in [-1, 0, 1]:
+            lowest_residual = np.inf
+            best_nu = 0
+            best_second_exponent = 0
+            for nu in np.linspace(0.01, 1, 100):
+                second_exponent = (ratio + k * ratio_error) * nu
+                scaling_functions = []
+                for d in data:
+                    scaling_function_at_size = []
+                    lattice_size = d[0]
+                    values = d[1]
+                    for v in values:
+                        TC = critical_temperature + p * critical_temperature_error
+                        t = (v[0] - TC) / TC
+                        scaling_variable = lattice_size**(1 / nu) * t
+                        v_tilde = lattice_size**(-second_exponent / nu) * v[1]
+                        v_tilde_error = lattice_size**(-second_exponent / nu) * v[2]
+                        scaling_function_at_size.append((scaling_variable, v_tilde, v_tilde_error))
+                    scaling_functions.append([lattice_size, scaling_function_at_size])
 
-        at_interval = [a for a in list(itertools.chain(*[s[1] for s in scaling_functions])) if -1 <= a[0] <= 1]
-        if len(at_interval) >= 15:
+                at_interval = [a for a in list(itertools.chain(*[s[1] for s in scaling_functions])) if -1 <= a[0] <= 1]
+                if len(at_interval) >= 15:
 
-            at_interval_x, at_interval_y = zip(*at_interval)
-            polynomial, residuals, a, b, c = np.polyfit(at_interval_x, at_interval_y, 5, full=True)
+                    at_interval_x, at_interval_y, at_interval_y_error = zip(*at_interval)
+                    polynomial, residuals, _, _, _ = np.polyfit(at_interval_x, at_interval_y, 5, full=True)
 
-            if residuals / (len(at_interval) - 5) < lowest_residual:
-                lowest_residual = residuals / (len(at_interval) - 6)
-                best_gamma = gamma
-                best_nu = nu
-                print("gamma={0}, nu={1}, residual={2}".format(best_gamma, best_nu, residuals))
-                f = np.poly1d(polynomial)
+                    if residuals / (len(at_interval) - 5) < lowest_residual:
+                        lowest_residual = residuals / (len(at_interval) - 6)
+                        best_second_exponent = second_exponent
+                        best_nu = nu
+                        if show_plots and k == 0 and p == 0:
+                            f = np.poly1d(polynomial)
+                            x_new = np.linspace(min(at_interval_x), max(at_interval_x), 50)
+                            y_new = f(x_new)
+                            plt.xlabel("L^(1/nu)t")
+                            plt.ylabel("Scaling Function")
+                            plt.errorbar(at_interval_x, at_interval_y, at_interval_y_error, marker='o', linestyle='None')
+                            plt.plot(x_new, y_new)
+                            plt.show()
+            best_nus.append(best_nu)
+            best_second_exponents.append(best_second_exponent)
+    print("best {0} = {1} +/- {2}, best nu = {3} +/- {4}".format(second_exponent_name, abs(np.mean(best_second_exponents)), calculate_error(best_second_exponents), np.mean(best_nus), calculate_error(best_nus)))
 
-                x_new = np.linspace(min(at_interval_x), max(at_interval_x), 50)
-                y_new = f(x_new)
-                plt.figure()
-                plt.plot(at_interval_x, at_interval_y, 'o', x_new, y_new)
-                plt.show()
-    print("best gamma = {0}, best nu = {1}".format(best_gamma, best_nu))
+    return np.mean(best_second_exponents), calculate_error(best_second_exponents), np.mean(best_nus), calculate_error(best_nus)
 
 
-def data_collapse(data, quantity, critical_temperature, critical_exponent1, critical_exponent2, name1, name2):
+def data_collapse(data, quantity, critical_temperature, critical_exponent1, nu, name1):
     scaling_functions = []
     for d in data:
         scaling_function_at_size = []
@@ -318,15 +328,15 @@ def data_collapse(data, quantity, critical_temperature, critical_exponent1, crit
         values = d[1]
         for v in values:
             t = (v[0] - critical_temperature) / critical_temperature
-            scaling_variable = lattice_size**(1 / critical_exponent2) * t
-            v_tilde = lattice_size**(-critical_exponent1 / critical_exponent2) * v[1]
+            scaling_variable = lattice_size**(1 / nu) * t
+            v_tilde = lattice_size**(critical_exponent1 / nu) * v[1]
             scaling_function_at_size.append((scaling_variable, v_tilde))
         scaling_functions.append([lattice_size, scaling_function_at_size])
     for p in scaling_functions:
         plt.xlabel("L^(1/nu)t")
         plt.ylabel("{0} Scaling Function".format(quantity))
         plt.plot([k[0] for k in p[1]], [k[1] for k in p[1]], linestyle='None', marker='o', label="{0} by {0} Lattice".format(p[0]))
-    print("{0} = {1}, {2} = {3}".format(name1, critical_exponent1, name2, critical_exponent2))
+    print("{0} = {1}, nu = {2}".format(name1, abs(critical_exponent1), nu))
     plt.legend(loc='best')
     plt.show()
 
