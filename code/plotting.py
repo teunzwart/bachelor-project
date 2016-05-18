@@ -91,7 +91,7 @@ def plot_quantity_range(data_range, quantity, exact=None, show_plot=True, save=F
     data_min = min(zipped_data, key=lambda x: x[1])[1]
     data_max = max(zipped_data, key=lambda x: x[1])[1]
     if data_max <= 0:
-        plt.ylim(ymin=1.15 * data_min, ymax=0)
+        plt.ylim(ymin=1.15 * data_min, ymax=0.85 * data_max)
     else:
         plt.ylim(ymin=0, ymax=data_max * 1.15)
     plt.xlabel("Temperature")
