@@ -87,13 +87,25 @@
 \tableofcontents
 
 
-\chapter{Theory}
+\chapter{Models and Critical Phenomena}
+
+\section{Phase Transitions and Critical Phenomena}
+% - Critical temperature
+% - Symmetry Breaking
+% - Order parameter
+% - Phase Transition, 1st and 2nd order
+% - Critical Phenomena
+% - Scaling Laws
+% - Define chi, c here
+
+\subsection{Universality}
+% - first noted for Ising
 
 \section{The Two-Dimensional Ising Model}
 
 The two-dimensional Ising model in zero-field was first solved exactly in 1944 by Lars Onsager.\cite{onsager:1944}
 It describes a square lattice with nearest neighbour interactions, where each lattice point has with it associated a number (which we will refer to as spin) which may either be +1 or -1 and was originally meant as a model for magnets.
-The Hamiltonian is\cite{mccoy:1973}
+The Hamiltonian in zero-field is\cite{mccoy:1973}
 \begin{align}
 	H = -J_{1} \sum_{j=1}^{\mathcal{M}} \sum_{k=1}^{\mathcal{N}} \sigma_{j,k} \sigma_{j,k+1} - J_{2} \sum_{j=1}^{\mathcal{M}} \sum_{k=1}^{\mathcal{N}} \sigma_{j,k} \sigma_{j+1,k},
 \end{align}
@@ -112,9 +124,9 @@ To that end we define the partition function
 	Z &= \sum_{\sigma = \pm 1} e^{-\beta H} \\
 	  &= \sum_{\sigma = \pm 1} \prod_{j=1}^{\mathcal{M}} \prod_{k=1}^{\mathcal{N}} e^{\beta J_1 \sigma_{j,k} \sigma_{j,k+1}} \prod_{j=1}^{\mathcal{M}} \prod_{k=1}^{\mathcal{N}} e^{\beta J_2 \sigma_{j,k} \sigma_{j+1,k}},
 \end{align}
-with \(\beta=1/k_B T\) and the sum running over every possible orientation of the spins on the lattice. Solving this requires a non-trivial amount of effort and it is best to refer to either Onsager\cite{onsager:1944}, who systemically added one-dimensional Ising models together to create a two dimensional lattice, or Kasteleyn as described in \cite{mccoy:1973}, who considerably simplified the derivation by reducing it to a combinatorial problem.
+with \(\beta=1/k_B T\) and the sum running over every possible orientation of the spins on the lattice. Solving this requires a non-trivial amount of effort and it is best to refer to either Onsager\cite{onsager:1944}, who systemically added one-dimensional Ising models together to create a two dimensional lattice, or Kasteleyn as described in \cite{mccoy:1973}, whose approach considerably simplifies the derivation by reducing it to a combinatorial problem.
 
-The derivation introduces a sign ambiguity in \(Z\) which takes some additional care to resolve, but this can be avoided by considering the free energy \(F\) instead of the partition function in the thermodynamic limit\footnote{This is the limit in which the number of particles on the lattice tends to infinity.}
+The derivation introduces a sign ambiguity in \(Z\) which takes some additional care to resolve, but we can avoid having to deal with this by considering the free energy \(F\) in the thermodynamic limit\footnote{This is the limit in which the number of particles on the lattice tends to infinity.} instead of the partition function
 \begin{dgroup*}
 	\begin{dmath*}
 		F = -\frac{1}{\beta} \lim_{\substack{\mathcal{N} \to \infty \\ \mathcal{M} \to \infty}} \frac{1}{\mathcal{M} \mathcal{N}} \log({Z_{\mathcal{M}, \mathcal{N}}})
@@ -141,7 +153,7 @@ we get the equality
 \begin{align}
 	1 = \sinh(2\beta J_1) \sinh(2\beta J_2).
 \end{align}
-In the case where interaction strength in both the x- and y-directions is the same (\(\left|J_1\right| = \left|J_2\right| = J\)) we get an expression for the critical temperature in terms of the bond energy
+In the case where interaction strength in both the \(x\)- and \(y\)-directions is the same (\(\left|J_1\right| = \left|J_2\right| = J\)) we get an expression for the critical temperature in terms of the bond energy
 \begin{align}
 	1 &= \sinh(2\beta J) \to \\
 	k_B T_c &= \frac{2}{\text{asinh}(1)}J = \frac{2}{\log(1+\sqrt{2})}J \approx 2.269 J
@@ -162,6 +174,7 @@ Then the expression for the free energy becomes
 \end{dmath}
 with
 \begin{align}
+	\label{eq:elliptic_argument}
 	k = \frac{4z(1-z^2)}{(1+z^2)^2} = \frac{2\sinh(2\beta J)}{\cosh^2{(2\beta J)}}.
 \end{align}
 Performing the substitutions \(\omega_1 = \frac{1}{2}(\theta_1 + \theta_2)\) and \(\omega_2 = \frac{1}{2}(\theta_1 - \theta_2)\) and integrating over \(\omega_1\) the free energy becomes
@@ -200,6 +213,7 @@ Taking the derivative of \(k\)
 \end{align}
 the internal energy per spin becomes
 \begin{align}
+	\label{eq:ising_internal_energy}
 	u = \frac{-J}{\tanh(2\beta J)} \left[1 + \frac{2}{\pi} \left\{2 \tanh^2(2\beta J) -1 \right\} K(k) \right].
 \end{align}
 
@@ -216,17 +230,111 @@ For the specific heat per spin we take the derivative of the internal energy per
 \end{dgroup}
 For the derivative of the elliptic integral we use the identity\cite{mccoy:1973}
 \begin{align}
-	\frac{\dif K(k)}{\dif k} = \frac{1}{k (1-k^2)} \left[E(k) - (1-k^2) K(k) \right],
+	\frac{\dif K(k)}{\dif k} = \frac{1}{k k^{'2}} \left[E(k) - k^{'2} K(k) \right],
 \end{align}
-where \(E(k)\) is the complete elliptic integral of the second kind:
+where \(E(k)\) is the complete elliptic integral of the second kind
 \begin{align}
 	\label{eq:elliptic_identity}
-	E(k) = \int_0^{\frac{\pi}{2}} \dif \phi \left(1-k^2 \sin^2(\phi)\right)^{\frac{1}{2}}.
+	E(k) = \int_0^{\frac{\pi}{2}} \dif \phi \left(1-k^2 \sin^2(\phi)\right)^{\frac{1}{2}},
 \end{align}
-Using \cref{eq:k_derivative} and \cref{eq:elliptic_identity} the expression for the specific heat per spin becomes \todo{Use k prime here anyway?}
+and \(k^{'2} = 1 - k^2\).
+Using \cref{eq:k_derivative} and \cref{eq:elliptic_identity} the expression for the specific heat per spin becomes
 \begin{align}
-	c = k_B \left[ \frac{\beta J}{\tanh(2\beta J)} \right]^{2} \frac{2}{\pi} \left[ 2 K(k) -2 E(k) - \left(1- \sqrt{1-k^2} \right) \left\{ \frac{\pi}{2} + \sqrt{1-k^2} K(k) \right\}\right].
+	\label{eq:ising_heat_capacity}
+	c = k_B \left[ \frac{\beta J}{\tanh(2\beta J)} \right]^{2} \frac{2}{\pi} \left[ 2 K(k) -2 E(k) - \left(1 - k' \right) \left\{ \frac{\pi}{2} + k' K(k) \right\}\right].
 \end{align}
+
+\subsection{The Ising Model around \(T_c\)}
+
+Given that we would like to know how the Ising model behaves around \(T_c\), we need to expand the expressions for the internal energy and the heat capacity around this temperature.
+When \(T \approx T_c\) the argument \(k\) as defined in \cref{eq:elliptic_argument} of the elliptic integrals in the definitions \cref{eq:ising_internal_energy} and \cref{eq:ising_heat_capacity} becomes approximatly 1. More precisily
+\begin{align}
+	k &\approx 1 - 4 \beta_c^2 J^2 (\frac{T}{T_c} - 1)^2, \\
+	k^' &\approx 2 \sqrt{2} \beta_c J (\frac{T}{T_c} - 1)
+\end{align}
+with \(\beta_c = \frac{1}{k_B T_c}\).
+It is obvious that for \(k = 1\) \(E(k) = 1\) whereas \(K(1)\) diverges since the integral becomes
+\begin{align}
+	\int_0^{\frac{\pi}{2}}\frac{1}{\cos{\theta}} \dif \theta \to \infty
+\end{align}
+Nevertheless an approximation around \(k = 1\) yields \(K(k) \approx \log(\frac{4}{k^'})\).
+
+At \(T_c\) the internal energy per spin \(u\) does not diverge and has the value
+\begin{align}
+	u(T_c) = \frac{-J}{\tanh(2\beta_c J)} = -\sqrt{2}J.
+\end{align}
+The heat capacity per spin \(c\) does diverge. Using the previous expansions
+\begin{align}
+	\frac{c(T)}{k_B} &\approx \frac{8}{\pi} \left(\beta_c J\right)^2 \left[\log(\frac{4}{k^'})\right] \\
+	&= \frac{2}{\pi} \log(1 + \sqrt{2})^2 \left[-\log(\frac{T}{T_c} - 1) - 1 - \frac{\pi}{4} - \log(\frac{\sqrt{2}}{4} \log(1+\sqrt{2}))\right]
+\end{align}
+and we see \(c\) diverging logarithmically as \(T \to T_c\).
+
+\subsection{Magnetization of the Ising Model}
+
+
+\section{The Potts Model}
+% - definition planar and standard
+% - T_c
+% - other critical properties
+% - conjectured critical exponents
+
+
+
+\chapter{Simulating Lattice Models}
+
+\section{Markov Processes and Monte Carlo Methods}
+% - sampling and importance sampling
+% - briefly mention the origins of Monte Carlo name and Los Alamos
+
+\subsection{Ergodicity and Detailed Balance}
+
+\section{The Metropolis Algorithm}
+The Metropolis algorithm, first published by Metropolis \textit{et al.} in 1953 \cite{metropolis:1953}, is a simple algorithm that was first used by its creators to study the dynamics of continously displacable hard spheres.
+% - either update randomly or sequentially
+% - discuss boundary conditions
+% - initial state
+
+
+\subsection{Critical Slowing Down}
+% - correlation times
+% - dynamic exponents
+% - dynamic universality
+
+\section{The Wolff Algorithm}
+% - mean cluster sizes
+
+\section{Generalizing Algorithms to the Potts Model}
+
+\subsection{Optimizations}
+% - obvious optimizations for E and m
+% - caching exponents
+
+\subsection{Systemic errors}
+
+
+\chapter{Analysis of Monte Carlo Simulations}
+% - Finite Size Scaling
+% - Binder cumulant, finding intersection
+% - Data collapse using chi-square fitting
+% - Binning
+% - Bootstrap
+% - Jackknife
+% - Log-Log plots to find Ratios
+
+\chapter{Results}
+% - Results for both Ising and Potts
+% - Compare to Fan (2007)
+
+\chapter{Conclusions}
+
+\section{Further Work}
+% - More attention to autocorrelation
+% - Better definition for the order parameter
+% - Measure entropy
+% - go to q=4, 5 and try to determine that the transition is first order
+
+
 
 % Set style to abbrv to get Vancouver style citations.
 \bibliographystyle{abbrv}
