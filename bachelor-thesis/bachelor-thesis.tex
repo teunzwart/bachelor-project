@@ -17,7 +17,7 @@
 \usepackage[utf8]{inputenc} % Special characters (e.g. trema) can be entered directly: .tex file has to be saved using UTF-8 encoding.
 \usepackage{lmodern} % Alternative font because 'fontenc' package does not work with default.
 \usepackage{microtype} % Improves character spacing.
-\usepackage{natbib} % Provides (author, year) references. \citet: textual, \citep: parenthetical
+\usepackage[sort]{natbib} % Provides (author, year) references. \citet: textual, \citep: parenthetical
 \usepackage{physics} % Provides physics macros such as Dirac notation.
 \usepackage{tikz} % Draw diagrams and figures.
 \usepackage{url} % Allow inclusion of urls in text.
@@ -33,6 +33,9 @@
 %%% Additional options %%%
 \pagestyle{fancy} % Set header style.
 \setlength{\headheight}{14pt}
+\fancyhead[R]{\rightmark}
+\fancyhead[L]{}
+
 
 %%% Personal Information %%%
 \newcommand\TITLE{Monte Carlo Simulations of the 3-State Potts Model in 2D}
@@ -86,10 +89,119 @@
 
 \tableofcontents
 
+\chapter{Introduction}
 
 \chapter{Models and Critical Phenomena}
 
 \section{Phase Transitions and Critical Phenomena}
+Phase transitions are an everyday part of life, the most well known being the transition of water into water vapor or ice into water.
+To determine when a phase transition has taken place, we consider the order parameter.
+In ferromagnetic systems such as iron, as well as in the systems we will study in this work, this is the magnetization.
+On one side of the phase transition a non-zero magnetization is present.
+As the iron is heated, it moves past its Curie temperature and the magnetization does become zero.
+More generally we consider an order parameter \(\phi\) which is a quantity that is non-zero on one side of the phase transition, and vanished on the other side. Usually the order parameter is zero on the high temperature side of the phase transition. (See \cref{fig:ising_magnetization}. The Ising model is considered in more detail in \cref{sec:ising_model}.)
+The temperature at which the order parameter becomes zero is the critical temperature \(T_c\).
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.66\textwidth]{ising_magnetization}
+	\caption{The magnetization of the two-dimensional Ising model. Notice how the magnetization is finite on one side of the phase transition, but zero on the other side.}
+	\label{fig:ising_magnetization}
+\end{figure}
+
+When we consider phase transitions, we distinguish two different kinds.
+The phase transition associated with freezing water is what is called first-order.
+As the critical temperature is crossed the water molecules move from a disordered phase into an ordered crystal phase.
+As this happens, energy is emmited in the form of latent heat.
+This is defined as
+\begin{equation}
+	\label{eq:laten_heat}
+	l = \int_{T_c-}^{T_c+} c(T) \dif T,
+\end{equation}
+with \(l\) the latent heat and \(c(T)\) the heat capacity of the system.
+In first order transition the order parameter is discontinous at \(T_c\).\cite{binney:1992}
+In the rest of this work we only consider second-order transitions, for which the latent heat is zero and the order parameter, but not the rate of change of the order parameter is continuous at \(T_c\).
+
+While the latent heat of a transition may be zero, this need not be the case for the heat capacity of the system or other thermodynamic properties such as the magnetic susceptibility.
+Often the heat capacity diverces as \(c \propto \abs{T-T_c}^{-\alpha}\).
+We call \(\alpha\) a critical exponent.
+Because for continuous phase transitions the latent heat has to vanish by definition, \(\alpha\) has to be smaller than 1, because otherwise the integral of \cref{eq:latent_heat} diverges.
+No divergence occurs if \(\alpha < 0\).
+In the limiting case that \(\alpha = 0\), we can consider the divergence of the specific heat to be logarithmic since
+\begin{equation}
+	\log(\frac{1}{x}) = \lim_{\alpha \to 0+} \frac{1}{\alpha}\left(x^{-\alpha} - 1\right).
+\end{equation}
+Theoretically and experimentally we find that the exponent governing divergence is the same both above and below \(T_c\).\cite{binney:1992}
+
+\subsection{Correlation Functions}
+For the systems we would like to consider it is often interesting to quantify how different parts of system relate to each other.
+In fact we will see that this correlation proves critical when choosing an appropriate algorithm to numerically study systems around the critical temperature (\cref{sec:critical_slowing_down}).
+To quantify the correlations in a system we define the two-point correlation function\cite{binney:1992}, which, to illustrate some properties of the correlation function, we first define for a system of spins:
+\begin{equation}
+	G^{(2)}(\mathbf{i}, \mathbf{j}) = \langle{\mathbf{s}_i \cdot \mathbf{s}_j}\rangle.
+\end{equation}
+Here \(\mathbf{i}\) and \(\mathbf{j}\) are the position vectors of the spins at locations \(i\) and \(j\) respectively.
+The angle brackets denote thermal averaging.
+Because the system is often translationally invariant as well as isotropic, meaning it has no preferred direction, such as in a crystal lattice or in disordered systems, \(G^{(2)}\) often depends only on \(\abs{\mathbf{i} - \mathbf{j}} \)
+
+In the general case the two-point correlation function is defined as
+\begin{equation}
+	G^{(2)}(r) = \langle \boldsymbol{\phi}(0) \cdot \boldsymbol{\phi}(\mathbf{r}) \rangle,
+\end{equation}
+where \(\phi\) is the order parameter of the system.
+Below \(T_c\) the system is ordered and \(G^{(2)}\) is large for all \(r\).
+In the example using spins given above, this means almost all spins are aligned.
+A more useful quantity in this case is the connected correlation function
+\begin{equation}
+	G_c^{(2)} = \langle \boldsymbol{\phi}(0) \cdot \boldsymbol{\phi}(\mathbf{r}) \rangle - \abs{\langle \phi \rangle}^2.
+\end{equation}
+By subtracting the thermally averaged value of the order parameter from the two-point correlation function, we can ignore the general alignment of the order parameter and only have fluctuations in the order parameter contribute.
+
+When \(T/T_c\) is either large or small \(G_c^{(2)}\) is small.
+Precisely at the critical temperature \(G_c^{(2)}\) has the form
+\begin{equation}
+	G_c^{(2)} \propto \frac{1}{r^{d-2+\eta}},
+\end{equation}
+with \(d\) the dimensionality of the system and \(\eta\) another critical exponent.
+Far away from \(T_c\) \(G_c^{(2)}\) can not be approximated by a power law, but for \(\abs{T-T_c} / T_c \ll 1\) \(G_c^{(2)}\) has the form
+\begin{equation}
+	G_c^{(2)} \propto \frac{e^{-r/\xi}}{r^{d-2+\eta}}.
+\end{equation}
+\(\xi\) denotes the correlation length.
+Fluctuations of the order parameter up to this length scale are common, but larger fluctuations are exponentially suppressed.
+The correlation length diverges as \(T_c\) is approached from above or below, according to
+\begin{equation}
+	\xi \propto \abs{T-T_c}^{-\nu},
+\end{equation}
+where \(\nu\) is another critical exponent.
+
+\subsection{Scaling Laws}
+We can define three other critical exponents.
+For the magnetic susceptibility we have
+\begin{equation}
+	\chi \propto \abs{T-T_c}^{-\gamma},
+\end{equation}
+while for the magnetization of a system we have
+\begin{equation}
+	m \propto \abs{T-T_c}^{\beta} \mathrm{\ \ \ \ \ T \to T_c\ from\ below}.
+\end{equation}
+Finally we can define a critical exponent for the magnetization in a non-zero magnetic field (the previous five critical exponents assumed \(B=0\)).
+Precicesly at \(T_c\)
+\begin{equation}
+	m \propto B^{1/\delta} \mathrm{\ \ \ \ \ B \to 0}.
+\end{equation}
+
+These six critical exponents are not independent of each other but are related through scaling laws.
+Given these scaling laws only two critical exponents need to be known to determine all others as well.
+They are:
+\begin{align}
+	\alpha + 2\beta +\gamma &= 2\\
+	\alpha + \beta(\delta+1) &= 2\\
+	(2-\eta)\nu &= \gamma \\
+	\nu d &= 2- \alpha,
+\end{align}
+with \(\nu\) the dimensionalty of the system.\cite{binney:1992,baxter:1973,landau:2015}\todo{Put some part of the derivation of these relations here?}
+
+
 % - Critical temperature
 % - Symmetry Breaking
 % - Order parameter
@@ -99,9 +211,18 @@
 % - Define chi, c here
 
 \subsection{Universality}
+One property of critical phenomena that simplifies their study is the concept of universality.
+This is the independence of many thermodynamic properties on the exact details of the hamiltonian of the system.
+They will only depend on the dimensionaly of the system
+Consider the hamiltonian
+\begin{equation}
+	H(s) = H_0(s) + lambda H_1(s),
+\end{equation}
+where \(s\) denotes the state of the system.
+
 % - first noted for Ising
 
-\section{The Two-Dimensional Ising Model}
+\section{The Two-Dimensional Ising Model} \label{sec:ising_model}
 
 The two-dimensional Ising model in zero-field was first solved exactly in 1944 by Lars Onsager.\cite{onsager:1944}
 It describes a square lattice with nearest neighbour interactions, where each lattice point has with it associated a number (which we will refer to as spin) which may either be +1 or -1 and was originally meant as a model for magnets.
@@ -269,6 +390,7 @@ The heat capacity per spin \(c\) does diverge. Using the previous expansions
 	&= \frac{2}{\pi} \log(1 + \sqrt{2})^2 \left[-\log(\frac{T}{T_c} - 1) - 1 - \frac{\pi}{4} - \log(\frac{\sqrt{2}}{4} \log(1+\sqrt{2}))\right]
 \end{align}
 and we see \(c\) diverging logarithmically as \(T \to T_c\).
+This was also the first instance of universility.\todo{Find the source which said this.}
 
 \subsection{Magnetization of the Ising Model}
 
@@ -296,7 +418,7 @@ The Metropolis algorithm, first published by Metropolis \textit{et al.} in 1953 
 % - initial state
 
 
-\subsection{Critical Slowing Down}
+\subsection{Critical Slowing Down} \label{sec:critical_slowing_down}
 % - correlation times
 % - dynamic exponents
 % - dynamic universality
@@ -333,6 +455,7 @@ The Metropolis algorithm, first published by Metropolis \textit{et al.} in 1953 
 % - Better definition for the order parameter
 % - Measure entropy
 % - go to q=4, 5 and try to determine that the transition is first order
+% - Analysis using renormalization group methods
 
 
 
