@@ -73,7 +73,7 @@ class PottsModel:
             np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, magnetization)
             for k in range(self.lattice_size**2):
-                states = [-1, 0, 1]
+                states = [0, 1, 2]
                 # Pick a random location on the lattice.
                 rand_y = np.random.randint(0, self.lattice_size)
                 rand_x = np.random.randint(0, self.lattice_size)
