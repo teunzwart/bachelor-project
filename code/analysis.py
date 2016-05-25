@@ -7,6 +7,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
 
+import seaborn as sns
+plt.rc('text', usetex=True)
+sns.set_style("ticks")
+sns.set_palette('colorblind')  # Options: deep, muted, pastel, bright, dark, colorblind
+
 import exact_ising_model as exact
 import plotting
 
@@ -100,7 +105,7 @@ def data_analysis(data_files, save=False, show_plots=True, exact_ising=True):
         plotting.plot_quantity_range(cluster_fractions, "Mean Cluster Size as fraction of Lattice", save=save)
         plotting.plot_quantity_range(magnetizations, "Absolute Magnetization per Site", exact=exact_magnetization, save=save)
         plotting.plot_quantity_range(heat_capacities, "Heat Capacity per Site", exact=exact_heat, save=save)
-        plotting.plot_quantity_range(magnetizabilities, "Magnetizability per Site", save=save)
+        plotting.plot_quantity_range(magnetizabilities, "Susceptibility per Site", save=save)
         plotting.plot_quantity_range(binder_cumulants, "Binder Cumulant", save=save)
         plotting.plot_correlation_time_range(energy_correlations, "Energy per Site", save=save)
         plotting.plot_correlation_time_range(magnetization_correlations, "Absolute Magnetization", save=save)
@@ -158,12 +163,13 @@ def binning(data, quantity, show_plot=False):
         autocorrelation_time = 1
 
     if show_plot:
-        plt.title("Binning Method {0} Error, Log Scale".format(quantity))
-        plt.xlabel("Data Points")
-        plt.ylabel("Error")
+        plt.title(r'${0}$'.format('\mathrm{Binning\ Method\ '+ quantity.replace(' ', '\ ') + 'Error, Log Scale'))
+        plt.xlabel(r'$\mathrm{Data Points}$')
+        plt.ylabel(r'$\mathrm{Error}$')
         plt.xlim(original_length, 1)
         plt.ylim(ymin=0, ymax=max(errors, key=lambda x: x[1])[1] * 1.15)
         plt.semilogx([e[0] for e in errors], [e[1] for e in errors], basex=2)
+        sns.despine()
         plt.show()
 
     return np.mean(data), errors[-1][1], autocorrelation_time, data
@@ -308,9 +314,10 @@ def chi_squared_data_collapse(data, critical_temperature,
                             f = np.poly1d(polynomial)
                             x_new = np.linspace(min(at_interval_x), max(at_interval_x), 50)
                             y_new = f(x_new)
-                            plt.xlabel("L^(1/nu)t")
-                            plt.ylabel("Scaling Function")
+                            plt.xlabel(r'$L^{(1/\nu)}t$')
+                            plt.ylabel(r'$\mathrm{Scaling\ Function}$')
                             plt.errorbar(at_interval_x, at_interval_y, at_interval_y_error, marker='o', linestyle='None')
+                            sns.despine()
                             plt.plot(x_new, y_new)
                             plt.show()
             best_nus.append(best_nu)
@@ -333,29 +340,35 @@ def data_collapse(data, quantity, critical_temperature, critical_exponent1, nu, 
             scaling_function_at_size.append((scaling_variable, v_tilde))
         scaling_functions.append([lattice_size, scaling_function_at_size])
     for p in scaling_functions:
-        plt.xlabel("L^(1/nu)t")
-        plt.ylabel("{0} Scaling Function".format(quantity))
-        plt.plot([k[0] for k in p[1]], [k[1] for k in p[1]], linestyle='None', marker='o', label="{0} by {0} Lattice".format(p[0]))
+        plt.xlabel(r'$L^{(1 / \nu)}t$')
+        plt.ylabel(r'${0}$'.format('\mathrm{' + quantity.replace(' ', '\ ') + '\ Scaling\ Function}'))
+        sns.despine()
+        plt.plot([k[0] for k in p[1]], [k[1] for k in p[1]], linestyle='None', marker='o', label=r"${0}$".format(str(p[0]) + '\mathrm{\ by\ }' + str(p[0]) + "\mathrm{\ Lattice}"))
     print("{0} = {1}, nu = {2}".format(name1, abs(critical_exponent1), nu))
     plt.legend(loc='best')
+    sns.despine()
     plt.show()
 
 
 def loglog_exponent_finding(data, quantity):
     lattice_sizes_log = []
     magnetizations_log = []
+    magnetizations_log_error = []
     for k in data:
         lattice_size_log = np.log(k[0])
         magnetization_log = np.log(k[1][0][1])
+        magnetization_log_error = k[1][0][2] / k[1][0][1]
         lattice_sizes_log.append(lattice_size_log)
         magnetizations_log.append(magnetization_log)
+        magnetizations_log_error.append(magnetization_log_error)
 
     lattice_sizes = np.asarray(lattice_sizes_log)
     magnetizations_log = np.asarray(magnetizations_log)
     slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(lattice_sizes, magnetizations_log)
-    plt.xlabel("Log(L)")
-    plt.ylabel("Log({0})".format(quantity))
-    plt.plot(lattice_sizes, magnetizations_log, linestyle='None', marker='o')
+    plt.xlabel(r'$\log(L)$')
+    plt.ylabel(r'$\log({0})$'.format('\mathrm{' + quantity.replace(" ", "\ ") + '}'))
+    plt.errorbar(lattice_sizes, magnetizations_log, magnetizations_log_error, linestyle='None', marker='o')
+    sns.despine()
     plt.show()
     return slope, std_err
 
