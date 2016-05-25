@@ -57,12 +57,11 @@ def plot_correlation_time_range(data_range, quantity, show_plot=True, save=False
     """Plot autocorrelation times for a range of temperatures."""
     plt.xlabel(r'$T$')
     plt.ylabel(r'${0}$'.format('\mathrm{' + quantity.replace(' ', '\ ') + "\ Autocorrelation\ Time\ in\ Monte\ Carlo\ Sweeps}"))
-    for p in data_range:
-        data = p[1]
-        plt.plot([d[0] for d in data], [d[1] for d in data], marker='o', linestyle='None', label=r"${0}$".format(str(p[0]) + '\mathrm{\ by\ }' + str(p[0]) + "\mathrm{\ Lattice}"))
+    for lattice_size, data in sorted(data_range.items()):
+        plt.plot([d[0] for d in data], [d[1] for d in data], marker='o', linestyle='None', label=r"${0}$".format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"))
     plt.legend(loc='best')
     # We put all data together so it is easy to find the maximum and minimum values.
-    zipped_data = list(itertools.chain(*[k[1] for k in data_range]))
+    zipped_data = list(itertools.chain(*data_range.values()))
     x_data_range = sorted(list(set(m[0] for m in zipped_data)))
     min_x = x_data_range[0]
     max_x = x_data_range[-1]
@@ -72,21 +71,21 @@ def plot_correlation_time_range(data_range, quantity, show_plot=True, save=False
     plt.ylim(0, data_max * 1.15)
     sns.despine()
     if save:
-        plt.savefig("{0}/{1}_Autocorrelation_Time_{2}.pdf".format(SAVE_LOCATION, quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
+        plt.savefig("{0}/{1}_Autocorrelation_Time_{2}.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), quantity.replace(" ", "_"), bbox_inches='tight')
     if show_plot:
         plt.show()
 
 
 def plot_quantity_range(data_range, quantity, exact=None, show_plot=True, save=False):
     """Plot quantity over a temperature range."""
-    for p in data_range:
-        data = p[1]
-        plt.errorbar([d[0] for d in data], [d[1] for d in data], [d[2] for d in data], linestyle='None', label=r"${0}$".format(str(p[0]) + '\mathrm{\ by\ }' + str(p[0]) + "\mathrm{\ Lattice}"), marker='o')
+    for lattice_size, data in sorted(data_range.items()):
+        plt.errorbar([d[0] for d in data], [d[1] for d in data], [d[2] for d in data], linestyle='None', label=r"${0}$".format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"), marker='o')
     if exact is not None:
         plt.plot([e[0] for e in exact], [e[1] for e in exact], label=r'$\mathrm{Thermodynamic\ Limit}$')
 
     # We put all data together so it is easy to find the maximum and minimum values.
-    zipped_data = list(itertools.chain(*[k[1] for k in data_range]))
+    # print(list(data_range.values()))
+    zipped_data = list(itertools.chain(*data_range.values()))
     x_data_range = sorted(list(set(m[0] for m in zipped_data)))
     min_x = x_data_range[0]
     max_x = x_data_range[-1]
@@ -103,6 +102,6 @@ def plot_quantity_range(data_range, quantity, exact=None, show_plot=True, save=F
     plt.legend(loc="best")
     sns.despine()
     if save:
-        plt.savefig("{0}/{1}_{2}.pdf".format(SAVE_LOCATION, quantity.replace(" ", "_"), time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), bbox_inches='tight')
+        plt.savefig("{0}/{1}_{2}.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), quantity.replace(" ", "_"), bbox_inches='tight')
     if show_plot:
         plt.show()

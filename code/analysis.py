@@ -2,6 +2,7 @@
 
 import itertools
 import pickle
+import time
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,6 +17,8 @@ import exact_ising_model as exact
 import plotting
 
 SIMULATION_FOLDER = "./simulation_runs"
+SAVE_LOCATION = "../bachelor-thesis/images"
+
 
 
 def open_simulation_files(data_files):
@@ -31,24 +34,15 @@ def open_simulation_files(data_files):
 def data_analysis(data_files, save=False, show_plots=True, exact_ising=True):
     """If save=True, save plots."""
     data = open_simulation_files(data_files)
-    energies = []
-    energy_correlations = []
-    magnetizations = []
-    magnetization_correlations = []
-    cluster_fractions = []
-    heat_capacities = []
-    magnetizabilities = []
-    binder_cumulants = []
+    energies = {}
+    energy_correlations = {}
+    magnetizations = {}
+    magnetization_correlations = {}
+    cluster_fractions = {}
+    heat_capacities = {}
+    magnetizabilities = {}
+    binder_cumulants = {}
     for d in data:
-        energy_at_size = []
-        energy_correlations_at_size = []
-        cluster_fraction_at_size = []
-        heat_capacity_at_size = []
-        magnetization_at_size = []
-        magnetization_correlations_at_size = []
-        magnetizability_at_size = []
-        binder_cumulant_at_size = []
-
         for t in d:
             (lattice_size, bond_energy, initial_temperature, thermalization_sweeps, measurement_sweeps,
              temperature, correction_factor, correction_factor_error) = t[0]
@@ -69,23 +63,14 @@ def data_analysis(data_files, save=False, show_plots=True, exact_ising=True):
             binder = np.mean([binder_jack, binder_boot])
             binder_error = max(binder_error_jack, binder_error_boot)
 
-            energy_at_size.append((temperature, measurements['energy'], measurements['energy error']))
-            energy_correlations_at_size.append((temperature, measurements['energy correlation']))
-            magnetization_at_size.append((temperature, measurements['m'], measurements['m error']))
-            cluster_fraction_at_size.append((temperature, correction_factor, correction_factor_error))
-            heat_capacity_at_size.append((temperature, heat_cap, heat_cap_error))
-            magnetizability_at_size.append((temperature, chi, chi_error))
-            binder_cumulant_at_size.append((temperature, binder, binder_error))
-            magnetization_correlations_at_size.append((temperature, measurements['m correlation']))
-
-        energies.append([lattice_size, energy_at_size])
-        energy_correlations.append([lattice_size, energy_correlations_at_size])
-        magnetization_correlations.append([lattice_size, magnetization_correlations_at_size])
-        magnetizations.append([lattice_size, magnetization_at_size])
-        cluster_fractions.append([lattice_size, cluster_fraction_at_size])
-        heat_capacities.append([lattice_size, heat_capacity_at_size])
-        magnetizabilities.append([lattice_size, magnetizability_at_size])
-        binder_cumulants.append([lattice_size, binder_cumulant_at_size])
+            energies.setdefault(lattice_size, []).append((temperature, measurements['energy'], measurements['energy error']))
+            energy_correlations.setdefault(lattice_size, []).append((temperature, measurements['energy correlation']))
+            magnetizations.setdefault(lattice_size, []).append((temperature, measurements['m'], measurements['m error']))
+            cluster_fractions.setdefault(lattice_size, []).append((temperature, correction_factor, correction_factor_error))
+            heat_capacities.setdefault(lattice_size, []).append((temperature, heat_cap, heat_cap_error))
+            magnetizabilities.setdefault(lattice_size, []).append((temperature, chi, chi_error))
+            binder_cumulants.setdefault(lattice_size, []).append((temperature, binder, binder_error))
+            magnetization_correlations.setdefault(lattice_size, []).append((temperature, measurements['m correlation']))
 
     # Find the critical temperature.
     critical_temperature, critical_temperature_error = find_binder_intersection(binder_cumulants)
@@ -163,7 +148,7 @@ def binning(data, quantity, show_plot=False):
         autocorrelation_time = 1
 
     if show_plot:
-        plt.title(r'${0}$'.format('\mathrm{Binning\ Method\ '+ quantity.replace(' ', '\ ') + 'Error, Log Scale'))
+        plt.title(r'${0}$'.format('\mathrm{Binning\ Method\ ' + quantity.replace(' ', '\ ') + 'Error, Log Scale'))
         plt.xlabel(r'$\mathrm{Data Points}$')
         plt.ylabel(r'$\mathrm{Error}$')
         plt.xlim(original_length, 1)
@@ -225,9 +210,10 @@ def find_binder_intersection(data):
     # We use Cramers rule, adapted from http://stackoverflow.com/questions/20677795/
     intersections = []
     # Inerate over datasets.
-    for k in range(len(data) - 1):
-        data1 = data[k][1]
-        data2 = data[k + 1][1]
+    keys = sorted(data.keys())
+    for key in keys[:-1]:
+        data1 = data[key]
+        data2 = data[keys[keys.index(key) + 1]]
         # Iterate over temperatures.
         for z in range(len(data1) - 1):
             intersection_error = []
@@ -264,7 +250,7 @@ def find_binder_intersection(data):
                 intersections.append(((x_intersection, x_intersection_error), (y_intersection, y_intersection_error)))
     if intersections:
         critical_temperature = np.mean([p[0][0] for p in intersections])
-        critical_temperature_error = calculate_error([p[0][0] for p in intersections])#(1 / len(intersections)) * np.sqrt(sum([p[0][1]**2 for p in intersections]))
+        critical_temperature_error = calculate_error([p[0][0] for p in intersections])
     else:
         critical_temperature = None
         critical_temperature_error = None
@@ -274,7 +260,7 @@ def find_binder_intersection(data):
     return critical_temperature, critical_temperature_error
 
 
-def chi_squared_data_collapse(data, critical_temperature,
+def chi_squared_data_collapse(data_set, critical_temperature,
                               critical_temperature_error, ratio, ratio_error, second_exponent_name, show_plots=False):
     """Find critical exponents through an iterative data fit."""
     best_nus = []
@@ -286,26 +272,21 @@ def chi_squared_data_collapse(data, critical_temperature,
             best_second_exponent = 0
             for nu in np.linspace(0.01, 1, 100):
                 second_exponent = (ratio + k * ratio_error) * nu
-                scaling_functions = []
-                for d in data:
-                    scaling_function_at_size = []
-                    lattice_size = d[0]
-                    values = d[1]
-                    for v in values:
+                scaling_functions = {}
+                for lattice_size, data in sorted(data_set.items()):
+                    for v in data:
                         TC = critical_temperature + p * critical_temperature_error
                         t = (v[0] - TC) / TC
                         scaling_variable = lattice_size**(1 / nu) * t
                         v_tilde = lattice_size**(-second_exponent / nu) * v[1]
                         v_tilde_error = lattice_size**(-second_exponent / nu) * v[2]
-                        scaling_function_at_size.append((scaling_variable, v_tilde, v_tilde_error))
-                    scaling_functions.append([lattice_size, scaling_function_at_size])
+                        scaling_functions.setdefault(lattice_size, []).append((scaling_variable, v_tilde, v_tilde_error))
 
-                at_interval = [a for a in list(itertools.chain(*[s[1] for s in scaling_functions])) if -1 <= a[0] <= 1]
+                at_interval = [a for a in list(itertools.chain(*list(scaling_functions.values()))) if -1 <= a[0] <= 1]
                 if len(at_interval) >= 15:
 
                     at_interval_x, at_interval_y, at_interval_y_error = zip(*at_interval)
                     polynomial, residuals, _, _, _ = np.polyfit(at_interval_x, at_interval_y, 5, full=True)
-
                     if residuals / (len(at_interval) - 5) < lowest_residual:
                         lowest_residual = residuals / (len(at_interval) - 6)
                         best_second_exponent = second_exponent
@@ -316,8 +297,11 @@ def chi_squared_data_collapse(data, critical_temperature,
                             y_new = f(x_new)
                             plt.xlabel(r'$L^{(1/\nu)}t$')
                             plt.ylabel(r'$\mathrm{Scaling\ Function}$')
-                            plt.errorbar(at_interval_x, at_interval_y, at_interval_y_error, marker='o', linestyle='None')
+                            for lattice_size, values in sorted(scaling_functions.items()):
+                                plt.errorbar([k[0] for k in values], [k[1] for k in values], [k[2] for k in values], marker='o', linestyle='None', label=r'${0}$'.format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"))
+                                plt.xlim(-1, 1)
                             sns.despine()
+                            plt.legend(loc='best')
                             plt.plot(x_new, y_new)
                             plt.show()
             best_nus.append(best_nu)
@@ -327,38 +311,37 @@ def chi_squared_data_collapse(data, critical_temperature,
     return np.mean(best_second_exponents), calculate_error(best_second_exponents), np.mean(best_nus), calculate_error(best_nus)
 
 
-def data_collapse(data, quantity, critical_temperature, critical_exponent1, nu, name1):
-    scaling_functions = []
-    for d in data:
-        scaling_function_at_size = []
-        lattice_size = d[0]
-        values = d[1]
-        for v in values:
+def data_collapse(data_set, quantity, critical_temperature, critical_exponent1, nu, name1, save=False):
+    scaling_functions = {}
+    for lattice_size, data in sorted(data_set.items()):
+        for v in data:
             t = (v[0] - critical_temperature) / critical_temperature
             scaling_variable = lattice_size**(1 / nu) * t
             v_tilde = lattice_size**(critical_exponent1 / nu) * v[1]
-            scaling_function_at_size.append((scaling_variable, v_tilde))
-        scaling_functions.append([lattice_size, scaling_function_at_size])
-    for p in scaling_functions:
+            scaling_functions.setdefault(lattice_size, []).append((scaling_variable, v_tilde))
+    for lattice_size, data in sorted(scaling_functions.items()):
         plt.xlabel(r'$L^{(1 / \nu)}t$')
         plt.ylabel(r'${0}$'.format('\mathrm{' + quantity.replace(' ', '\ ') + '\ Scaling\ Function}'))
         sns.despine()
-        plt.plot([k[0] for k in p[1]], [k[1] for k in p[1]], linestyle='None', marker='o', label=r"${0}$".format(str(p[0]) + '\mathrm{\ by\ }' + str(p[0]) + "\mathrm{\ Lattice}"))
+        plt.plot([k[0] for k in data], [k[1] for k in data], linestyle='None', marker='o', label=r"${0}$".format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"))
     print("{0} = {1}, nu = {2}".format(name1, abs(critical_exponent1), nu))
     plt.legend(loc='best')
     sns.despine()
+    if save:
+        plt.savefig("{0}/{1}_{2}_data_collapse.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), quantity.replace(" ", "_"), bbox_inches='tight')
+
     plt.show()
 
 
-def loglog_exponent_finding(data, quantity):
+
+def loglog_exponent_finding(data_set, quantity, save=False):
     lattice_sizes_log = []
     magnetizations_log = []
     magnetizations_log_error = []
-    for k in data:
-        lattice_size_log = np.log(k[0])
-        magnetization_log = np.log(k[1][0][1])
-        magnetization_log_error = k[1][0][2] / k[1][0][1]
-        lattice_sizes_log.append(lattice_size_log)
+    for lattice_size, data in data_set.items():
+        magnetization_log = np.log(data[0][1])
+        magnetization_log_error = data[0][2] / data[0][1]
+        lattice_sizes_log.append(np.log(lattice_size))
         magnetizations_log.append(magnetization_log)
         magnetizations_log_error.append(magnetization_log_error)
 
@@ -369,6 +352,8 @@ def loglog_exponent_finding(data, quantity):
     plt.ylabel(r'$\log({0})$'.format('\mathrm{' + quantity.replace(" ", "\ ") + '}'))
     plt.errorbar(lattice_sizes, magnetizations_log, magnetizations_log_error, linestyle='None', marker='o')
     sns.despine()
+    if save:
+        plt.savefig("{0}/{1}_{2}_loglog_plot.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())), quantity.lower().replace(" ", "_"), bbox_inches='tight'))
     plt.show()
     return slope, std_err
 
