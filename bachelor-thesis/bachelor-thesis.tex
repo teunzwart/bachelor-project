@@ -128,8 +128,9 @@ Because for continuous phase transitions the latent heat has to vanish by defini
 No divergence occurs if \(\alpha < 0\).
 In the limiting case that \(\alpha = 0\), we can consider the divergence of the specific heat to be logarithmic since
 \begin{equation}
-	\log(\frac{1}{x}) = \lim_{\alpha \to 0+} \frac{1}{\alpha}\left(x^{-\alpha} - 1\right).
+	\log(\frac{1}{x}) = \lim_{\alpha \to 0+} \frac{1}{\alpha}\left(x^{-\alpha} - 1\right),
 \end{equation}
+where \(x = \abs{T - T_c}/T_c\).
 Theoretically and experimentally we find that the exponent governing divergence is the same both above and below \(T_c\).\cite{binney:1992}
 
 \subsection{Correlation Functions}
@@ -174,7 +175,7 @@ The correlation length diverges as \(T_c\) is approached from above or below, ac
 \end{equation}
 where \(\nu\) is another critical exponent.
 
-\subsection{Scaling Laws}
+\subsection{Scaling Laws} \label{sec:scaling_laws}
 We can define three other critical exponents.
 For the magnetic susceptibility we have
 \begin{equation}
@@ -182,6 +183,7 @@ For the magnetic susceptibility we have
 \end{equation}
 while for the magnetization of a system we have
 \begin{equation}
+	\label{eq:magnetization_beta}
 	m \propto \abs{T-T_c}^{\beta} \mathrm{\ \ \ \ \ T \to T_c\ from\ below}.
 \end{equation}
 Finally we can define a critical exponent for the magnetization in a non-zero magnetic field (the previous five critical exponents assumed \(B=0\)).
@@ -199,7 +201,7 @@ They are:
 	(2-\eta)\nu &= \gamma \\
 	\nu d &= 2- \alpha,
 \end{align}
-with \(\nu\) the dimensionalty of the system.\cite{binney:1992,baxter:1973,landau:2015}\todo{Put some part of the derivation of these relations here?}
+with \(\nu\) the dimensionalty of the system.\cite{binney:1992,baxter:1982,landau:2015}\todo{Put some part of the derivation of these relations here?}
 
 
 % - Critical temperature
@@ -213,18 +215,21 @@ with \(\nu\) the dimensionalty of the system.\cite{binney:1992,baxter:1973,landa
 \subsection{Universality}
 One property of critical phenomena that simplifies their study is the concept of universality.
 This is the independence of many thermodynamic properties on the exact details of the hamiltonian of the system.
-They will only depend on the dimensionaly of the system
+They will only depend on the dimensionality of the system and symmetries of the Hamiltonian
 Consider the hamiltonian
 \begin{equation}
-	H(s) = H_0(s) + lambda H_1(s),
+	H(s) = H_0(s) + \lambda H_1(s),
 \end{equation}
-where \(s\) denotes the state of the system.
-
-% - first noted for Ising
+where \(s\) denotes the state of the system, \(H_0\) is a part with a given symmetry, and \(H_1\) does not have that symmetry.
+The critical exponents then only depend on \(\lambda\) in that they have one value when \(\lambda=0\) and another when \(\lambda \neq 0\).
+This also means that, if both \(H_0\) and \(H_1\) have the same symmetries, then, if \(H_0\) is some simple hamiltonian while \(H_1\) is more complicated, it is possible to obtain the critical exponents of a system using the simple part while stripping the more complicated part.
+This may significantly ease the determination of critical exponents when performing simulations.
+Different systems with the same critical exponents are said to be in the same universality class.
+It is believed (and experimentally established with error) that such diverse systems as carbon dioxide, xenon and the three-dimensional Ising model are in the same universality class.\cite{baxter:1989}
 
 \section{The Two-Dimensional Ising Model} \label{sec:ising_model}
 
-The two-dimensional Ising model in zero-field was first solved exactly in 1944 by Lars Onsager.\cite{onsager:1944}
+To validate methods to determine critical exponents for systems that are not exactly solvable, a control system that is exactly solved is useful. To that end we study the two-dimensional Ising model in zero-field, first solved exactly in 1944 by Lars Onsager.\cite{onsager:1944}
 It describes a square lattice with nearest neighbour interactions, where each lattice point has with it associated a number (which we will refer to as spin) which may either be +1 or -1 and was originally meant as a model for magnets.
 The Hamiltonian in zero-field is\cite{mccoy:1973}
 \begin{align}
@@ -257,14 +262,15 @@ The derivation introduces a sign ambiguity in \(Z\) which takes some additional 
 	\end{dmath}
 \end{dgroup*}
 
-\(F\) is an analytic function of the temperature \(T\), except at one value, which we will call the critical temperature \(T_c\). At this temperature we can define the equality
+\(F\) is an analytic function of the temperature \(T\), except at one value, which we will call the critical temperature \(T_c\). At this temperature we can define the equality\cite{mccoy:1973}
 \begin{align}
-	\left|z_1\right| &= \frac{1 - \left| z_2 \right|}{1+\left| z_2 \right|}, \text{ with } z_1 = \tanh(2\beta J_1), z_2 = \tanh(2\beta J_2).
+	\abs{z_1} &= \frac{1 - \abs{z_2}}{1+ \abs{z_2}}, \text{ with } z_1 = \tanh(2\beta J_1), z_2 = \tanh(2\beta J_2).
 \end{align}
-Rewritting and squaring this gives
+Rewriting and squaring this gives
 \begin{align}
-	1 - \left|z_1 z_2\right| &= \left|z_1\right| + \left|z_2\right|\rightarrow\\
-	\left(1 - z_1^2 \right) \left(1 - z_2^2 \right) &= 4 \left| z_1 z_2 \right|
+	\label{eq:ising_z_functions}
+	1 - \abs{z_1 z_2} &= \abs{z_1} + \abs{z_2}\rightarrow\\
+	\left(1 - z_1^2 \right) \left(1 - z_2^2 \right) &= 4 \abs{z_1 z_2}
 \end{align}
 Finally, using
 \begin{align}
@@ -274,7 +280,7 @@ we get the equality
 \begin{align}
 	1 = \sinh(2\beta J_1) \sinh(2\beta J_2).
 \end{align}
-In the case where interaction strength in both the \(x\)- and \(y\)-directions is the same (\(\left|J_1\right| = \left|J_2\right| = J\)) we get an expression for the critical temperature in terms of the bond energy
+In the case where interaction strength in both the \(x\)- and \(y\)-directions is the same (\(\abs{J_1} = \abs{J_2} = J\)) we get an expression for the critical temperature in terms of the bond energy
 \begin{align}
 	1 &= \sinh(2\beta J) \to \\
 	k_B T_c &= \frac{2}{\text{asinh}(1)}J = \frac{2}{\log(1+\sqrt{2})}J \approx 2.269 J
@@ -288,7 +294,7 @@ Onsager \cite{onsager:1944} also calculated the values of the free energy, inter
 with \(G\) Catalan's constant.\footnote{\(G = 1^{-2} - 3^{-2} + 5^{-2} - 7^{-2} \approx 0.916\)}
 
 \subsection{Thermodynamic Properties of the Two-Dimensional Ising Model}\todo{Check the formula in this part with \cite{mccoy:1973}, with special attention to factors of two and exponents!}
-From the free energy it is relatively simple to determine the specific heat per spin and the internal energy per spin by taking the appropriate derivatives of the free energy\cite{mccoy:1973}. We work with the isotropic case where \(\left|J_1\right| = \left|J_2\right| = J\) and \(z_1 = z_2 = z = \tanh(\beta J)\), corresponding to \cref{eq:isotropic_hamiltonian}.
+From the free energy it is relatively simple to determine the specific heat per spin and the internal energy per spin by taking the appropriate derivatives of the free energy\cite{mccoy:1973}. We work with the isotropic case where \(\abs{J_1} = \abs{J_2} = J\) and \(z_1 = z_2 = z = \tanh(\beta J)\), corresponding to \cref{eq:isotropic_hamiltonian}.
 Then the expression for the free energy becomes
 \begin{dmath}
 	F = -\frac{1}{\beta} \left[\log(2\cosh^2(\beta J)) + \log(1+z^2) + \frac{1}{(2\pi)^2} \int_0^{\pi}\dif \theta_1 \int_0^{\pi} \dif \theta_2 \log(1-\frac{1}{2}k \Big\{\cos(\theta_1) + \cos(\theta_2)\Big\})\right],
@@ -304,7 +310,7 @@ Performing the substitutions \(\omega_1 = \frac{1}{2}(\theta_1 + \theta_2)\) and
 		&= -\frac{1}{\beta} \left[\log(\sqrt{2}\cosh(2\beta J)) + \frac{1}{\pi} \int_0^{\frac{\pi}{2}} \dif \omega \log(1+\left\{1-k^2 \cos^2(\omega)\right\}^{\frac{1}{2}}) \right]
 \end{align}
 
-We will take derivatives from this expression. The internal energy per spin is
+We will take derivatives from this expression to determine expressions for thermodynamic properties. The internal energy per spin is
 \begin{align}
 	\label{eq:internal_energy}
 	u &= \frac{\partial \beta F}{\partial \beta}\\
@@ -332,7 +338,7 @@ Taking the derivative of \(k\)
 	\label{eq:k_derivative}
 	\frac{1}{k}\frac{\dif k}{\dif \beta} = \frac{2 J}{\tanh(2\beta J)} (1 - 2\tanh^2(2 \beta J)),
 \end{align}
-the internal energy per spin becomes
+the internal energy per spin becomes (see \cref{fig:ising_internal_energy}) for a plot)
 \begin{align}
 	\label{eq:ising_internal_energy}
 	u = \frac{-J}{\tanh(2\beta J)} \left[1 + \frac{2}{\pi} \left\{2 \tanh^2(2\beta J) -1 \right\} K(k) \right].
@@ -359,11 +365,17 @@ where \(E(k)\) is the complete elliptic integral of the second kind
 	E(k) = \int_0^{\frac{\pi}{2}} \dif \phi \left(1-k^2 \sin^2(\phi)\right)^{\frac{1}{2}},
 \end{align}
 and \(k^{'2} = 1 - k^2\).
-Using \cref{eq:k_derivative} and \cref{eq:elliptic_identity} the expression for the specific heat per spin becomes
+Using \cref{eq:k_derivative} and \cref{eq:elliptic_identity} the expression for the specific heat per spin becomes (see \cref{fig:ising_internal_energy} for a plot)
 \begin{align}
 	\label{eq:ising_heat_capacity}
 	c = k_B \left[ \frac{\beta J}{\tanh(2\beta J)} \right]^{2} \frac{2}{\pi} \left[ 2 K(k) -2 E(k) - \left(1 - k' \right) \left\{ \frac{\pi}{2} + k' K(k) \right\}\right].
 \end{align}
+
+\begin{figure}[h]
+	\includegraphics[width=0.66\textwidth]{ising_internal_energy.pdf}
+	\caption{The internal energy per site and the specific heat per site of the two-dimensional Ising model in zero-field. Notice the divergence of the specfic heat around \(T=T_c \approx 2.269\).}
+	\label{fig:ising_internal_energy}
+\end{figure}
 
 \subsection{The Ising Model around \(T_c\)}
 
@@ -390,10 +402,40 @@ The heat capacity per spin \(c\) does diverge. Using the previous expansions
 	&= \frac{2}{\pi} \log(1 + \sqrt{2})^2 \left[-\log(\frac{T}{T_c} - 1) - 1 - \frac{\pi}{4} - \log(\frac{\sqrt{2}}{4} \log(1+\sqrt{2}))\right]
 \end{align}
 and we see \(c\) diverging logarithmically as \(T \to T_c\).
-This was also the first instance of universility.\todo{Find the source which said this.}
+This means that the critical exponents \(\alpha = 0\) for the two-dimensional Ising model.
+When Onsager first solved the model, it also highlighted the first instance of universality.
+Onsager considered the general case where the interaction energy in the \(x\)- and \(y\)-directions differed, but the logarithmic divergence depended only on the critical temperature, and not on the ratio \(J_1 \ J_2\).\cite{baxter:1989}
 
 \subsection{Magnetization of the Ising Model}
 
+Onsager also calculated the magnetization of the Ising model.
+On the square lattice with \(T < T_c\) and \(J_1, J_2 > 0\) the magnetization squared is equal to the spin-spin correlation function
+\todo{Is this m or M?}
+\begin{equation}
+	M^2 = \lim_{N \to \infty} \langle \sigma_{00} \sigma_{0,N} \rangle = \lim{N \to \infty} \langle \sigma_{00} \sigma_{N, N} \rangle.
+\end{equation}
+
+Determining the correlation function is non-trivial, but the result is\todo{Check the exponents with McCoy}
+\begin{equation}
+	M^2 = \lim_{N \to \infty} \langle \sigma_{00} \sigma_{0,N} \rangle = \left[ \frac{(1-\alpha_1^2)(1-\alpha_2^2)}{(1-\alpha_1 \alpha_2)^2}, \right]^{1/4}
+\end{equation}
+with
+\begin{equation}
+	\alpha_1 = \frac{z_1(1-\abs{z_2})}{1+\abs{z_2}}, \alpha_2 = \frac{1}{z_1}\frac{1-\abs{z_2}}{1+\abs{z_2}},
+\end{equation}
+where we use \(z_1\) and \(z_2\) as defined in \cref{eq:ising_z_functions}.
+The magnetization is then (see \cref{fig:ising_magnetization} for a plot)
+\begin{equation}
+	M = \left[1 - \left\{\sinh(2\beta J_1)\sinh(2 \beta J_2)\right\}^{-2} \right]^{1/4}.
+\end{equation}
+When we approach the critical temperature from below we can expand around \(T_c\) and get
+\begin{equation}
+	M \propto \left[4\beta_c\left\{\frac{J_1}{\tanh(2\beta J_1)} + \frac{J_2}{\tanh(2\beta J_2)}\right\} \left\{1-\frac{T}{T_c}\right\}\right]^{1/8}.
+\end{equation}
+Comparing with \cref{eq:magnetization_beta} we see that \(\beta = 1/8\).\cite{wu:1982}
+
+Finally the magnetic susceptibility can be shown to diverge as \(\chi \propto \abs{T - T_c}^{-7/4}\), giving \(\gamma = 7/4\).
+With the earlier result \(\alpha=0\), we can use the scaling laws (\cref{sec:scaling_laws}) to determine that \(\delta = 15\), \(\eta = 1/4\) and \(\nu = 1\).\cite{binney:1992}
 
 \section{The Potts Model}
 % - definition planar and standard
