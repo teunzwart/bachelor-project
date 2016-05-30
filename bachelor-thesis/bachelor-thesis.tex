@@ -91,10 +91,13 @@
 
 \chapter{Introduction}
 
+The code for this project may be found at \url{github.com/teunzwart/bachelor-project}, including a basic guide on how to use it.\todo{Set repository to non-private.}
+
 \chapter{Models and Critical Phenomena}
 
 \section{Phase Transitions and Critical Phenomena}
 Phase transitions are an everyday part of life, the most well known being the transition of water into water vapor or ice into water.
+They also occur in more abstract contexts such as networks of neurons.\cite{tkacik:2014}\todo{Read this paper.}
 To determine when a phase transition has taken place, we consider the order parameter.
 In ferromagnetic systems such as iron, as well as in the systems we will study in this work, this is the magnetization.
 On one side of the phase transition a non-zero magnetization is present.
@@ -114,7 +117,7 @@ As the critical temperature is crossed the water molecules move from a disordere
 As this happens, energy is emmited in the form of latent heat.
 This is defined as
 \begin{equation}
-	\label{eq:laten_heat}
+	\label{eq:latent_heat}
 	l = \int_{T_c-}^{T_c+} c(T) \dif T,
 \end{equation}
 with \(l\) the latent heat and \(c(T)\) the heat capacity of the system.
@@ -201,16 +204,8 @@ They are:
 	(2-\eta)\nu &= \gamma \\
 	\nu d &= 2- \alpha,
 \end{align}
-with \(\nu\) the dimensionalty of the system.\cite{binney:1992,baxter:1982,landau:2015}\todo{Put some part of the derivation of these relations here?}
+with \(\nu\) the dimensionalty of the system.\cite{binney:1992,baxter:1989,landau:2015}
 
-
-% - Critical temperature
-% - Symmetry Breaking
-% - Order parameter
-% - Phase Transition, 1st and 2nd order
-% - Critical Phenomena
-% - Scaling Laws
-% - Define chi, c here
 
 \subsection{Universality}
 One property of critical phenomena that simplifies their study is the concept of universality.
@@ -293,7 +288,7 @@ Onsager \cite{onsager:1944} also calculated the values of the free energy, inter
 \end{align}
 with \(G\) Catalan's constant.\footnote{\(G = 1^{-2} - 3^{-2} + 5^{-2} - 7^{-2} \approx 0.916\)}
 
-\subsection{Thermodynamic Properties of the Two-Dimensional Ising Model}\todo{Check the formula in this part with \cite{mccoy:1973}, with special attention to factors of two and exponents!}
+\subsection{Thermodynamic Properties of the Two-Dimensional Ising Model}\todo{Check the formula in this part with McCoy, with special attention to factors of two and exponents!}
 From the free energy it is relatively simple to determine the specific heat per spin and the internal energy per spin by taking the appropriate derivatives of the free energy\cite{mccoy:1973}. We work with the isotropic case where \(\abs{J_1} = \abs{J_2} = J\) and \(z_1 = z_2 = z = \tanh(\beta J)\), corresponding to \cref{eq:isotropic_hamiltonian}.
 Then the expression for the free energy becomes
 \begin{dmath}
@@ -405,6 +400,9 @@ and we see \(c\) diverging logarithmically as \(T \to T_c\).
 This means that the critical exponents \(\alpha = 0\) for the two-dimensional Ising model.
 When Onsager first solved the model, it also highlighted the first instance of universality.
 Onsager considered the general case where the interaction energy in the \(x\)- and \(y\)-directions differed, but the logarithmic divergence depended only on the critical temperature, and not on the ratio \(J_1 \ J_2\).\cite{baxter:1989}
+Note that the sharp phase transition as described here only occurs when the lattice is of infinite extent.
+When we do not operate in the thermodynamic limit the partition function of the Ising model is analytic for all \(T\) and has a maximum but no divergence at \(T_c\).\cite{onsager:1944}
+
 
 \subsection{Magnetization of the Ising Model} \label{sec:ising_magnetization}
 
@@ -414,7 +412,6 @@ On the square lattice with \(T < T_c\) and \(J_1, J_2 > 0\) the magnetization sq
 \begin{equation}
 	M^2 = \lim_{N \to \infty} \langle \sigma_{00} \sigma_{0,N} \rangle = \lim{N \to \infty} \langle \sigma_{00} \sigma_{N, N} \rangle.
 \end{equation}
-
 Determining the correlation function is non-trivial, but the result is\todo{Check the exponents with McCoy}
 \begin{equation}
 	M^2 = \lim_{N \to \infty} \langle \sigma_{00} \sigma_{0,N} \rangle = \left[ \frac{(1-\alpha_1^2)(1-\alpha_2^2)}{(1-\alpha_1 \alpha_2)^2}, \right]^{1/4}
@@ -459,14 +456,14 @@ For this system he established that for all \(q\) the transition ocurres at\cite
 \end{equation}
 with
 \begin{align}
-	x_0 &= e^{-J_0 / k_B T} \mathrm{\ \ \ \ \ for\ spins\ in\ like\ orientations}\\
+	x_0 &= e^{-J_0 / k_B T} \mathrm{\ \ \ \ \ for\ spins\ in\ like\ orientations,}\\
 	x_1 & = e^{-J_1 / k_B T} \mathrm{\ \ \ \ \ for\ spins\ in\ unlike\ orientations}.
 \end{align}
 For \(q=3\) we find that the critical temperature is \(T_c=\frac{1}{\log(1+\sqrt{3})} \approx 0.995\).\cite{fan:2007}
 We call this system the standard Potts model.
 Throughout the rest of this thesis we will mainly consider this model and will simply refer to it as the Potts model.
 The planar and standard Potts models are related for \(q = 2\) by \(\epsilon_2 = 2 \epsilon_1\) and for \(q=3\) by \(\epsilon_2 = \frac{3}{2} \epsilon_1\).
-For the Potts model in two dimensions the transition at the critical point is first-order for \(q > 4\) and second-order for \(q \leq 4\).\cite{wu:1982}
+For the Potts model in two dimensions the transition at the critical point is first-order for \(q > 4\) and second-order for \(q \leq 4\).\cite{wu:1982,baxter:1973}
 Potts found that an earlier result by Ashkin and Teller for the discontinuities of the energy and specific heat\cite{ashkin:1943}, \(\Delta E, \Delta C\), could be generalized to show the relationship between those quantities:
 \begin{equation}
 	\sqrt{q}T \Delta E = \log(\frac{x_0}{x_1}) \Delta E.
@@ -497,7 +494,7 @@ It has the desired properties of being 1 when all spins on the lattice point in 
 The Potts model has not been solved exactly, thus we do not know the exact values of the critical exponents.
 There are however other systems in the same universality class as the Potts model.
 For \(q=2\) the model reduces to the Ising model and associated exponents (\cref{sec:ising_magnetization}).
-For \(q=3\) the model is conjectured to be equal to absorbed monolayers (two-dimensional model), a system that can be probed experimentally and gives \(\alpha = 0.36\)\cite{binder:1981a}. 
+For \(q=3\) the model is conjectured to be equal to absorbed monolayers (two-dimensional model), a system that can be probed experimentally and gives \(\alpha = 0.36\)\cite{binder:1981a}.
 It is also suspected that the hard hexagon model (a two-dimensional lattice model describing a gas of non-overlapping spheres, placed on a triangular lattice so no two molecules are adjacent) is in this universality class.
 This model is exactly solved and has the critical exponents\cite{baxter:1989,wu:1982}
 \begin{equation} \label{eq:potts_critical_exponents}
@@ -505,7 +502,6 @@ This model is exactly solved and has the critical exponents\cite{baxter:1989,wu:
 \end{equation}
 
 While no exact solution exists, Den Nijs has put forth conjectures for the values of the exponents.\cite{nijs:1979}
-\todo{Add step here.}
 We have
 \begin{equation}
 	2 - \alpha = \frac{1}{y_t} ,\ \ \ 1 + \frac{1}{\delta} = \frac{2}{y_h},
@@ -535,24 +531,46 @@ The critical exponents then become\cite{wu:1982, baxter:1989}:
 For \(q=3\), \(u=1/3\), and these equations reproduce \cref{eq:potts_critical_exponents}.
 
 
-% - definition planar and standard
-% - T_c
-% - other critical properties
-% - conjectured critical exponents
-
-
-
 \chapter{Simulating Lattice Models}
 
 \section{Markov Processes and Monte Carlo Methods}
+While some success is to be had by using analytical methods to study lattice models and their critical exponents, often the partition function can not exactly be determined.
+At that point we can use computer simulation of the models in question to study phase transitions, while having the exactly solved models as a benchmark for these simulations.
+
+We are almost always interested in the value of a thermal average of a quantity:
+\begin{equation}
+	\langle X \rangle = \sum_{\alpha}X_{\alpha}p_{\alpha},
+\end{equation}
+with \(\langle X \rangle\) a thermal average, the sum running over all configurations, each labeled by \(\alpha\), and \(p_{\alpha}\) the Gibbs probability of state \(\alpha\) in equilibrium\cite{binney:1992}:
+\begin{equation}
+	p_{\alpha} = \frac{e^{-\beta E_{\alpha}}}{\sum_{\alpha}e^{-\beta E_{\alpha}}}.
+\end{equation}
+While for small lattices (e.g. 3 by 3) the number of states is tractable (this number scales as \(2^{N}\) for the Ising model and \(q^{N}\) for the Potts model), for larger lattices the sum can no longer be performed numerically and some clever way has to be found to sample only important states.
 % - sampling and importance sampling
 % - briefly mention the origins of Monte Carlo name and Los Alamos
 
 \subsection{Ergodicity and Detailed Balance}
 
 \section{The Metropolis Algorithm}
-The Metropolis algorithm, first published by Metropolis \textit{et al.} in 1953 \cite{metropolis:1953}, is a simple algorithm that was first used by its creators to study the dynamics of continously displacable hard spheres.
-% - either update randomly or sequentially
+The Metropolis algorithm, first published by Metropolis \textit{et al.} in 1953 \cite{metropolis:1953}, is a simple algorithm that was first used by its creators to study the dynamics of continuously displaceable hard spheres.
+The algorithm is as follows\cite{binney:1992}:
+\begin{enumerate}
+	\item Choose a random site on the lattice.
+	\item Flip the spin on this location and calculate the change in energy \(\Delta E\) associated with this spin-flip.
+	\item Calculate the probability of accepting this move:
+	\begin{equation}
+		A =
+		\begin{cases}
+			e^{-\beta \Delta E}\ \ \ &\Delta E > 0 \\
+			1 \ \ \ &\Delta E \leq 0
+		\end{cases}
+	\end{equation}
+	\item Generate a random variable \(r\) in the interval \(\left[0, 1\right)\).
+	\item Accept the move if \(r \leq A\). Otherwise leave the lattice as it was.
+\end{enumerate}
+The spin flip may also happen to a non-random spin simply by iterating over the rows and columns of the lattice. When studying only equilibrium dynamics, the two approaches are identical.\cite{landau:2015}
+
+
 % - discuss boundary conditions
 % - initial state
 
@@ -563,29 +581,71 @@ The Metropolis algorithm, first published by Metropolis \textit{et al.} in 1953 
 % - dynamic universality
 
 \section{The Wolff Algorithm}
+The Wolff algorithm goes as follows:
+\begin{enumerate}
+	\item Choose a random site on the lattice \(i\)
+	\item \label{item:wolff_step_two} Look at the neighbours of \(i\). If a neighbour \(j\) has the same spin as \(i\), add it to the cluster with probability \(P = 1 - e^{-2\beta J}\).
+	\item Repeat step \ref{item:wolff_step_two} for spin \(j\) until no more spin can be added to the cluster.
+	\item Flip the entire cluster.
+\end{enumerate}
+If a spin was considered during a previous step but not added to the cluster, this spin may be reconsidered for future steps.\cite{newman:1999}
 % - mean cluster sizes
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\textwidth]{20160530161259_Mean_Cluster_Size_as_Fraction_of_Lattice.pdf}
+	\caption{The mean size as a fraction of the lattice of clusters generated with the Wolff method. During the simulation the temperature varied from 2 to 3 in steps of 0.1. The errorbars are too small to see.}
+\end{figure}
 
 \section{Generalizing Algorithms to the Potts Model}
 
-\subsection{Optimizations}
+\section{Optimizations}
+When working in a programming language that represents data in continuous blocks of memory such as C, helical boundary condition may improve performance.
 % - obvious optimizations for E and m
 % - caching exponents
 
-\subsection{Systemic errors}
+\section{Systemic errors}
 
 
 \chapter{Analysis of Monte Carlo Simulations}
-% - Finite Size Scaling
-% - Binder cumulant, finding intersection
+\section{Statistics}
+\subsection{Binning}
+\subsection{Bootstrap and Jackknife}
+% Define chi, c here
+\section{The Binder Cumulant}
+Given these statistically independent measurements, one thing we may like to find is the critical temperature.
+Unfortunately we can not determine this simply by looking at the order parameter of a system and when it becomes zero, because the finite size of the simulated lattices precludes a sharp phase transition.
+We can however define the Binder cumulant\cite{binder:1981b}
+\begin{equation}
+	U_4 = 1 - \frac{\langle m^4 \rangle}{3 \langle m^2 \rangle^2},
+\end{equation}
+which for \(L \to \infty\) becomes \(2/3\) for \((T \to 0)\) and 0 for \(T \to \infty\).\cite{landau:2015}
+At the critical temperature \(U_4\) has the same value independent of the lattice size.
+Therefore the critical temperature can be found by plotting the binder cumulant for different lattice sizes and looking for the intersection (as seen in \cref{fig:ising_binder_cumulant}).
+\begin{figure}[h]
+	\includegraphics[width=\textwidth]{20160530161301_Binder_Cumulant.pdf}
+	\caption{The Binder cumulant for the Ising model at three different lattice sizes. The critical point occurs at approximately \(T = 2.26\). The values were acquired by simulation the lattice using the Wolff algorithm and running 65536 steps after equilibration. The temperature was varied from 2.169 to 2.369 in steps of 0.01. The errorbars are too small to see in this plot.}
+	\label{fig:ising_binder_cumulant}
+\end{figure}
+
+% Finding the intersection
+\section{Finite Size Scaling}
 % - Data collapse using chi-square fitting
-% - Binning
-% - Bootstrap
-% - Jackknife
 % - Log-Log plots to find Ratios
 
 \chapter{Results}
+The Binder cumulant intersections were found by\todo{Explain}
+This was also used to find the error
 % - Results for both Ising and Potts
-% - Compare to Fan (2007)
+\begin{center}
+	\begin{tabular}{l c c c c c c}
+		& \(\alpha\) & \(\beta\) & \(\gamma\) & \(\eta\) & \(\nu\) & \(\delta\) \\\hline
+		Blöte (1981)\cite{blote:1981} & & \\
+		Fan (2007)\cite{fan:2007} & & \\
+		Ghamei (2001)\cite{ghaemi:2001} & & \\
+		Hu (1980)\cite{hu:1980} & & \\
+		Straley (1973)\cite{straley:1973} & & \\
+	\end{tabular}
+\end{center}
 
 \chapter{Conclusions}
 
