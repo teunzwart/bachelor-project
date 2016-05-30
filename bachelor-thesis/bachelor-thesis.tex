@@ -373,7 +373,7 @@ Using \cref{eq:k_derivative} and \cref{eq:elliptic_identity} the expression for 
 
 \begin{figure}[h]
 	\includegraphics[width=0.66\textwidth]{ising_internal_energy.pdf}
-	\caption{The internal energy per site and the specific heat per site of the two-dimensional Ising model in zero-field. Notice the divergence of the specfic heat around \(T=T_c \approx 2.269\).}
+	\caption{The internal energy per site and the specific heat per site of the two-dimensional Ising model in zero-field. Notice the divergence of the specfic heat around \(T=T_c \approx 2.269\), which is cutoff in this graph due to the limited resolution.}
 	\label{fig:ising_internal_energy}
 \end{figure}
 
@@ -406,7 +406,7 @@ This means that the critical exponents \(\alpha = 0\) for the two-dimensional Is
 When Onsager first solved the model, it also highlighted the first instance of universality.
 Onsager considered the general case where the interaction energy in the \(x\)- and \(y\)-directions differed, but the logarithmic divergence depended only on the critical temperature, and not on the ratio \(J_1 \ J_2\).\cite{baxter:1989}
 
-\subsection{Magnetization of the Ising Model}
+\subsection{Magnetization of the Ising Model} \label{sec:ising_magnetization}
 
 Onsager also calculated the magnetization of the Ising model.
 On the square lattice with \(T < T_c\) and \(J_1, J_2 > 0\) the magnetization squared is equal to the spin-spin correlation function
@@ -439,17 +439,20 @@ With the earlier result \(\alpha=0\), we can use the scaling laws (\cref{sec:sca
 
 \section{The Potts Model}
 The Potts model was first defined by Potts in 1953 as a generalization of the Ising model on the suggestion of Domb, his supervisor.\cite{potts:1952}
-Domb suggested that that to generalize, we can consider the spins of the model to be confined to a plane, with each spin pointing in one of \(q\) equally spaced directions, separated by an angle \(\theta_n = 2\pi n /q\), with \(q = 0, 1, \ldots q - 1\).
+Domb suggested that that to generalize, we can consider the spins of the model to be confined to a plane, with each spin pointing in one of \(q\) equally spaced directions, separated by an angle \(\theta_n = 2\pi n /q\), with \(n = 0, 1, \ldots q - 1\).
 The nearest neighbour interaction depend only on the angle between those neighbours.
 The hamiltonian for this system is
 \begin{equation}
 	H = - \sum_{\langle i, j \rangle} J(\theta_{ij}),
 \end{equation}
 with \(J(\theta)\) a \(2\pi\)-peridic function and \(\theta_{ij} = \theta_i - \theta_j\) the angle between two spins.
-Domb suggested to use \(J(\theta_{ij} = - \epsilon_1\cos(\theta_ij)\).
+Domb suggested to use \(J(\theta_{ij}) = - \epsilon_1\cos(\theta_{ij})\).
 This is now known as the planar Potts model.\cite{wu:1982}
-Making use of a duality relation which showed that the partition function at a low temperature \(T\) was equal to that at a high temperature \(T^*\), (\(Z(T)=Z(T^*)\)) Potts found the critical temperature for \(q=2, 3, 4\).
-He also gave a formula for the critical temperature of a system with a different interaction strength: \(J(\theta_{ij} = -\epsilon_2 \delta(\sigma_i, \sigma_j)\), where \(\delta\) is the Kronecker delta.
+
+Making use of a duality relation which showed that the partition function at a low temperature \(T\) was equal to that at a high temperature \(T^*\), (\(Z(T)=Z(T^*)\)) Potts found the critical temperature for \(q=2, 3, 4\), by assuming that there is exactly one temperature for which \(T=T^*\).
+This method was first used by Kramers and Wannier in 1941\cite{kramers:1941}, to determine the critical temperature of the two-dimensional Ising model three years before Onsager's exact solution.
+
+Potts also gave a formula for the critical temperature of a system with a different interaction strength: \(J(\theta_{ij}) = -\epsilon_2 \delta(\sigma_i, \sigma_j)\), where \(\delta\) is the Kronecker delta.
 For this system he established that for all \(q\) the transition ocurres at\cite{potts:1952}
 \begin{equation}
 	\frac{x_0}{x_1} = 1 + \sqrt{q},
@@ -459,54 +462,78 @@ with
 	x_0 &= e^{-J_0 / k_B T} \mathrm{\ \ \ \ \ for\ spins\ in\ like\ orientations}\\
 	x_1 & = e^{-J_1 / k_B T} \mathrm{\ \ \ \ \ for\ spins\ in\ unlike\ orientations}.
 \end{align}
-For \(q=3\) we find that \todo{Find T_c}
+For \(q=3\) we find that the critical temperature is \(T_c=\frac{1}{\log(1+\sqrt{3})} \approx 0.995\).\cite{fan:2007}
 We call this system the standard Potts model.
 Throughout the rest of this thesis we will mainly consider this model and will simply refer to it as the Potts model.
 The planar and standard Potts models are related for \(q = 2\) by \(\epsilon_2 = 2 \epsilon_1\) and for \(q=3\) by \(\epsilon_2 = \frac{3}{2} \epsilon_1\).
-For the Potts model in two dimensions the transition at the critical point is first-order for \(q > 4\) and second-order for \(q \leq 4\).
+For the Potts model in two dimensions the transition at the critical point is first-order for \(q > 4\) and second-order for \(q \leq 4\).\cite{wu:1982}
+Potts found that an earlier result by Ashkin and Teller for the discontinuities of the energy and specific heat\cite{ashkin:1943}, \(\Delta E, \Delta C\), could be generalized to show the relationship between those quantities:
+\begin{equation}
+	\sqrt{q}T \Delta E = \log(\frac{x_0}{x_1}) \Delta E.
+\end{equation}
+Therefore transitions with a continuos energy exclude the possibility of a discontinuous heat capacity.
+This does however not mean that the specific heat needs to be finite at \(T_c\).
 
-The Potts model has not been solved exactly, thus we do not know the exact values of the critical exponents.
-However, Den Nijs \todo{Read his paper.} has put forth conjectures for the values of the exponents.
-\todo{Add step here.}
-We have
-\begin{align}
-	2 - \alpha &= \frac{1}{y_t} \\
-	1 + \frac{1}{\delta} &= \frac{2}{y_h},
-\end{align}
+
+At the critical temperature the internal energy is\cite{baxter:1989,binder:1981a}
+\begin{equation}
+	u_{\mathrm{average}} = -\left(1+\frac{1}{\sqrt{q}}\right)J,
+\end{equation}
 with
 \begin{equation}
-	y_t = \frac{3(1-u)}{2-u}
+	u_{\mathrm{average}} = \frac{1}{2} (u_c^+ + u_c^-),
 \end{equation}
-and for \(q \leq 4\)
-\begin{equation}
-	0 \leq \frac{2}{\pi} \arccos(\frac{\sqrt{q}}{2}) \leq 1.
-\end{equation}
-For \(y_h\):
-\begin{equation}
-	y_h = \frac{(3-u)(5-u)}{4(2-u)}.
-\end{equation}
-The critical exponents then become:
-\begin{align}
-	\alpha &= \frac{2(1-2u)}{3(1-u)}, \\
-	\beta &= \frac{1}{12}(1 + u), \\
-	\gamma &= \frac{u^2 -4u +7}{6(1+u)}, \\
-	\delta &= \frac{(3-u)(5-u)}{1-u}, \\
-	\nu &= \frac{2-u}{3(1-u)}, \\
-	\eta &= \frac{1-u^2}{2(2-u)}.
-\end{align}
-
-
-
-At the critical temperature the internal energy is\cite{baxter:1989}
-\begin{equation}
-	u = -\left(1+\frac{1}{\sqrt{q}}\right)J.
-\end{equation}
+where \(u_c^+ = \lim_{T \to T_c^+} \langle u \rangle\) and for a second order transition \(u_c^+ = u_c^-\).
+For \(q=3\) (a second order transition) \(u_{\mathrm{average}} = -(1+\frac{1}{\sqrt{3}})J \approx - 1.577 J\).
 
 To properly define when the phase transition occurs we define the order parameter, which here is the magnetization, as
 \begin{equation}
 	m = \frac{1}{N}\abs{\sum_i^N e^{i2\pi n_i / q}},
 \end{equation}
 with the sum running over every site of the lattice, \(N\) being the number of sites and \(n_i\) being the state of the spin at site \(i\).
+This is based on the definition of the \(q\)-state Potts model as consisting of equally spaced vectors.
+It has the desired properties of being 1 when all spins on the lattice point in the same direction and being 0 when the spins are equally distributed over the possible states.
+
+The Potts model has not been solved exactly, thus we do not know the exact values of the critical exponents.
+There are however other systems in the same universality class as the Potts model.
+For \(q=2\) the model reduces to the Ising model and associated exponents (\cref{sec:ising_magnetization}).
+For \(q=3\) the model is conjectured to be equal to absorbed monolayers (two-dimensional model), a system that can be probed experimentally and gives \(\alpha = 0.36\)\cite{binder:1981a}. 
+It is also suspected that the hard hexagon model (a two-dimensional lattice model describing a gas of non-overlapping spheres, placed on a triangular lattice so no two molecules are adjacent) is in this universality class.
+This model is exactly solved and has the critical exponents\cite{baxter:1989,wu:1982}
+\begin{equation} \label{eq:potts_critical_exponents}
+	\alpha = \frac{1}{3},\ \ \beta = \frac{1}{9},\ \ \delta = 14,\ \ \nu = \frac{5}{6},\ \ \gamma = \frac{13}{9},\ \ \eta = \frac{4}{15}.
+\end{equation}
+
+While no exact solution exists, Den Nijs has put forth conjectures for the values of the exponents.\cite{nijs:1979}
+\todo{Add step here.}
+We have
+\begin{equation}
+	2 - \alpha = \frac{1}{y_t} ,\ \ \ 1 + \frac{1}{\delta} = \frac{2}{y_h},
+\end{equation}
+with the thermal and magnetic exponents:
+\begin{equation}
+	y_t = \frac{3(1-u)}{2-u},\ \ \ y_h = \frac{(3-u)(5-u)}{4(2-u)}.
+\end{equation}
+For \(q \leq 4\)\cite{wu:1982}
+\begin{equation}
+	0 \leq u = \frac{2}{\pi} \arccos(\frac{\sqrt{q}}{2}) \leq 1.
+\end{equation}
+The critical exponents then become\cite{wu:1982, baxter:1989}:
+\begin{equation}
+	\begin{aligned}[c]
+		\alpha &= \frac{2(1-2u)}{3(1-u)}, \\
+		\beta &= \frac{1}{12}(1 + u), \\
+		\gamma &= \frac{u^2 -4u +7}{6(1+u)}, \\
+	\end{aligned}
+	\ \ \
+	\begin{aligned}[c]
+		\delta &= \frac{(3-u)(5-u)}{1-u}, \\
+		\nu &= \frac{2-u}{3(1-u)}, \\
+		\eta &= \frac{1-u^2}{2(2-u)}.
+	\end{aligned}
+\end{equation}
+For \(q=3\), \(u=1/3\), and these equations reproduce \cref{eq:potts_critical_exponents}.
+
 
 % - definition planar and standard
 % - T_c
