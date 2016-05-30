@@ -87,7 +87,7 @@ def data_analysis(data_files, save=False, show_plots=True, exact_ising=True):
 
     if show_plots:
         plotting.plot_quantity_range(energies, "Energy per Site", exact=exact_energy, save=save)
-        plotting.plot_quantity_range(cluster_fractions, "Mean Cluster Size as fraction of Lattice", save=save)
+        plotting.plot_quantity_range(cluster_fractions, "Mean Cluster Size as Fraction of Lattice", save=save)
         plotting.plot_quantity_range(magnetizations, "Absolute Magnetization per Site", exact=exact_magnetization, save=save)
         plotting.plot_quantity_range(heat_capacities, "Heat Capacity per Site", exact=exact_heat, save=save)
         plotting.plot_quantity_range(magnetizabilities, "Susceptibility per Site", save=save)
@@ -98,14 +98,14 @@ def data_analysis(data_files, save=False, show_plots=True, exact_ising=True):
     return critical_temperature, critical_temperature_error, magnetizabilities, magnetizations, heat_capacities
 
 
-def find_critical_exponents(critical_temperature, critical_temperature_error, magnetizabilities, magnetizations, heat_capacities, alpha, beta, gamma, nu):
+def find_critical_exponents(critical_temperature, critical_temperature_error, magnetizabilities, magnetizations, heat_capacities, alpha, beta, gamma, nu, save=False):
     # Sanity check.
     if not 0 <= alpha < 1:
         raise ValueError("Alpha should be in the interval [0, 1), alpha is {0}".format(alpha))
     if critical_temperature and critical_temperature_error:
-        data_collapse(magnetizabilities, "Magnetizability", critical_temperature, -gamma, nu, "Gamma")
-        data_collapse(magnetizations, "Magnetization", critical_temperature, beta, nu, "Beta")
-        data_collapse(heat_capacities, "Heat Capacity", critical_temperature, alpha, nu, "Alpha")
+        data_collapse(magnetizabilities, "Magnetizability", critical_temperature, -gamma, nu, "Gamma", save=save)
+        data_collapse(magnetizations, "Magnetization", critical_temperature, beta, nu, "Beta", save=save)
+        data_collapse(heat_capacities, "Heat Capacity", critical_temperature, alpha, nu, "Alpha", save=save)
 
         critical_exponent_consistency(gamma, alpha, beta, nu)
 
@@ -328,7 +328,7 @@ def data_collapse(data_set, quantity, critical_temperature, critical_exponent1, 
     plt.legend(loc='best')
     sns.despine()
     if save:
-        plt.savefig("{0}/{1}_{2}_data_collapse.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), quantity.replace(" ", "_"), bbox_inches='tight')
+        plt.savefig("{0}/{1}_{2}_data_collapse.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())), quantity.replace(" ", "_"), bbox_inches='tight'))
 
     plt.show()
 

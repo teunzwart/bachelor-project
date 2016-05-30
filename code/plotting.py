@@ -71,7 +71,7 @@ def plot_correlation_time_range(data_range, quantity, show_plot=True, save=False
     plt.ylim(0, data_max * 1.15)
     sns.despine()
     if save:
-        plt.savefig("{0}/{1}_Autocorrelation_Time_{2}.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), quantity.replace(" ", "_"), bbox_inches='tight')
+        plt.savefig("{0}/{1}_Autocorrelation_Time_{2}.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())), quantity.replace(" ", "_"), bbox_inches='tight'))
     if show_plot:
         plt.show()
 
@@ -102,6 +102,6 @@ def plot_quantity_range(data_range, quantity, exact=None, show_plot=True, save=F
     plt.legend(loc="best")
     sns.despine()
     if save:
-        plt.savefig("{0}/{1}_{2}.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))), quantity.replace(" ", "_"), bbox_inches='tight')
+        plt.savefig("{0}/{1}_{2}.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())), quantity.replace(" ", "_"), bbox_inches='tight'))
     if show_plot:
         plt.show()
