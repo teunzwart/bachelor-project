@@ -130,7 +130,7 @@ def calculate_error(data):
     return np.std(data) / np.sqrt(len(data))
 
 
-def binning(data, quantity, show_plot=False):
+def binning(data, quantity, show_plot=False, save_plot=False):
     """
     Calculate autocorrelation time, mean and error for a quantity using the binning method.
 
@@ -148,13 +148,15 @@ def binning(data, quantity, show_plot=False):
         autocorrelation_time = 1
 
     if show_plot:
-        plt.title(r'${0}$'.format('\mathrm{Binning\ Method\ ' + quantity.replace(' ', '\ ') + 'Error, Log Scale'))
-        plt.xlabel(r'$\mathrm{Data Points}$')
+        # plt.title(r'${0}$'.format('\mathrm{' + quantity.replace(' ', '\ ') + '\ Error}'))
+        plt.xlabel(r'$\mathrm{Number\ of\ Data\ Points}$')
         plt.ylabel(r'$\mathrm{Error}$')
         plt.xlim(original_length, 1)
         plt.ylim(ymin=0, ymax=max(errors, key=lambda x: x[1])[1] * 1.15)
         plt.semilogx([e[0] for e in errors], [e[1] for e in errors], basex=2)
         sns.despine()
+        if save_plot:
+            plt.savefig("{0}/{1}_{2}_binning_error.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())), quantity.replace(" ", "_"), bbox_inches='tight'))
         plt.show()
 
     return np.mean(data), errors[-1][1], autocorrelation_time, data

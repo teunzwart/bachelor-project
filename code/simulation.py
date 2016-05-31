@@ -14,7 +14,7 @@ SIMULATION_FOLDER = "./simulation_runs"
 
 
 def single_temperature_simulation(model, algorithm, lattice_size, bond_energy, temperature, initial_temperature,
-                                  thermalization_sweeps, measurement_sweeps, show_plots=False):
+                                  thermalization_sweeps, measurement_sweeps, show_plots=False, save_plots=False):
     """Only perform the simulation. No analysis."""
     total_no_of_sweeps = thermalization_sweeps + measurement_sweeps
 
@@ -44,7 +44,7 @@ def single_temperature_simulation(model, algorithm, lattice_size, bond_energy, t
     equi_magnetization = simulation.magnetization_history[thermalization_sweeps:] / simulation.no_of_sites
 
     # E and E**2 have very similair binning error profiles. So don't plot both.
-    energy, energy_error, energy_correlation, energy_bins = analysis.binning(equi_energy, "Energy per Site", show_plots)
+    energy, energy_error, energy_correlation, energy_bins = analysis.binning(equi_energy, "Energy per Site", show_plots, save_plots)
     energy_sq, energy_sq_error, _, energy_sq_bins = analysis.binning(equi_energy**2, "Energy Squared per Site", False)
     energy_4th, energy_4th_error, _, energy_4th_bins = analysis.binning(equi_energy**4, "Energy^4 per Site", False)
 
