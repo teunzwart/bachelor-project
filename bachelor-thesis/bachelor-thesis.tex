@@ -232,7 +232,7 @@ They are:
 	(2-\eta)\nu &= \gamma \\
 	\nu d &= 2- \alpha,
 \end{align}
-with \(\nu\) the dimensionalty of the system.\cite{binney:1992,baxter:1989,landau:2015}
+with \(d\) the dimensionalty of the system.\cite{binney:1992,baxter:1989,landau:2015}
 
 
 \subsection{Universality}
@@ -568,13 +568,31 @@ We are almost always interested in the value of a thermal average of a quantity:
 \begin{equation}
 	\langle X \rangle = \sum_{\alpha}X_{\alpha}p_{\alpha},
 \end{equation}
-with \(\langle X \rangle\) a thermal average, the sum running over all configurations, each labeled by \(\alpha\), and \(p_{\alpha}\) the Gibbs probability of state \(\alpha\) in equilibrium\cite{binney:1992}:
-\begin{equation}
+with \(\langle X \rangle\) a thermal average, the sum running over all configurations, each labeled by \(\alpha\), and \(p_{\alpha}\) the Boltzmann probability of state \(\alpha\) in equilibrium\cite{binney:1992}:
+\begin{equation} \label{eq:boltzmann_probability}
 	p_{\alpha} = \frac{e^{-\beta E_{\alpha}}}{\sum_{\alpha}e^{-\beta E_{\alpha}}}.
 \end{equation}
 While for small lattices (e.g. 3 by 3) the number of states is tractable (this number scales as \(2^{N}\) for the Ising model and \(q^{N}\) for the Potts model), for larger lattices the sum can no longer be performed numerically and some clever way has to be found to sample only important states.
-% - sampling and importance sampling
+
+Instead, we randomly choose states distributed according to a probability distribution \(p_{\alpha}\).
+If we choose \(M\) random states the estimator for the quantity \(X\) is
+\begin{equation} \label{eq:estimator}
+	X_M = \frac{\sum_{i=1}^M Q_{\alpha_i}\frac{1}{p_{\alpha_i}}e^{-\beta E_{\alpha_i}}}{\sum_{j=1}^M \frac{1}{p_{\alpha_i}} e^{-\beta E_{\alpha_i}}},
+\end{equation}
+which becomes \(\langle X \rangle\) when \(M \to \infty\).
+We could set \(p_{\alpha_i}=1\) and choose all states with equal probability.
+However, often only a few states dominate the sums in \cref{eq:estimator}.
+In a large system we will then sample a huge amount of states that contribute almost nothing to the sums.
+
+To resolve this problem we can use the fact that a physical system samples the states available to it according to the Boltzmann probability .
+We therefore set \(p_{\alpha_i}\) equal to \cref{eq:boltzmann_probability}, after which the estimator becomes
+\begin{equation}
+	X_M = \frac{1}{M} \sum_{i=1}^M X_{\alpha_i}.
+\end{equation}
+This way of sampling is called importance sampling. The states that contribute the most are also sampled most often.
 % - briefly mention the origins of Monte Carlo name and Los Alamos
+
+To pick states randomly according to the Boltzmann distribution we use a Markov process.
 
 \subsection{Ergodicity and Detailed Balance}
 
@@ -597,6 +615,8 @@ The algorithm is as follows\cite{binney:1992}:
 \end{enumerate}
 The spin flip may also happen to a non-random spin simply by iterating over the rows and columns of the lattice. When studying only equilibrium dynamics, the two approaches are identical.\cite{landau:2015}
 
+To be able to change spins we need to prepare the system in a given state at the start of the simulation.
+Common choices are to
 
 % - discuss boundary conditions
 % - initial state
@@ -612,10 +632,11 @@ The Wolff algorithm goes as follows:
 \begin{enumerate}
 	\item Choose a random site on the lattice \(i\)
 	\item \label{item:wolff_step_two} Look at the neighbours of \(i\). If a neighbour \(j\) has the same spin as \(i\), add it to the cluster with probability \(P = 1 - e^{-2\beta J}\).
-	\item Repeat step \ref{item:wolff_step_two} for spin \(j\) until no more spin can be added to the cluster.
+	\item Repeat step \ref{item:wolff_step_two} for spin \(j\) until no more spins can be added to the cluster.
 	\item Flip the entire cluster.
 \end{enumerate}
-If a spin was considered during a previous step but not added to the cluster, this spin may be reconsidered for future steps.\cite{newman:1999}
+If a spin was considered during a previous step but not added to the cluster, this spin may be reconsidered for future steps.
+Spins that are already part of the cluster are not added again.\cite{newman:1999}
 % - mean cluster sizes
 \begin{figure}[h]
 	\centering
@@ -624,6 +645,29 @@ If a spin was considered during a previous step but not added to the cluster, th
 \end{figure}
 
 \subsection{Generalizing Algorithms to the Potts Model}
+Both the Metropolis and Wolff algorithm can be easily generalized to the q-state Potts model.
+For the Metropolis algorithm we again pick a random spin \(s\) in state \(i\).
+We then pick a new state \(j\) from the remaining \(q-1\) possible state for that spin such that \(s_i \neq s_j\).
+After that we proceed as described earlier.
+Just like for the Ising model the algorithm satisfies the ergodicity and detailed balance conditions.
+For large \(q\) more efficient algorithms exist, but for \(q=3\) Metropolis works fine.
+
+Near phase transitions the Potts model also experiences critical slowing down and cluster algorithms are more appropriate.
+The generalized Wolff algorithm proceeds exactly the same as in the Ising case, with the only difference being that the probability to add a spin to the cluster has become \(P_{add} = 1 - e^{-\beta J}\).
+We can see where this factor of 2 comes from by considering the \(q=2\) Potts model.
+The Hamiltonian is still
+\begin{equation}
+	H = -J\sum_{\langle i j \rangle} \delta(\sigma_i, \sigma_j),
+\end{equation}
+but for the two-state model we can rewrite this as
+\begin{equation}
+	H = -\frac{1}{2} J \sum_{\langle i j \rangle} 2 (\delta(\sigma_i, \sigma_j) - \frac{1}{2}) - \sum_{\langle i j \rangle} \frac{1}{2}J.
+\end{equation}
+These expressions are the same except for a constant, since for \(\sigma_i = \sigma_j\) \(2 (\delta(\sigma_i, \sigma_j) - \frac{1}{2}) = +1\) while it is -1 otherwise.
+We therefore have an interaction energy \(\frac{1}{2}J\) instead of \(J\), explaining the change in the addition probability.
+This algorithm again satisfies detailed balance and ergodicity.\cite{newman:1999}
+
+
 
 \section{Optimizations}
 When working in a programming language that represents data in continuous blocks of memory such as C, helical boundary condition may improve performance.
@@ -635,7 +679,31 @@ When working in a programming language that represents data in continuous blocks
 
 \chapter{Analysis of Monte Carlo Simulations}
 \section{Statistics}
+Now that we have obtained measurements for the energy and magnetization of the Ising and Potts models, we need to find a way to make these measurements statistically uncorrelated, since the state of a lattice after a single algorithm sweep may not be very different compared to the state before.
+We can calculate the autocorrelation times, but an easier and quicker approach is the Binning method.
+
 \subsection{Binning}
+
+The Binning method creates uncorrelated sequences of data from a given correlated output.
+Consider an original data set \(A_i^{(0)}\) with \(i = 1, \ldots N\) and \(N\) the number of data points in the original set.
+Iteratively combine two consecutive data points into a bin according to
+\begin{equation}
+	A_i^(l) = \frac{1}{2} \left(A_{2i-1}^{(l-1)} + A_{2i}^{(l-1)} \right) \mathrm{\ \ \ with \ \ \ } i = 1, \ldots, N_l = \frac{N}{2^l},
+\end{equation}
+with \(l\) the current binning step.
+The average in each bin is less correlated with every step while the mean remains the same.
+The error on a quantity for a given binning step is
+\begin{equation}
+	\Delta A^{(l)} = \sqrt{\frac{\mathrm{Var}(A^{(l)})}{N_l}}.
+\end{equation}
+As the binning progresses the error for each step converges to the actual error, meaning that in a plot the errors tend to a plateau (\cref{fig:binning_error_convergence}).\cite{corboz}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\textwidth]{ising_metropolis_energy_per_site_error_binning.pdf}
+	\caption{The error for the energy per site as a function of the data size. As the binning progresses the error tends to a plateau. A 10 by 10 Ising model was simulated at a temperature of 2, thermalized for 5000 sweeps and then measured for 65536 sweeps.}
+	\label{fig:binning_error_convergence}
+\end{figure}
+
 \subsection{Bootstrap and Jackknife}
 % Define chi, c here
 \section{The Binder Cumulant}
@@ -645,7 +713,7 @@ We can however define the Binder cumulant\cite{binder:1981b}
 \begin{equation}
 	U_4 = 1 - \frac{\langle m^4 \rangle}{3 \langle m^2 \rangle^2},
 \end{equation}
-which for \(L \to \infty\) becomes \(2/3\) for \((T \to 0)\) and 0 for \(T \to \infty\).\cite{landau:2015}
+which for \(L \to \infty\) becomes \(2/3\) for \(T \to 0\) and 0 for \(T \to \infty\).\cite{landau:2015}
 At the critical temperature \(U_4\) has the same value independent of the lattice size.
 Therefore the critical temperature can be found by plotting the binder cumulant for different lattice sizes and looking for the intersection (as seen in \cref{fig:ising_binder_cumulant}).
 \begin{figure}[h]
@@ -663,22 +731,21 @@ Therefore the critical temperature can be found by plotting the binder cumulant 
 The Binder cumulant intersections were found by\todo{Explain}
 This was also used to find the error
 % - Results for both Ising and Potts
-MORE SPACE IN THIS TABLE
 \begin{table}[h]
 	\renewcommand{\arraystretch}{1.5}
 	\begin{center}
 		\begin{tabular}{l | c c c c c c}
 			\hline
 			& \(\alpha\) & \(\beta\) & \(\gamma\) & \(\eta\) & \(\nu\) & \(\delta\) \\\hline
-			Den Nijs (1979, Conjecture)\cite{nijs:1979,baxter:1989} & \(\frac{1}{3}\) & \(\frac{1}{9}\) & \(\frac{13}{9}\) & \(\frac{4}{15}\) & \(\frac{5}{6}\) & 14 \\
+			Den Nijs (1979)\cite{nijs:1979,baxter:1989} & \(\frac{1}{3}\) & \(\frac{1}{9}\) & \(\frac{13}{9}\) & \(\frac{4}{15}\) & \(\frac{5}{6}\) & 14 \\
 			Blöte (1981)\cite{blote:1981} & & \\
-			Fan (2007)\cite{fan:2007} & & \\
+			Fan (2007)\cite{fan:2007} & 0.396(66) & 0.108(4) & 1.416(62) & 0.265(19) & 0.816(27) & 14.1(1.1) \\
 			Ghamei (2001)\cite{ghaemi:2001} & & \\
 			Hu (1980)\cite{hu:1980} & & \\
-			Straley (1973)\cite{straley:1973} & & \\\hline
+			Straley (1973)\cite{straley:1973} & 0.05(10)& 0.103(10) & 1.5(1) & & 0.97(5)* &\\\hline
 		\end{tabular}
 	\end{center}
-	\caption{The critical exponents of the three-state Potts model. Values marked with a star are derived from values mentioned in papers using scaling relations.}
+	\caption{The critical exponents of the three-state Potts model. Values marked with a star are derived from values mentioned in papers using scaling relations. The values quoted for Den Nijs are conjectured exact values.}
 \end{table}
 
 The critical exponent ratio is found by a chi-least-squares test, as suggested by Sandvik\cite{sandvik:2011}
@@ -691,7 +758,7 @@ The critical exponent ratio is found by a chi-least-squares test, as suggested b
 % - Measure entropy
 % - go to q=4, 5 and try to determine that the transition is first order
 % - Analysis using renormalization group methods
-
+% - different algorithms
 
 
 % Set style to abbrv to get Vancouver style citations.
