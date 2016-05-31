@@ -25,7 +25,6 @@
 \usepackage{subcaption} % Allow subcaptions.
 \usepackage[nottoc]{tocbibind} % Include references in table of contents.
 \usepackage[colorinlistoftodos]{todonotes} % Add todo notes.
-\usepackage{varioref} % Automatically put reference to page in reference. Use \vref.
 \usepackage{cleveref} % Automate "equation (...)" reference. Use \vref.
 \usepackage{commath}
 \usepackage{breqn}
@@ -89,15 +88,44 @@
 
 \tableofcontents
 
-\chapter{Introduction}
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
+Phase transitions are an everyday part of life, the most well known being the transition of water into water vapor or ice into water.
+They also occur in more abstract contexts such as networks of neurons.\cite{tkacik:2015}
 
-The code for this project may be found at \url{github.com/teunzwart/bachelor-project}, including a basic guide on how to use it.\todo{Set repository to non-private.}
+Although there are some systems that can be exactly solved and thus be studied at the phase transition, many more can not, and thus different methods have to be employed to understand the phase transitions.
+In this thesis we will use Monte Carlo simulations to study the critical behaviour of the Potts model.
+We proceed as follows:
+
+In Chapter 1 we consider exactly what properties a phase transitions has.
+We see that the behaviour of of many thermodynamic properties of a system at criticality can be described by critical exponents.
+These exponents are closely related to each other.
+We also consider the two-dimensional Ising model in zero-field, which has been solved exactly and for which the critical exponents are known.
+Then we have a look at the Potts model, its definition and some conjectures concerning properties of the phase transition.
+
+In Chapter 2 we look at the theory behind simulating lattice systems using Monte Carlo simulations.
+We define the Metropolis algorithm, what shortcomings it has and how those shortcomings can be amended by using the Wolff algorithm.
+We also consider some optimizations for the simulations.
+
+Chapter 3 lays out the way to analyze the data obtained from the simulation.
+Some care has to be taken to use statistically independent measurements.
+We also look at resampling methods used to calculate properties of the system that depend in a complicated way on the measured quantities.
+The critical temperature is found by using Binder cumulants, while critical exponents are found using finite size scaling arguments.
+
+In Chapter 4 the results of applying the methods from Chapter 3 are presented for the two-dimensional Ising and Potts models.
+The measured values for the critical temperatures and exponents agree well with the exact solution (for the Ising model) and other simulation and conjectures (for the Potts model).
+
+In Chapter 5 we summarize the results and give an outlook for further work.
+
+Due to the strong computational component of this project, a significant chunk of code is not included here.
+A repository containing Python and Cython\footnote{Cython is a Python module that allows the inclusion of static types and other C features in Python code and converts the resulting code into valid C, which is then normally compiled. Especially for-loop heavy code may become 300 times faster. See \url{cython.org}} code as well as the data sets that were generated may be found at \url{github.com/teunzwart/bachelor-project}, including a basic guide on how to use it.\todo{Set repository to non-private.}
+
+Finally I would like to thank my supervisor, dr. Phillipe Corboz, for introducing me into the field of computational physics and patiently explaining statistical analysis of Monte Carlo data.
+I would also like to thank Edan Lerner for acting as my second assessor.
 
 \chapter{Models and Critical Phenomena}
 
 \section{Phase Transitions and Critical Phenomena}
-Phase transitions are an everyday part of life, the most well known being the transition of water into water vapor or ice into water.
-They also occur in more abstract contexts such as networks of neurons.\cite{tkacik:2014}\todo{Read this paper.}
 To determine when a phase transition has taken place, we consider the order parameter.
 In ferromagnetic systems such as iron, as well as in the systems we will study in this work, this is the magnetization.
 On one side of the phase transition a non-zero magnetization is present.
@@ -286,13 +314,13 @@ Onsager \cite{onsager:1944} also calculated the values of the free energy, inter
 	u_c &= - \sqrt{2} J \approx - 1.414 J,\\
 	\frac{s_c}{k_B} &= \log{(\sqrt{2} e^{2G/\pi})} - \sqrt{2} \frac{J}{k_B T} \approx 0.306
 \end{align}
-with \(G\) Catalan's constant.\footnote{\(G = 1^{-2} - 3^{-2} + 5^{-2} - 7^{-2} \approx 0.916\)}
+with \(G\) Catalan's constant.\footnote{\(G = 1^{-2} - 3^{-2} + 5^{-2} - 7^{-2} +\ldots \approx 0.916\)}
 
-\subsection{Thermodynamic Properties of the Two-Dimensional Ising Model}\todo{Check the formula in this part with McCoy, with special attention to factors of two and exponents!}
+\subsection{Thermodynamic Properties of the Two-Dimensional Ising Model}
 From the free energy it is relatively simple to determine the specific heat per spin and the internal energy per spin by taking the appropriate derivatives of the free energy\cite{mccoy:1973}. We work with the isotropic case where \(\abs{J_1} = \abs{J_2} = J\) and \(z_1 = z_2 = z = \tanh(\beta J)\), corresponding to \cref{eq:isotropic_hamiltonian}.
 Then the expression for the free energy becomes
 \begin{dmath}
-	F = -\frac{1}{\beta} \left[\log(2\cosh^2(\beta J)) + \log(1+z^2) + \frac{1}{(2\pi)^2} \int_0^{\pi}\dif \theta_1 \int_0^{\pi} \dif \theta_2 \log(1-\frac{1}{2}k \Big\{\cos(\theta_1) + \cos(\theta_2)\Big\})\right],
+	F = -\frac{1}{\beta} \left[\log(2\cosh^2(\beta J)) + \log(1+z^2) + \frac{1}{2\pi^2} \int_0^{\pi}\dif \theta_1 \int_0^{\pi} \dif \theta_2 \log(1-\frac{1}{2}k \Big\{\cos(\theta_1) + \cos(\theta_2)\Big\})\right],
 \end{dmath}
 with
 \begin{align}
@@ -301,7 +329,7 @@ with
 \end{align}
 Performing the substitutions \(\omega_1 = \frac{1}{2}(\theta_1 + \theta_2)\) and \(\omega_2 = \frac{1}{2}(\theta_1 - \theta_2)\) and integrating over \(\omega_1\) the free energy becomes
 \begin{align}
-		F &= -\frac{1}{\beta} \left[\log(2\cosh(2\beta J)) + \frac{1}{\pi^2} \int_0^{\frac{\pi}{2}} \dif \omega_1 \int_0^{\frac{\pi}{2}} \dif \omega_2 \log(1- k \Big\{\cos(\omega_1) + \cos(\omega_2)\Big\})\right]\\
+		F &= -\frac{1}{\beta} \left[\log(2\cosh(2\beta J)) + \frac{1}{\pi^2} \int_0^{\frac{\pi}{2}} \dif \omega_1 \int_0^{\frac{\pi}{2}} \dif \omega_2 \log(1- k \cos(\omega_1)\cos(\omega_2))\right]\\
 		&= -\frac{1}{\beta} \left[\log(\sqrt{2}\cosh(2\beta J)) + \frac{1}{\pi} \int_0^{\frac{\pi}{2}} \dif \omega \log(1+\left\{1-k^2 \cos^2(\omega)\right\}^{\frac{1}{2}}) \right]
 \end{align}
 
@@ -333,7 +361,7 @@ Taking the derivative of \(k\)
 	\label{eq:k_derivative}
 	\frac{1}{k}\frac{\dif k}{\dif \beta} = \frac{2 J}{\tanh(2\beta J)} (1 - 2\tanh^2(2 \beta J)),
 \end{align}
-the internal energy per spin becomes (see \cref{fig:ising_internal_energy}) for a plot)
+the internal energy per spin becomes (see \cref{fig:ising_internal_energy} for a plot)
 \begin{align}
 	\label{eq:ising_internal_energy}
 	u = \frac{-J}{\tanh(2\beta J)} \left[1 + \frac{2}{\pi} \left\{2 \tanh^2(2\beta J) -1 \right\} K(k) \right].
@@ -394,7 +422,7 @@ At \(T_c\) the internal energy per spin \(u\) does not diverge and has the value
 The heat capacity per spin \(c\) does diverge. Using the previous expansions
 \begin{align}
 	\frac{c(T)}{k_B} &\approx \frac{8}{\pi} \left(\beta_c J\right)^2 \left[\log(\frac{4}{k^'})\right] \\
-	&= \frac{2}{\pi} \log(1 + \sqrt{2})^2 \left[-\log(\frac{T}{T_c} - 1) - 1 - \frac{\pi}{4} - \log(\frac{\sqrt{2}}{4} \log(1+\sqrt{2}))\right]
+	&= \frac{2}{\pi} \log(1 + \sqrt{2})^2 \left[-\log\abs{\frac{T}{T_c} - 1} - 1 - \frac{\pi}{4} - \log(\frac{\sqrt{2}}{4} \log(1+\sqrt{2}))\right]
 \end{align}
 and we see \(c\) diverging logarithmically as \(T \to T_c\).
 This means that the critical exponents \(\alpha = 0\) for the two-dimensional Ising model.
@@ -408,11 +436,10 @@ When we do not operate in the thermodynamic limit the partition function of the 
 
 Onsager also calculated the magnetization of the Ising model.
 On the square lattice with \(T < T_c\) and \(J_1, J_2 > 0\) the magnetization squared is equal to the spin-spin correlation function
-\todo{Is this m or M?}
 \begin{equation}
 	M^2 = \lim_{N \to \infty} \langle \sigma_{00} \sigma_{0,N} \rangle = \lim{N \to \infty} \langle \sigma_{00} \sigma_{N, N} \rangle.
 \end{equation}
-Determining the correlation function is non-trivial, but the result is\todo{Check the exponents with McCoy}
+Determining the correlation function is non-trivial, but the result is
 \begin{equation}
 	M^2 = \lim_{N \to \infty} \langle \sigma_{00} \sigma_{0,N} \rangle = \left[ \frac{(1-\alpha_1^2)(1-\alpha_2^2)}{(1-\alpha_1 \alpha_2)^2}, \right]^{1/4}
 \end{equation}
@@ -427,7 +454,7 @@ The magnetization is then (see \cref{fig:ising_magnetization} for a plot)
 \end{equation}
 When we approach the critical temperature from below we can expand around \(T_c\) and get
 \begin{equation}
-	M \propto \left[4\beta_c\left\{\frac{J_1}{\tanh(2\beta J_1)} + \frac{J_2}{\tanh(2\beta J_2)}\right\} \left\{1-\frac{T}{T_c}\right\}\right]^{1/8}.
+	M \propto \left[4\beta_c\left\{\frac{J_1}{\tanh(2\beta_c J_1)} + \frac{J_2}{\tanh(2\beta_c J_2)}\right\} \left\{1-\frac{T}{T_c}\right\}\right]^{1/8}.
 \end{equation}
 Comparing with \cref{eq:magnetization_beta} we see that \(\beta = 1/8\).\cite{wu:1982}
 
@@ -592,11 +619,11 @@ If a spin was considered during a previous step but not added to the cluster, th
 % - mean cluster sizes
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=\textwidth]{20160530161259_Mean_Cluster_Size_as_Fraction_of_Lattice.pdf}
-	\caption{The mean size as a fraction of the lattice of clusters generated with the Wolff method. During the simulation the temperature varied from 2 to 3 in steps of 0.1. The errorbars are too small to see.}
+	\includegraphics[width=\textwidth]{wolff_mean_cluster_size_as_fraction_of_lattice.pdf}
+	\caption{The mean size as a fraction of the lattice of clusters generated with the Wolff method. During the simulation the temperature varied from 2 to 3 in steps of 0.1, with a higher resolution from 2.169 to 2.369 in steps of 0.01. The errorbars are too small to see.}
 \end{figure}
 
-\section{Generalizing Algorithms to the Potts Model}
+\subsection{Generalizing Algorithms to the Potts Model}
 
 \section{Optimizations}
 When working in a programming language that represents data in continuous blocks of memory such as C, helical boundary condition may improve performance.
@@ -622,8 +649,8 @@ which for \(L \to \infty\) becomes \(2/3\) for \((T \to 0)\) and 0 for \(T \to \
 At the critical temperature \(U_4\) has the same value independent of the lattice size.
 Therefore the critical temperature can be found by plotting the binder cumulant for different lattice sizes and looking for the intersection (as seen in \cref{fig:ising_binder_cumulant}).
 \begin{figure}[h]
-	\includegraphics[width=\textwidth]{20160530161301_Binder_Cumulant.pdf}
-	\caption{The Binder cumulant for the Ising model at three different lattice sizes. The critical point occurs at approximately \(T = 2.26\). The values were acquired by simulation the lattice using the Wolff algorithm and running 65536 steps after equilibration. The temperature was varied from 2.169 to 2.369 in steps of 0.01. The errorbars are too small to see in this plot.}
+	\includegraphics[width=\textwidth]{wolff_binder_cumulant.pdf}
+	\caption{The Binder cumulant for the Ising model at three different lattice sizes. The critical point occurs at approximately \(T = 2.26\). The values were acquired by simulation the lattice using the Wolff algorithm and running 65536 steps after equilibration. During the simulation the temperature was varied from 2 to 3 in steps of 0.1, with a higher resolution from 2.169 to 2.369 in steps of 0.01. The errorbars are too small to see in this plot.}
 	\label{fig:ising_binder_cumulant}
 \end{figure}
 
@@ -636,16 +663,25 @@ Therefore the critical temperature can be found by plotting the binder cumulant 
 The Binder cumulant intersections were found by\todo{Explain}
 This was also used to find the error
 % - Results for both Ising and Potts
-\begin{center}
-	\begin{tabular}{l c c c c c c}
-		& \(\alpha\) & \(\beta\) & \(\gamma\) & \(\eta\) & \(\nu\) & \(\delta\) \\\hline
-		Blöte (1981)\cite{blote:1981} & & \\
-		Fan (2007)\cite{fan:2007} & & \\
-		Ghamei (2001)\cite{ghaemi:2001} & & \\
-		Hu (1980)\cite{hu:1980} & & \\
-		Straley (1973)\cite{straley:1973} & & \\
-	\end{tabular}
-\end{center}
+MORE SPACE IN THIS TABLE
+\begin{table}[h]
+	\renewcommand{\arraystretch}{1.5}
+	\begin{center}
+		\begin{tabular}{l | c c c c c c}
+			\hline
+			& \(\alpha\) & \(\beta\) & \(\gamma\) & \(\eta\) & \(\nu\) & \(\delta\) \\\hline
+			Den Nijs (1979, Conjecture)\cite{nijs:1979,baxter:1989} & \(\frac{1}{3}\) & \(\frac{1}{9}\) & \(\frac{13}{9}\) & \(\frac{4}{15}\) & \(\frac{5}{6}\) & 14 \\
+			Blöte (1981)\cite{blote:1981} & & \\
+			Fan (2007)\cite{fan:2007} & & \\
+			Ghamei (2001)\cite{ghaemi:2001} & & \\
+			Hu (1980)\cite{hu:1980} & & \\
+			Straley (1973)\cite{straley:1973} & & \\\hline
+		\end{tabular}
+	\end{center}
+	\caption{The critical exponents of the three-state Potts model. Values marked with a star are derived from values mentioned in papers using scaling relations.}
+\end{table}
+
+The critical exponent ratio is found by a chi-least-squares test, as suggested by Sandvik\cite{sandvik:2011}
 
 \chapter{Conclusions}
 
