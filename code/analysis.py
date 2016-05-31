@@ -17,7 +17,7 @@ import exact_ising_model as exact
 import plotting
 
 SIMULATION_FOLDER = "./simulation_runs"
-SAVE_LOCATION = "../bachelor-thesis/images"
+SAVE_LOCATION = "./analysis_images"
 
 
 

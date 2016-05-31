@@ -1,6 +1,7 @@
 sources/
 etc/
-build/
+code/build/
+code/analysis_images/
 .ipynb_checkpoints/
 *.so
 *.c

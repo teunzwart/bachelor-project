@@ -11,7 +11,7 @@ plt.rc('text', usetex=True)
 sns.set_style("ticks")
 sns.set_palette('colorblind')  # Options: deep, muted, pastel, bright, dark, colorblind
 
-SAVE_LOCATION = "../bachelor-thesis/images"
+SAVE_LOCATION = "./analysis_images"
 
 
 def show_history(data, quantity):
