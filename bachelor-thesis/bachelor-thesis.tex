@@ -202,6 +202,7 @@ Far away from \(T_c\) \(G_c^{(2)}\) can not be approximated by a power law, but 
 Fluctuations of the order parameter up to this length scale are common, but larger fluctuations are exponentially suppressed.
 The correlation length diverges as \(T_c\) is approached from above or below, according to
 \begin{equation}
+	\label{eq:correlation_length}
 	\xi \propto \abs{T-T_c}^{-\nu},
 \end{equation}
 where \(\nu\) is another critical exponent.
@@ -210,6 +211,7 @@ where \(\nu\) is another critical exponent.
 We can define three other critical exponents.
 For the magnetic susceptibility we have
 \begin{equation}
+	\label{eq:chi_divergence}
 	\chi \propto \abs{T-T_c}^{-\gamma},
 \end{equation}
 while for the magnetization of a system we have
@@ -594,6 +596,14 @@ This way of sampling is called importance sampling. The states that contribute t
 
 To pick states randomly according to the Boltzmann distribution we use a Markov process.
 
+While specific algorithms are described below, the steps of a simulation are broadly the same.
+Firstly, to be able to change spins we need to prepare the system in a given state at the start of the simulation.
+Common choices are to prepare the system in a \(T=\infty\) state where all spins are randomly aligned, or \(T=0\) where all spins are pointing in one randomly chosen direction.
+
+After every step of the algorithm, measurements are performed.
+What we can measure are the magnetization and the energy.
+The magnetization can be
+
 \subsection{Ergodicity and Detailed Balance}
 
 \section{The Metropolis Algorithm}
@@ -615,8 +625,7 @@ The algorithm is as follows\cite{binney:1992}:
 \end{enumerate}
 The spin flip may also happen to a non-random spin simply by iterating over the rows and columns of the lattice. When studying only equilibrium dynamics, the two approaches are identical.\cite{landau:2015}
 
-To be able to change spins we need to prepare the system in a given state at the start of the simulation.
-Common choices are to
+
 
 % - discuss boundary conditions
 % - initial state
@@ -624,7 +633,7 @@ Common choices are to
 
 \subsection{Critical Slowing Down} \label{sec:critical_slowing_down}
 % - correlation times
-% - dynamic exponents
+% - dynamic critical exponents
 % - dynamic universality
 
 \section{The Wolff Algorithm}
@@ -696,7 +705,12 @@ The error on a quantity for a given binning step is
 \begin{equation}
 	\Delta A^{(l)} = \sqrt{\frac{\mathrm{Var}(A^{(l)})}{N_l}}.
 \end{equation}
-As the binning progresses the error for each step converges to the actual error, meaning that in a plot the errors tend to a plateau (\cref{fig:binning_error_convergence}).\cite{corboz}
+As the binning progresses the error for each step converges to the actual error, meaning that in a plot the errors tend to a plateau (\cref{fig:binning_error_convergence}).
+
+From the binning method we can also determine the autocorrelation time:\cite{corboz}
+\begin{equation}
+	\tau = \frac{1}{2} \left( \frac{\Delta A^{(l_{max})}}{\Delta A^{(0)}} - 1 \right)
+\end{equation}
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=\textwidth]{ising_metropolis_energy_per_site_error_binning.pdf}
@@ -706,6 +720,12 @@ As the binning progresses the error for each step converges to the actual error,
 
 \subsection{Bootstrap and Jackknife}
 % Define chi, c here
+Other interesting values we would like to know are functions of measured values.
+These include the heat capacity \(c\) and magnetic susceptibility \(\chi\):
+\begin{align}
+	c &= \langle E^2 \rangle, \\
+	\chi &= \langle m^2 \rangle.
+\end{align}
 \section{The Binder Cumulant}
 Given these statistically independent measurements, one thing we may like to find is the critical temperature.
 Unfortunately we can not determine this simply by looking at the order parameter of a system and when it becomes zero, because the finite size of the simulated lattices precludes a sharp phase transition.
@@ -722,8 +742,34 @@ Therefore the critical temperature can be found by plotting the binder cumulant 
 	\label{fig:ising_binder_cumulant}
 \end{figure}
 
-% Finding the intersection
 \section{Finite Size Scaling}
+To extract the critical exponents for different models, one way to proceed is to use finites size scaling.
+The advantage of this method is that \(T_c\) does not need to be known in advance, although if a value has already been determined using the Binder cumulant, this can also be used.
+
+We derive finite size scaling for the magnetic susceptibilty.
+Close to the critical temperature we have \(\chi \propto \abs{t} ^{-\gamma}\) with \(t = (T-T_c) / T_c\) (\cref{eq:chi_divergence}).
+We also know that for the correlation length \(\xi \propto \abs{t}^{-\nu}\) in this region (\cref{eq:correlation_length}).
+Therefore we can write \(\chi \propto \xi^{\gamma /\nu}\).
+
+
+For the specific heat and magnetization similair equations can be derived:
+\begin{align}
+	\widetilde{c}(L^{1/\nu}t) &= L^{-\alpha/\nu} c, \\
+	\widetilde{m}(L^{1/\nu}t) &= L^{\beta/\nu} m.
+\end{align}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}{0.66\textwidth}
+		\includegraphics[width=\textwidth]{ising_magnetization_exact_data_collapse.pdf}
+	\end{subfigure}
+
+	\begin{subfigure}{0.66\textwidth}
+		\includegraphics[width=\textwidth]{ising_susceptibility_exact_data_collapse.pdf}
+	\end{subfigure}
+	\caption{Finite size scaling data collapses for the magnetization and the magnetic susceptibility of the Ising model. The exact values for the exponents \(\gamma = 7/4\) and \(\beta=1/8\) were used.}
+\end{figure}
+
 % - Data collapse using chi-square fitting
 % - Log-Log plots to find Ratios
 
@@ -731,6 +777,8 @@ Therefore the critical temperature can be found by plotting the binder cumulant 
 The Binder cumulant intersections were found by\todo{Explain}
 This was also used to find the error
 % - Results for both Ising and Potts
+% Finding the intersection of the Binder cumulants
+
 \begin{table}[h]
 	\renewcommand{\arraystretch}{1.5}
 	\begin{center}
@@ -742,10 +790,10 @@ This was also used to find the error
 			Fan (2007)\cite{fan:2007} & 0.396(66) & 0.108(4) & 1.416(62) & 0.265(19) & 0.816(27) & 14.1(1.1) \\
 			Ghamei (2001)\cite{ghaemi:2001} & & \\
 			Hu (1980)\cite{hu:1980} & & \\
-			Straley (1973)\cite{straley:1973} & 0.05(10)& 0.103(10) & 1.5(1) & & 0.97(5)* &\\\hline
+			Straley (1973)\cite{straley:1973} & 0.05(10)& 0.103(10) & 1.5(1)\\\hline
 		\end{tabular}
 	\end{center}
-	\caption{The critical exponents of the three-state Potts model. Values marked with a star are derived from values mentioned in papers using scaling relations. The values quoted for Den Nijs are conjectured exact values.}
+	\caption{The critical exponents of the three-state Potts model. The values quoted for Den Nijs are conjectured exact values.}
 \end{table}
 
 The critical exponent ratio is found by a chi-least-squares test, as suggested by Sandvik\cite{sandvik:2011}
@@ -753,13 +801,23 @@ The critical exponent ratio is found by a chi-least-squares test, as suggested b
 \chapter{Conclusions}
 
 \section{Further Work}
-% - More attention to autocorrelation
-% - Better definition for the order parameter
-% - Measure entropy
-% - go to q=4, 5 and try to determine that the transition is first order
-% - Analysis using renormalization group methods
-% - different algorithms
+There are severals way to expand on the work presented here.
+One way is use renormalization group techniques to calculate the critical exponents.
+This is the way most papers determine those and has as advantage that the errors on the critical exponents can be better determined.
 
+The Ising and Potts model can also be simulated on different kinds of lattice such as triangular or honeycomb lattices, to verify that the critical exponents (but not the critical temperature) remain the same, thus testing universality.
+
+The autocorrelation times were determined using the data from the binning analysis.
+The integrated autocorrelation time proved too slow to determine for large datasets.
+The correlation times could be more accurately investigated and used to establish the occurence of critical slowing down as well as determining the dynamic critical exponents.
+
+It is also possible to go to \(q > 4\) and try to determine that the phase transition becomes first order in this case.
+To that end the latent heat would have to be accurately determined, while also having to deal with phase transitions that are not sharp in finite systems.
+
+The order parameter of the Potts model was in this thesis defined based on the definition of the Potts model.
+Many papers used a slightly different definition that is does not have the property of being 1 below \(T_c\) and 0 above \(T_c\).
+
+Finally the heat-bath algorithm could be used to simulate Potts model with large \(q\) more efficiently\cite{newman:1999}, tying into trying to measure that for \(q > 4\) in two-dimensions the transitions is first-order.
 
 % Set style to abbrv to get Vancouver style citations.
 \bibliographystyle{abbrv}
