@@ -28,6 +28,7 @@
 \usepackage{cleveref} % Automate "equation (...)" reference. Use \vref.
 \usepackage{commath}
 \usepackage{breqn}
+\usepackage{adjustbox}
 
 %%% Additional options %%%
 \pagestyle{fancy} % Set header style.
@@ -40,7 +41,7 @@
 \newcommand\TITLE{Monte Carlo Simulations of the 3-State Potts Model in 2D}
 \newcommand\THESISFORM{Bachelor Project Physics and Astronomy, size 15 EC\\conducted between 29-03-2016 and xx-xx-2016}
 \newcommand\INSTITUTE{Instituut voor Theoretische Fysica Amsterdam}
-\newcommand\FACULTY{Faculteit der Natuurwetenschappen, Wiskunde en Informatice}
+\newcommand\FACULTY{Faculteit der Natuurwetenschappen, Wiskunde en Informatica}
 \newcommand\UNIVERSITY{Universiteit van Amsterdam}
 \newcommand\AUTHOR{Teun Zwart (10499873)}
 \newcommand\SUPERVISOR{dr. Phillipe Corboz}
@@ -118,7 +119,7 @@ The measured values for the critical temperatures and exponents agree well with 
 In Chapter 5 we summarize the results and give an outlook for further work.
 
 Due to the strong computational component of this project, a significant chunk of code is not included here.
-A repository containing Python and Cython\footnote{Cython is a Python module that allows the inclusion of static types and other C features in Python code and converts the resulting code into valid C, which is then normally compiled. Especially for-loop heavy code may become 300 times faster. See \url{cython.org}} code as well as the data sets that were generated may be found at \url{github.com/teunzwart/bachelor-project}, including a basic guide on how to use it.\todo{Set repository to non-private.}
+A repository containing Python and Cython\footnote{Cython is a Python module that allows the inclusion of static types and other C features in Python code and converts the resulting code into valid C, which is then normally compiled. Especially for-loop heavy code may become 300 times faster. See \url{cython.org}} code as well as the data sets that were generated may be found at \url{github.com/teunzwart/bachelor-project}, including a basic guide on how to use it.\todo{Currently this repository is still private.}
 
 Finally I would like to thank my supervisor, dr. Phillipe Corboz, for introducing me into the field of computational physics and patiently explaining statistical analysis of Monte Carlo data.
 I would also like to thank Edan Lerner for acting as my second assessor.
@@ -397,6 +398,7 @@ Using \cref{eq:k_derivative} and \cref{eq:elliptic_identity} the expression for 
 \end{align}
 
 \begin{figure}[h]
+	\centering
 	\includegraphics[width=0.66\textwidth]{ising_internal_energy.pdf}
 	\caption{The internal energy per site and the specific heat per site of the two-dimensional Ising model in zero-field. Notice the divergence of the specfic heat around \(T=T_c \approx 2.269\), which is cutoff in this graph due to the limited resolution.}
 	\label{fig:ising_internal_energy}
@@ -531,9 +533,9 @@ This model is exactly solved and has the critical exponents\cite{baxter:1989,wu:
 \end{equation}
 
 While no exact solution exists, Den Nijs has put forth conjectures for the values of the exponents.\cite{nijs:1979}
-We have
+We have\cite{wu:1982}
 \begin{equation}
-	2 - \alpha = \frac{1}{y_t} ,\ \ \ 1 + \frac{1}{\delta} = \frac{2}{y_h},
+	2 - \alpha = \frac{2}{y_t} ,\ \ \ 1 + \frac{1}{\delta} = \frac{2}{y_h},
 \end{equation}
 with the thermal and magnetic exponents:
 \begin{equation}
@@ -584,27 +586,62 @@ If we choose \(M\) random states the estimator for the quantity \(X\) is
 which becomes \(\langle X \rangle\) when \(M \to \infty\).
 We could set \(p_{\alpha_i}=1\) and choose all states with equal probability.
 However, often only a few states dominate the sums in \cref{eq:estimator}.
-In a large system we will then sample a huge amount of states that contribute almost nothing to the sums.
+In a large system we will then sample a huge amount of states that contribute almost nothing to the sums.\cite{newman:1999}
 
 To resolve this problem we can use the fact that a physical system samples the states available to it according to the Boltzmann probability .
 We therefore set \(p_{\alpha_i}\) equal to \cref{eq:boltzmann_probability}, after which the estimator becomes
 \begin{equation}
 	X_M = \frac{1}{M} \sum_{i=1}^M X_{\alpha_i}.
 \end{equation}
-This way of sampling is called importance sampling. The states that contribute the most are also sampled most often.
-% - briefly mention the origins of Monte Carlo name and Los Alamos
+This way of sampling is called importance sampling. The states that contribute the most are also sampled most often.\cite{newman:1999}
 
 To pick states randomly according to the Boltzmann distribution we use a Markov process.
+In a Markov process a system in state \(\mu\) is mutated into a state \(\nu\) with probability \(P(\mu\to\nu)\).
+These probabilities do not vary over time and only depend only on the system as it is in state \(\mu\), not as it was earlier.
+The probablities should satify
+\begin{equation}
+	\sum_{\nu} P(\mu \to \nu) = 1
+\end{equation}
+since the system is always in some state.\cite{newman:1999,landau:2015}
+To simulate a lattice over a longer time, we look at a series of Markov processes, called a Markov Chain.
 
+To sample the Boltzmann distribution and allow for the use of importance sampling any algorithms we use to simulate lattice systems have to be conform to two conditions.
+First the process has to be ergodic.
+This means that given a starting state, any other possible state of the system should be reachable in a finite number of steps.
+Second, the algorithm has to display detailed balance:
+\begin{equation}
+	p_{\mu} P(\mu \to \nu) = p_{\nu} P(\nu \to \mu).
+\end{equation}
+Under this condition the system will always tend to the desired probability distribution after a long enough time.
+
+The probability \(P\) can be decomposed into two parts:
+\begin{equation}
+	P(\mu\to\nu) = g(\mu\to\nu) A(\mu\to \nu),
+\end{equation}
+with \(g\) the selection probability, the probability of selecting the state \(\nu\) given a starting state \(\mu\) and \(A\) the acceptance ratio, how likely it is to accept a given new state.
+To effiecently sample states in as simulation the accaptance probability should be as large as possible.
+
+To simulate the systems using Markov chains we use Monte Carlo simulations.\footnote{Monte Carlo simulations have their origin in the Manhattan Project and were used after World War 2 to simulate neutron transport in hydrogen bombs.\cite{newman:1999}}
 While specific algorithms are described below, the steps of a simulation are broadly the same.
 Firstly, to be able to change spins we need to prepare the system in a given state at the start of the simulation.
-Common choices are to prepare the system in a \(T=\infty\) state where all spins are randomly aligned, or \(T=0\) where all spins are pointing in one randomly chosen direction.
+Common choices are to prepare the system in a \(T=\infty\) state where all spins are randomly aligned, or \(T=0\) where all spins are pointing in one randomly chosen direction.\cite{newman:1999}
+% TODO:Equilibration
 
 After every step of the algorithm, measurements are performed.
 What we can measure are the magnetization and the energy.
-The magnetization can be
+The magnetization for the Ising model is defined as
+\begin{equation}
+	M = \sum_i \sigma_i.
+\end{equation}
+Because in finite systems the spin symmetry is not broken, the system magnetization below \(T_c\) oscillates between the two possible extremes (for the Ising model, \cref{fig:ising_4by4_magnetization_history}).
+The mean of a long enough series of measurements will therefore always be approximatly 0.
+Therefore it is more useful to measure the absolute magnetization per spin \(m = \abs{M} / N\).
+\begin{figure}
+	\includegraphics[width=\textwidth]{ising_4by4_magnetization_history.pdf}
+	\caption{The magnetization per spin of the Ising model. As the simulation runs (this simulation was done at \(T=2\) for a 4 by 4 system) the magnetization oscillates.}
+	\label{fig:ising_4by4_magnetization_history}
+\end{figure}
 
-\subsection{Ergodicity and Detailed Balance}
 
 \section{The Metropolis Algorithm}
 The Metropolis algorithm, first published by Metropolis \textit{et al.} in 1953 \cite{metropolis:1953}, is a simple algorithm that was first used by its creators to study the dynamics of continuously displaceable hard spheres.
@@ -627,14 +664,14 @@ The spin flip may also happen to a non-random spin simply by iterating over the 
 
 
 
-% - discuss boundary conditions
-% - initial state
-
+% TODO:discuss boundary conditions
+% TODO:initial state
+% TODO:Define sweep
 
 \subsection{Critical Slowing Down} \label{sec:critical_slowing_down}
-% - correlation times
-% - dynamic critical exponents
-% - dynamic universality
+% TODO:correlation times
+% TODO:dynamic critical exponents
+% TODO:dynamic universality
 
 \section{The Wolff Algorithm}
 The Wolff algorithm goes as follows:
@@ -646,7 +683,7 @@ The Wolff algorithm goes as follows:
 \end{enumerate}
 If a spin was considered during a previous step but not added to the cluster, this spin may be reconsidered for future steps.
 Spins that are already part of the cluster are not added again.\cite{newman:1999}
-% - mean cluster sizes
+% TODO:mean cluster sizes
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=\textwidth]{wolff_mean_cluster_size_as_fraction_of_lattice.pdf}
@@ -670,7 +707,7 @@ The Hamiltonian is still
 \end{equation}
 but for the two-state model we can rewrite this as
 \begin{equation}
-	H = -\frac{1}{2} J \sum_{\langle i j \rangle} 2 (\delta(\sigma_i, \sigma_j) - \frac{1}{2}) - \sum_{\langle i j \rangle} \frac{1}{2}J.
+	H = -\frac{1}{2} J \sum_{\langle i j \rangle} 2 \left(\delta(\sigma_i, \sigma_j\right) - \frac{1}{2}) - \sum_{\langle i j \rangle} \frac{1}{2}J.
 \end{equation}
 These expressions are the same except for a constant, since for \(\sigma_i = \sigma_j\) \(2 (\delta(\sigma_i, \sigma_j) - \frac{1}{2}) = +1\) while it is -1 otherwise.
 We therefore have an interaction energy \(\frac{1}{2}J\) instead of \(J\), explaining the change in the addition probability.
@@ -680,16 +717,15 @@ This algorithm again satisfies detailed balance and ergodicity.\cite{newman:1999
 
 \section{Optimizations}
 When working in a programming language that represents data in continuous blocks of memory such as C, helical boundary condition may improve performance.
-% - obvious optimizations for E and m
-% - caching exponents
-
-\section{Systemic errors}
+% TODO:obvious optimizations for E and m
+% TODO:caching exponents
 
 
 \chapter{Analysis of Monte Carlo Simulations}
 \section{Statistics}
 Now that we have obtained measurements for the energy and magnetization of the Ising and Potts models, we need to find a way to make these measurements statistically uncorrelated, since the state of a lattice after a single algorithm sweep may not be very different compared to the state before.
-We can calculate the autocorrelation times, but an easier and quicker approach is the Binning method.
+Because typical methods for error calculation assume uncorrelated samples, those methos do not work.
+We can calculate the autocorrelation times, and only sample once every two correlation times, but an easier and quicker approach is the Binning method.
 
 \subsection{Binning}
 
@@ -703,13 +739,14 @@ with \(l\) the current binning step.
 The average in each bin is less correlated with every step while the mean remains the same.
 The error on a quantity for a given binning step is
 \begin{equation}
+	\label{eq:basic_error}
 	\Delta A^{(l)} = \sqrt{\frac{\mathrm{Var}(A^{(l)})}{N_l}}.
 \end{equation}
 As the binning progresses the error for each step converges to the actual error, meaning that in a plot the errors tend to a plateau (\cref{fig:binning_error_convergence}).
 
 From the binning method we can also determine the autocorrelation time:\cite{corboz}
 \begin{equation}
-	\tau = \frac{1}{2} \left( \frac{\Delta A^{(l_{max})}}{\Delta A^{(0)}} - 1 \right)
+	\tau = \frac{1}{2} \left[\left( \frac{\Delta A^{(l_{max})}}{\Delta A^{(0)}} \right)^2- 1 \right]
 \end{equation}
 \begin{figure}[h]
 	\centering
@@ -719,13 +756,36 @@ From the binning method we can also determine the autocorrelation time:\cite{cor
 \end{figure}
 
 \subsection{Bootstrap and Jackknife}
-% Define chi, c here
 Other interesting values we would like to know are functions of measured values.
 These include the heat capacity \(c\) and magnetic susceptibility \(\chi\):
 \begin{align}
-	c &= \langle E^2 \rangle, \\
+	c &= \frac{\beta^2}{N} \left(\langle E^2 \rangle - \langle E \rangle^2 \right), \\
 	\chi &= \langle m^2 \rangle.
 \end{align}
+These quantities are not defined at a single instant of the simulation, but instead depend on time averages of the energy or magnetization.
+
+To still be able to calculate errors on the quantities we use resampling methods
+
+The first method is the bootstrap method.
+For conreteness we consider the specific heat.
+Given a list of \(n\) measurements of the energy (and the energy squared), we randomly choose \(n\) values, allowing duplicates.
+Strictly speaking these measurements should be independent, but for the bootstrap method this does not matter.
+We can simply use measurements made after every sweep of the lattice.
+With the \(n\) samples we calculate the desired quantity.
+Then we repeat the random sampling a number of times (1000 should be enough).
+With those 1000 values of the heat capacity, we can use basic methods to calculate errors, such as \cref{eq:basic_error}.\cite{newman:1999}
+
+We can also use the jackknife method.
+Here we do need statistically uncorrelated samples.
+With these samples we calculate the heat capacity \(c_0\).
+Then, we calculate the heat capacity \(c_i\) for which we took out the \(i\)-th measurement from our data set.
+Replacing it we next remove the \(i+1\)-th measurement, and so on.\cite{newman:1999}
+The error becomes\cite{corboz}
+\begin{equation}
+	\Delta c = \sqrt{M-1}\left( \frac{1}{M} \sum_{i=1}^M \left[c_i^2 - c^2\right] \right)^{1/2}
+\end{equation}
+
+
 \section{The Binder Cumulant}
 Given these statistically independent measurements, one thing we may like to find is the critical temperature.
 Unfortunately we can not determine this simply by looking at the order parameter of a system and when it becomes zero, because the finite size of the simulated lattices precludes a sharp phase transition.
@@ -743,7 +803,7 @@ Therefore the critical temperature can be found by plotting the binder cumulant 
 \end{figure}
 
 \section{Finite Size Scaling}
-To extract the critical exponents for different models, one way to proceed is to use finites size scaling.
+To extract the critical exponents for different models, one way to proceed is to use finite size scaling.
 The advantage of this method is that \(T_c\) does not need to be known in advance, although if a value has already been determined using the Binder cumulant, this can also be used.
 
 We derive finite size scaling for the magnetic susceptibilty.
@@ -751,50 +811,96 @@ Close to the critical temperature we have \(\chi \propto \abs{t} ^{-\gamma}\) wi
 We also know that for the correlation length \(\xi \propto \abs{t}^{-\nu}\) in this region (\cref{eq:correlation_length}).
 Therefore we can write \(\chi \propto \xi^{\gamma /\nu}\).
 
+The finite size of simulated systems introduced a cutoff for the correlation length equal to the system size \(L\), also cutting off the divergence of the susceptibility.
+If \(\xi\) is the correlation lenght of the infinite system, the cutoff occurs when \(\xi > L\).
+For \(\xi \ll L\) \(\chi\) should be the same as in the infinite system.
+We can then write for \(\chi\):
+\begin{equation}\label{eq:finite_size_chi}
+	\chi = \xi^{\gamma/\nu} \chi_0(L/\xi).
+\end{equation}
+where \(\chi_0\) has the properties
+\begin{align}
+	\chi_0(L/\xi) &= \mathrm{constant}\ \ \ \ \mathrm{for}\ L \gg \xi,\\
+	\chi_0(L/\xi) &\propto (L/\xi)^{\gamma/\nu}\ \ \ \ \mathrm{as}\ L/\xi \to 0.
+\end{align}
+Because we do not know the correlation length of the infinite system it is more useful to define
+\begin{equation}
+	\tilde{\chi} = (L/\xi)^{-\gamma} \chi_0((L/\xi)^{\nu}),
+\end{equation}
+with which we can rewrite \cref{eq:finite_size_chi} to get
+\begin{equation}
+	\chi = L^{\gamma/\nu}\tilde{\chi}(L^{1/\nu}t).
+\end{equation}
+We call \(\tilde{\chi}\) the scaling function.
+All dependence on system size has been extracted from the scaling function, meaning that its value is the same for all \(L\) when close to the critical temperature.
+Given a set off data for the susceptibility, we can calculate the scaling function for different \(\gamma\), \(\nu\) and \(T_c\).
+If the values are correct, the data collapses onto a single curve around \(t=0\) when plotted (\cref{fig:ising_data_collapse}).
 
-For the specific heat and magnetization similair equations can be derived:
+For the specific heat and magnetization similar equations can be derived\cite{newman:1999}:
 \begin{align}
 	\widetilde{c}(L^{1/\nu}t) &= L^{-\alpha/\nu} c, \\
 	\widetilde{m}(L^{1/\nu}t) &= L^{\beta/\nu} m.
 \end{align}
 
+If \(T_c\) is known, simulations for different system sizes at \(T_c\) can be performed and a log-log plot of the data can be created to determine ratios of critical exponents.
+For this we use that at the critical point \(L = \xi\) and the susceptibility scales as \(\chi \propto L^{\gamma/\nu}\).
+Then the value of the susceptibility scales with system size as
+\begin{equation}
+	\log(\chi) = \gamma/\nu \log(L) + \mathrm{constant}.
+\end{equation}
+Plotting the values, the slope of the line passing through the points, which can be determined by a linear fit, gives the ratio \(\gamma/\nu\) (see \cref{fig:ising_magnetizabilities_loglog_plot}).\cite{corboz}
+
 \begin{figure}[h]
 	\centering
-	\begin{subfigure}{0.66\textwidth}
+	\includegraphics[width=\textwidth]{ising_magnetizabilities_loglog_plot.pdf}
+	\caption{Log-Log plot of the magnetic susceptibility of the Ising model at \(T_c\) for systems of size 10, 20, 40, 60 and 80.}
+	\label{fig:ising_magnetizabilities_loglog_plot}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}{\textwidth}
 		\includegraphics[width=\textwidth]{ising_magnetization_exact_data_collapse.pdf}
 	\end{subfigure}
 
-	\begin{subfigure}{0.66\textwidth}
+	\begin{subfigure}{\textwidth}
 		\includegraphics[width=\textwidth]{ising_susceptibility_exact_data_collapse.pdf}
 	\end{subfigure}
-	\caption{Finite size scaling data collapses for the magnetization and the magnetic susceptibility of the Ising model. The exact values for the exponents \(\gamma = 7/4\) and \(\beta=1/8\) were used.}
+	\caption{Finite size scaling data collapse for the magnetization and the magnetic susceptibility of the Ising model. The exact values for the exponents \(\gamma = 7/4\), \(\nu=1\) and \(\beta=1/8\) were used.}
+	\label{fig:ising_data_collapse}
 \end{figure}
 
-% - Data collapse using chi-square fitting
-% - Log-Log plots to find Ratios
 
 \chapter{Results}
 The Binder cumulant intersections were found by\todo{Explain}
 This was also used to find the error
-% - Results for both Ising and Potts
-% Finding the intersection of the Binder cumulants
+% TODO:Finding the intersection of the Binder cumulants
+% TODO:Finite size systemic errors
+\section{The Ising Model at Criticality}
+
+The critical temperature agrees well with Onsager's result\cite{onsager:1944}, as well as those of Ghaemi \textit{et al.}\cite{ghaemi:2001}.
+\section{The Potts Model at Criticality}
 
 \begin{table}[h]
-	\renewcommand{\arraystretch}{1.5}
-	\begin{center}
+	\begin{adjustbox}{center}
+		\centering
+		\renewcommand{\arraystretch}{1.5}
 		\begin{tabular}{l | c c c c c c}
 			\hline
 			& \(\alpha\) & \(\beta\) & \(\gamma\) & \(\eta\) & \(\nu\) & \(\delta\) \\\hline
 			Den Nijs (1979)\cite{nijs:1979,baxter:1989} & \(\frac{1}{3}\) & \(\frac{1}{9}\) & \(\frac{13}{9}\) & \(\frac{4}{15}\) & \(\frac{5}{6}\) & 14 \\
-			Blöte (1981)\cite{blote:1981} & & \\
+			Blöte (1981)\cite{blote:1981} & \(\sim\frac{1}{3}\) & & & & & \(\sim14\)\\
 			Fan (2007)\cite{fan:2007} & 0.396(66) & 0.108(4) & 1.416(62) & 0.265(19) & 0.816(27) & 14.1(1.1) \\
-			Ghamei (2001)\cite{ghaemi:2001} & & \\
-			Hu (1980)\cite{hu:1980} & & \\
-			Straley (1973)\cite{straley:1973} & 0.05(10)& 0.103(10) & 1.5(1)\\\hline
+			Hu (1980)\cite{hu:1980} & 0.3071 & \\
+			Straley (1973)\cite{straley:1973} & 0.05(10)& 0.103(10) & 1.5(1)\\
+			Binder (1981)\cite{binder:1981a} & \(\sim0.4\) & \(\sim0.1\) & \(\sim1.45\)\\\hline
 		\end{tabular}
-	\end{center}
-	\caption{The critical exponents of the three-state Potts model. The values quoted for Den Nijs are conjectured exact values.}
+	\end{adjustbox}
+	\caption{The critical exponents of the three-state Potts model. The values quoted for Den Nijs are conjectured exact values. For Blöte the results had to be read from a graphs, and thus do not have error margins. Hu did not report any error margins.
+	Table VI in \cite{wu:1982} contains more values for the critical exponents, from both numerical and analytical methods.}
 \end{table}
+
+The critical temperature agrees well with the result of Ghaemi \textit{et al.}\cite{ghaemi:2001}, as well as those of Fan \textit{et al.} of \(T_c = 0.9968(20)\).
 
 The critical exponent ratio is found by a chi-least-squares test, as suggested by Sandvik\cite{sandvik:2011}
 
@@ -815,7 +921,7 @@ It is also possible to go to \(q > 4\) and try to determine that the phase trans
 To that end the latent heat would have to be accurately determined, while also having to deal with phase transitions that are not sharp in finite systems.
 
 The order parameter of the Potts model was in this thesis defined based on the definition of the Potts model.
-Many papers used a slightly different definition that is does not have the property of being 1 below \(T_c\) and 0 above \(T_c\).
+Many papers used a slightly different definition that is does not have the property of being 1 below \(T_c\) and 0 above \(T_c\).\cite{binder:1981a,wu:1982,fan:2007}
 
 Finally the heat-bath algorithm could be used to simulate Potts model with large \(q\) more efficiently\cite{newman:1999}, tying into trying to measure that for \(q > 4\) in two-dimensions the transitions is first-order.
 
