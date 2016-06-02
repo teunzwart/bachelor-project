@@ -14,11 +14,13 @@ sns.set_palette('colorblind')  # Options: deep, muted, pastel, bright, dark, col
 SAVE_LOCATION = "./analysis_images"
 
 
-def show_history(data, quantity):
+def show_history(data, quantity, save_plot=False):
     """Plot a quantity for a run at a given temperature."""
-    plt.xlabel(r'$Monte Carlo Sweeps$')
+    plt.xlabel(r'$\mathrm{Monte\ Carlo\ Sweeps}$')
     plt.ylabel(r'${0}$'.format('\mathrm{' + quantity.replace(' ', '\ ') + '}'))
     plt.plot(data)
+    if save_plot:
+        plt.savefig("{0}/{1}_{2}_history.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())), quantity.lower()), bbox_inches='tight')
     plt.show()
 
 
@@ -33,7 +35,7 @@ def show_lattice(lattice, lattice_size, save=False):
     plt.gca().grid(False)
     plt.imshow(lattice, interpolation="nearest")
     if save:
-        plt.savefig("{0}/{1}_{2}_by_{2}_Lattice.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time())), lattice_size), bbox_inches='tight')
+        plt.savefig("{0}/{1}_{2}_by_{2}_Lattice.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())), lattice_size), bbox_inches='tight')
     plt.show()
 
 

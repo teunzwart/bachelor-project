@@ -14,7 +14,7 @@ SIMULATION_FOLDER = "./simulation_runs"
 
 
 def single_temperature_simulation(model, algorithm, lattice_size, bond_energy, temperature, initial_temperature,
-                                  thermalization_sweeps, measurement_sweeps, show_plots=False, save_plots=False):
+                                  thermalization_sweeps, measurement_sweeps, show_plots=False, save_plots=False, show_values=True):
     """Only perform the simulation. No analysis."""
     total_no_of_sweeps = thermalization_sweeps + measurement_sweeps
 
@@ -64,6 +64,10 @@ def single_temperature_simulation(model, algorithm, lattice_size, bond_energy, t
              "mag": mag, "mag error": mag_error, "mag bins": mag_bins,
              "mag sq": mag_sq, "mag sq error": mag_sq_error, "mag sq bins": mag_sq_bins,
              "mag fourth": mag_4th, "mag 4th error": mag_4th_error, "mag 4th bins": mag_4th_bins})
+
+    if show_values:
+        print("Energy per site: {0} +/- {1}".format(energy, energy_error))
+        print("\n")
 
     return data
 
@@ -149,7 +153,7 @@ def argument_parser():
     )
     parser.add_argument(
         "--nosave",
-        help="Do not save output in a binary pickle file, default is true",
+        help="Do not save output in a binary pickle file, default behaviour is that it is saved",
         action="store_false"
     )
     arguments = parser.parse_args()

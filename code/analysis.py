@@ -100,12 +100,12 @@ def data_analysis(data_files, save=False, show_plots=True, exact_ising=True):
 
 def find_critical_exponents(critical_temperature, critical_temperature_error, magnetizabilities, magnetizations, heat_capacities, alpha, beta, gamma, nu, save=False):
     # Sanity check.
-    if not 0 <= alpha < 1:
-        raise ValueError("Alpha should be in the interval [0, 1), alpha is {0}".format(alpha))
+    # if not 0 <= alpha < 1:
+    #     raise ValueError("Alpha should be in the interval [0, 1), alpha is {0}".format(alpha))
     if critical_temperature and critical_temperature_error:
-        data_collapse(magnetizabilities, "Magnetizability", critical_temperature, -gamma, nu, "Gamma", save=save)
+        data_collapse(magnetizabilities, "Susceptibility", critical_temperature, -gamma, nu, "Gamma", save=save)
         data_collapse(magnetizations, "Magnetization", critical_temperature, beta, nu, "Beta", save=save)
-        data_collapse(heat_capacities, "Heat Capacity", critical_temperature, alpha, nu, "Alpha", save=save)
+        data_collapse(heat_capacities, "Heat Capacity", critical_temperature, -alpha, nu, "Alpha", save=save)
 
         critical_exponent_consistency(gamma, alpha, beta, nu)
 
@@ -263,10 +263,11 @@ def find_binder_intersection(data):
 
 
 def chi_squared_data_collapse(data_set, critical_temperature,
-                              critical_temperature_error, ratio, ratio_error, second_exponent_name, show_plots=False):
+                              critical_temperature_error, ratio, ratio_error, second_exponent_name, show_plots=False, save_plot=False):
     """Find critical exponents through an iterative data fit."""
     best_nus = []
     best_second_exponents = []
+    current_time = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
     for k in [-1, 0, 1]:
         for p in [-1, 0, 1]:
             lowest_residual = np.inf
@@ -305,6 +306,8 @@ def chi_squared_data_collapse(data_set, critical_temperature,
                             sns.despine()
                             plt.legend(loc='best')
                             plt.plot(x_new, y_new)
+                            if save_plot:
+                                plt.savefig("{0}/{1}_{2}_data_collapse.pdf".format(SAVE_LOCATION, current_time, '{0}_over_nu'.format(second_exponent_name), bbox_inches='tight'))
                             plt.show()
             best_nus.append(best_nu)
             best_second_exponents.append(best_second_exponent)
@@ -314,6 +317,7 @@ def chi_squared_data_collapse(data_set, critical_temperature,
 
 
 def data_collapse(data_set, quantity, critical_temperature, critical_exponent1, nu, name1, save=False):
+    print(critical_exponent1, "hi")
     scaling_functions = {}
     for lattice_size, data in sorted(data_set.items()):
         for v in data:
@@ -326,14 +330,13 @@ def data_collapse(data_set, quantity, critical_temperature, critical_exponent1, 
         plt.ylabel(r'${0}$'.format('\mathrm{' + quantity.replace(' ', '\ ') + '\ Scaling\ Function}'))
         sns.despine()
         plt.plot([k[0] for k in data], [k[1] for k in data], linestyle='None', marker='o', label=r"${0}$".format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"))
-    print("{0} = {1}, nu = {2}".format(name1, abs(critical_exponent1), nu))
+    print("{0} = {1}, nu = {2}".format(name1, critical_exponent1, nu))
     plt.legend(loc='best')
     sns.despine()
     if save:
         plt.savefig("{0}/{1}_{2}_data_collapse.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())), quantity.replace(" ", "_"), bbox_inches='tight'))
 
     plt.show()
-
 
 
 def loglog_exponent_finding(data_set, quantity, save=False):
