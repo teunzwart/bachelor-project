@@ -93,7 +93,7 @@ The values found for the critical exponents as well as the critical temperature 
 \section*{Populaire Samenvatting}
 Faseovergangen zien we overal om ons heen. Water verandert in stoom, of bevriest tot ijs.
 Bij een faseovergang zien we dat een bepaald getal, dat we de orde parameter noemen, een sprong maakt.
-Bij een magneet is dat bijvoorbeeld de magnetizatie, die een waarde heeft bij lage temperaturen maar 0 wordt als de magneet wordt opgewarmd tot boven zijn Curie temperatuur.
+Bij een magneet is dat bijvoorbeeld de magnetisatie, die een waarde heeft bij lage temperaturen maar 0 wordt als de magneet wordt opgewarmd tot boven zijn Curie temperatuur.
 
 In dit verslag beschrijf ik de faseovergang van twee modellen.
 Het Ising model beschrijft een rooster waarbij op ieder roosterpunt een
@@ -106,24 +106,24 @@ Deze simulaties zijn bijvoorbeeld ook nuttig bij het
 
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
-Phase transitions are an everyday part of life, the most well known being the transition of water into water vapor or ice into water.
+Phase transitions are an everyday part of life, the most well known being the transition of water into water vapour or ice into water.
 They also occur in more abstract contexts such as networks of neurons.\cite{tkacik:2015}
 
-Although there are some systems that can be exactly solved and thus be studied at the phase transition, many more can not, and thus different methods have to be employed to understand the phase transitions.
+Although there are some systems that can be exactly solved and thus be studied at the phase transition, many more cannot, and thus different methods have to be employed to understand the phase transitions.
 In this thesis we will use Monte Carlo simulations to study the critical behaviour of the Potts model.
 We proceed as follows:
 
 In Chapter 1 we consider exactly what properties a phase transitions has.
-We see that the behaviour of of many thermodynamic properties of a system at criticality can be described by critical exponents.
+We see that the behaviour of many thermodynamic properties of a system at criticality can be described by critical exponents.
 These exponents are closely related to each other.
 We also consider the two-dimensional Ising model in zero-field, which has been solved exactly and for which the critical exponents are known.
 Then we have a look at the Potts model, its definition and some conjectures concerning properties of the phase transition.
 
 In Chapter 2 we look at the theory behind simulating lattice systems using Monte Carlo simulations.
 We define the Metropolis algorithm, what shortcomings it has and how those shortcomings can be amended by using the Wolff algorithm.
-We also consider some optimizations for the simulations.
+We also consider some optimisations for the simulations.
 
-Chapter 3 lays out the way to analyze the data obtained from the simulation.
+Chapter 3 lays out the way to analyse the data obtained from the simulation.
 Some care has to be taken to use statistically independent measurements.
 We also look at resampling methods used to calculate properties of the system that depend in a complicated way on the measured quantities.
 The critical temperature is found by using Binder cumulants, while critical exponents are found using finite size scaling arguments.
@@ -131,7 +131,7 @@ The critical temperature is found by using Binder cumulants, while critical expo
 In Chapter 4 the results of applying the methods from Chapter 3 are presented for the two-dimensional Ising and Potts models.
 The measured values for the critical temperatures and exponents agree well with the exact solution (for the Ising model) and other simulation and conjectures (for the Potts model).
 
-In Chapter 5 we summarize the results and give an outlook for further work.
+In Chapter 5 we summarise the results and give an outlook for further work.
 
 Due to the strong computational component of this project, a significant chunk of code is not included here.
 A repository containing Python and Cython\footnote{Cython is a Python module that allows the inclusion of static types and other C features in Python code and converts the resulting code into valid C, which is then normally compiled. Especially for-loop heavy code may become 300 times faster. See \url{cython.org}} code as well as the data sets that were generated may be found at \url{github.com/teunzwart/bachelor-project}, including a basic guide on how to use it.\todo{Currently this repository is still private.}
@@ -143,33 +143,33 @@ I would also like to thank Edan Lerner for acting as my second assessor.
 
 \section{Phase Transitions and Critical Phenomena}
 To determine when a phase transition has taken place, we consider the order parameter.
-In ferromagnetic systems such as iron, as well as in the systems we will study in this work, this is the magnetization.
-On one side of the phase transition a non-zero magnetization is present.
-As the iron is heated, it moves past its Curie temperature and the magnetization does become zero.
+In ferromagnetic systems such as iron, as well as in the systems we will study in this work, this is the magnetisation.
+On one side of the phase transition a non-zero magnetisation is present.
+As the iron is heated, it moves past its Curie temperature and the magnetisation does become zero.
 More generally we consider an order parameter \(\phi\) which is a quantity that is non-zero on one side of the phase transition, and vanished on the other side. Usually the order parameter is zero on the high temperature side of the phase transition. (See \cref{fig:ising_magnetization}. The Ising model is considered in more detail in \cref{sec:ising_model}.)
 The temperature at which the order parameter becomes zero is the critical temperature \(T_c\).
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.66\textwidth]{ising_magnetization}
-	\caption{The magnetization of the two-dimensional Ising model. Notice how the magnetization is finite on one side of the phase transition, but zero on the other side.}
+	\caption{The magnetisation of the two-dimensional Ising model. Notice how the magnetisation is finite on one side of the phase transition, but zero on the other side.}
 	\label{fig:ising_magnetization}
 \end{figure}
 
 When we consider phase transitions, we distinguish two different kinds.
 The phase transition associated with freezing water is what is called first-order.
 As the critical temperature is crossed the water molecules move from a disordered phase into an ordered crystal phase.
-As this happens, energy is emmited in the form of latent heat.
+As this happens, energy is emitted in the form of latent heat.
 This is defined as
 \begin{equation}
 	\label{eq:latent_heat}
 	l = \int_{T_c-}^{T_c+} c(T) \dif T,
 \end{equation}
 with \(l\) the latent heat and \(c(T)\) the heat capacity of the system.
-In first order transition the order parameter is discontinous at \(T_c\).\cite{binney:1992}
+In first order transition the order parameter is discontinuous at \(T_c\).\cite{binney:1992}
 In the rest of this work we only consider second-order transitions, for which the latent heat is zero and the order parameter, but not the rate of change of the order parameter is continuous at \(T_c\).
 
 While the latent heat of a transition may be zero, this need not be the case for the heat capacity of the system or other thermodynamic properties such as the magnetic susceptibility.
-Often the heat capacity diverces as \(c \propto \abs{T-T_c}^{-\alpha}\).
+Often the heat capacity diverges as \(c \propto \abs{T-T_c}^{-\alpha}\).
 We call \(\alpha\) a critical exponent.
 Because for continuous phase transitions the latent heat has to vanish by definition, \(\alpha\) has to be smaller than 1, because otherwise the integral of \cref{eq:latent_heat} diverges.
 No divergence occurs if \(\alpha < 0\).
@@ -230,13 +230,13 @@ For the magnetic susceptibility we have
 	\label{eq:chi_divergence}
 	\chi \propto \abs{T-T_c}^{-\gamma},
 \end{equation}
-while for the magnetization of a system we have
+while for the magnetisation of a system we have
 \begin{equation}
 	\label{eq:magnetization_beta}
 	m \propto \abs{T-T_c}^{\beta} \mathrm{\ \ \ \ \ T \to T_c\ from\ below}.
 \end{equation}
-Finally we can define a critical exponent for the magnetization in a non-zero magnetic field (the previous five critical exponents assumed \(B=0\)).
-Precicesly at \(T_c\)
+Finally we can define a critical exponent for the magnetisation in a non-zero magnetic field (the previous five critical exponents assumed \(B=0\)).
+Precisely at \(T_c\)
 \begin{equation}
 	m \propto B^{1/\delta} \mathrm{\ \ \ \ \ B \to 0}.
 \end{equation}
@@ -250,7 +250,7 @@ They are:
 	(2-\eta)\nu &= \gamma \\
 	\nu d &= 2- \alpha,
 \end{align}
-with \(d\) the dimensionalty of the system.\cite{binney:1992,baxter:1989,landau:2015}
+with \(d\) the dimensionality of the system.\cite{binney:1992,baxter:1989,landau:2015}
 
 
 \subsection{Universality}
@@ -326,7 +326,7 @@ In the case where interaction strength in both the \(x\)- and \(y\)-directions i
 	1 &= \sinh(2\beta J) \to \\
 	k_B T_c &= \frac{2}{\text{asinh}(1)}J = \frac{2}{\log(1+\sqrt{2})}J \approx 2.269 J
 \end{align}
-Onsager \cite{onsager:1944} also calculated the values of the free energy, internal energy and entropy at the critical temperature\footnote{We use lowercase letters to denote the thermodynamic properties of a single spin on the lattice and uppercase letters when refering to the entire lattice. Taking as an example the internal energy, \(U/N = u\) with \(N\) the number of spins on the lattice.}:
+Onsager \cite{onsager:1944} also calculated the values of the free energy, internal energy and entropy at the critical temperature\footnote{We use lowercase letters to denote the thermodynamic properties of a single spin on the lattice and uppercase letters when referring to the entire lattice. Taking as an example the internal energy, \(U/N = u\) with \(N\) the number of spins on the lattice.}:
 \begin{align}
 	-\frac{f_c}{k_B T} &= \frac{1}{2} \log{2} + \frac{2}{\pi} G \approx 0.929, \\
 	u_c &= - \sqrt{2} J \approx - 1.414 J,\\
@@ -415,14 +415,14 @@ Using \cref{eq:k_derivative} and \cref{eq:elliptic_identity} the expression for 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.66\textwidth]{ising_internal_energy.pdf}
-	\caption{The internal energy per site and the specific heat per site of the two-dimensional Ising model in zero-field. Notice the divergence of the specfic heat around \(T=T_c \approx 2.269\), which is cutoff in this graph due to the limited resolution.}
+	\caption{The internal energy per site and the specific heat per site of the two-dimensional Ising model in zero-field. Notice the divergence of the specific heat around \(T=T_c \approx 2.269\), which is cutoff in this graph due to the limited resolution.}
 	\label{fig:ising_internal_energy}
 \end{figure}
 
 \subsection{The Ising Model around \(T_c\)}
 
 Given that we would like to know how the Ising model behaves around \(T_c\), we need to expand the expressions for the internal energy and the heat capacity around this temperature.
-When \(T \approx T_c\) the argument \(k\) as defined in \cref{eq:elliptic_argument} of the elliptic integrals in the definitions \cref{eq:ising_internal_energy} and \cref{eq:ising_heat_capacity} becomes approximatly 1. More precisily
+When \(T \approx T_c\) the argument \(k\) as defined in \cref{eq:elliptic_argument} of the elliptic integrals in the definitions \cref{eq:ising_internal_energy} and \cref{eq:ising_heat_capacity} becomes approximately 1. More precisely
 \begin{align}
 	k &\approx 1 - 4 \beta_c^2 J^2 (\frac{T}{T_c} - 1)^2, \\
 	k^' &\approx 2 \sqrt{2} \beta_c J (\frac{T}{T_c} - 1)
@@ -451,10 +451,10 @@ Note that the sharp phase transition as described here only occurs when the latt
 When we do not operate in the thermodynamic limit the partition function of the Ising model is analytic for all \(T\) and has a maximum but no divergence at \(T_c\).\cite{onsager:1944}
 
 
-\subsection{Magnetization of the Ising Model}\label{sec:ising_magnetization}
+\subsection{Magnetisation of the Ising Model}\label{sec:ising_magnetization}
 
-Onsager also calculated the magnetization of the Ising model.
-On the square lattice with \(T < T_c\) and \(J_1, J_2 > 0\) the magnetization squared is equal to the spin-spin correlation function
+Onsager also calculated the magnetisation of the Ising model.
+On the square lattice with \(T < T_c\) and \(J_1, J_2 > 0\) the magnetisation squared is equal to the spin-spin correlation function
 \begin{equation}
 	M^2 = \lim_{N \to \infty} \langle \sigma_{00} \sigma_{0,N} \rangle = \lim{N \to \infty} \langle \sigma_{00} \sigma_{N, N} \rangle.
 \end{equation}
@@ -467,7 +467,7 @@ with
 	\alpha_1 = \frac{z_1(1-\abs{z_2})}{1+\abs{z_2}}, \alpha_2 = \frac{1}{z_1}\frac{1-\abs{z_2}}{1+\abs{z_2}},
 \end{equation}
 where we use \(z_1\) and \(z_2\) as defined in \cref{eq:ising_z_functions}.
-The magnetization is then (see \cref{fig:ising_magnetization} for a plot)
+The magnetisation is then (see \cref{fig:ising_magnetization} for a plot)
 \begin{equation}
 	M = \left[1 - \left\{\sinh(2\beta J_1)\sinh(2 \beta J_2)\right\}^{-2} \right]^{1/4}.
 \end{equation}
@@ -481,14 +481,14 @@ Finally the magnetic susceptibility can be shown to diverge as \(\chi \propto \a
 With the earlier result \(\alpha=0\), we can use the scaling laws (\cref{sec:scaling_laws}) to determine that \(\delta = 15\), \(\eta = 1/4\) and \(\nu = 1\).\cite{binney:1992}
 
 \section{The Potts Model}
-The Potts model was first defined by Potts in 1953 as a generalization of the Ising model on the suggestion of Domb, his supervisor.\cite{potts:1952}
-Domb suggested that that to generalize, we can consider the spins of the model to be confined to a plane, with each spin pointing in one of \(q\) equally spaced directions, separated by an angle \(\theta_n = 2\pi n /q\), with \(n = 0, 1, \ldots q - 1\).
+The Potts model was first defined by Potts in 1953 as a generalisation of the Ising model on the suggestion of Domb, his supervisor.\cite{potts:1952}
+Domb suggested that that to generalise, we can consider the spins of the model to be confined to a plane, with each spin pointing in one of \(q\) equally spaced directions, separated by an angle \(\theta_n = 2\pi n /q\), with \(n = 0, 1, \ldots q - 1\).
 The nearest neighbour interaction depend only on the angle between those neighbours.
 The hamiltonian for this system is
 \begin{equation}
 	H = - \sum_{\langle i, j \rangle} J(\theta_{ij}),
 \end{equation}
-with \(J(\theta)\) a \(2\pi\)-peridic function and \(\theta_{ij} = \theta_i - \theta_j\) the angle between two spins.
+with \(J(\theta)\) a \(2\pi\)-periodic function and \(\theta_{ij} = \theta_i - \theta_j\) the angle between two spins.
 Domb suggested to use \(J(\theta_{ij}) = - \epsilon_1\cos(\theta_{ij})\).
 This is now known as the planar Potts model.\cite{wu:1982}
 
@@ -496,7 +496,7 @@ Making use of a duality relation which showed that the partition function at a l
 This method was first used by Kramers and Wannier in 1941\cite{kramers:1941}, to determine the critical temperature of the two-dimensional Ising model three years before Onsager's exact solution.
 
 Potts also gave a formula for the critical temperature of a system with a different interaction strength: \(J(\theta_{ij}) = -\epsilon_2 \delta(\sigma_i, \sigma_j)\), where \(\delta\) is the Kronecker delta.
-For this system he established that for all \(q\) the transition ocurres at\cite{potts:1952}
+For this system he established that for all \(q\) the transition occurs at\cite{potts:1952}
 \begin{equation}
 	\frac{x_0}{x_1} = 1 + \sqrt{q},
 \end{equation}
@@ -510,7 +510,7 @@ We call this system the standard Potts model.
 Throughout the rest of this thesis we will mainly consider this model and will simply refer to it as the Potts model.
 The planar and standard Potts models are related for \(q = 2\) by \(\epsilon_2 = 2 \epsilon_1\) and for \(q=3\) by \(\epsilon_2 = \frac{3}{2} \epsilon_1\).
 For the Potts model in two dimensions the transition at the critical point is first-order for \(q > 4\) and second-order for \(q \leq 4\).\cite{wu:1982,baxter:1973}
-Potts found that an earlier result by Ashkin and Teller for the discontinuities of the energy and specific heat\cite{ashkin:1943}, \(\Delta E, \Delta C\), could be generalized to show the relationship between those quantities:
+Potts found that an earlier result by Ashkin and Teller for the discontinuities of the energy and specific heat\cite{ashkin:1943}, \(\Delta E, \Delta C\), could be generalised to show the relationship between those quantities:
 \begin{equation}
 	\sqrt{q}T \Delta E = \log(\frac{x_0}{x_1}) \Delta E.
 \end{equation}
@@ -529,7 +529,7 @@ with
 where \(u_c^+ = \lim_{T \to T_c^+} \langle u \rangle\) and for a second order transition \(u_c^+ = u_c^-\).
 For \(q=3\) (a second order transition) \(u_{\mathrm{average}} = -(1+\frac{1}{\sqrt{3}})J \approx - 1.577 J\).
 
-To properly define when the phase transition occurs we define the order parameter, which here is the magnetization, as
+To properly define when the phase transition occurs we define the order parameter, which here is the magnetisation, as
 \begin{equation}
 	m = \frac{1}{N}\abs{\sum_i^N e^{i2\pi n_i / q}},
 \end{equation}
@@ -580,7 +580,7 @@ For \(q=3\), \(u=1/3\), and these equations reproduce \cref{eq:potts_critical_ex
 \chapter{Simulating Lattice Models}
 
 \section{Markov Processes and Monte Carlo Methods}
-While some success is to be had by using analytical methods to study lattice models and their critical exponents, often the partition function can not be determined exactly.
+While some success is to be had by using analytical methods to study lattice models and their critical exponents, often the partition function cannot be determined exactly.
 At that point we can use computer simulation of the models in question to study phase transitions, while having the exactly solved models as a benchmark for these simulations.
 
 We are almost always interested in the value of a thermal average of a quantity:
@@ -591,7 +591,7 @@ with \(\langle X \rangle\) a thermal average, the sum running over all configura
 \begin{equation}\label{eq:boltzmann_probability}
 	p_{\alpha} = \frac{e^{-\beta E_{\alpha}}}{\sum_{\alpha}e^{-\beta E_{\alpha}}}.
 \end{equation}
-While for small lattices (e.g. 3 by 3) the number of states is tractable (this number scales as \(2^{N}\) for the Ising model and \(q^{N}\) for the Potts model), for larger lattices the sum can no longer be performed exactly and some clever way has to be found to sample only important states.
+While for small lattices (such as 3 by 3) the number of states is tractable (this number scales as \(2^{N}\) for the Ising model and \(q^{N}\) for the Potts model), for larger lattices the sum can no longer be performed exactly and some clever way has to be found to sample only important states.
 
 Instead, we randomly choose states distributed according to a probability distribution \(p_{\alpha}\).
 If we choose \(M\) random states the estimator for the quantity \(X\) is
@@ -613,7 +613,7 @@ This way of sampling is called importance sampling. The states that contribute t
 To pick states randomly according to the Boltzmann distribution we use a Markov process.
 In a Markov process a system in state \(\mu\) is mutated into a state \(\nu\) with probability \(P(\mu\to\nu)\).
 These probabilities do not vary over time and depend only on the system as it is in state \(\mu\), not as it was earlier.
-The probablities should satify
+The probabilities should satisfy
 \begin{equation}
 	\sum_{\nu} P(\mu \to \nu) = 1
 \end{equation}
@@ -634,31 +634,31 @@ The probability \(P\) can be decomposed into two parts:
 	P(\mu\to\nu) = g(\mu\to\nu) A(\mu\to \nu),
 \end{equation}
 with \(g\) the selection probability, the probability of selecting the state \(\nu\) given a starting state \(\mu\) and \(A\) the acceptance ratio, how likely it is to accept a given new state.
-To effiecently sample states in as simulation the accaptance probability should be as large as possible.
+To efficiently sample states in as simulation the acceptance probability should be as large as possible.
 
 To simulate the systems using Markov chains we use Monte Carlo simulations.\footnote{Monte Carlo simulations have their origin in the Manhattan Project and were used after World War 2 to simulate neutron transport in hydrogen bombs.\cite{newman:1999}}
 While specific algorithms are described below, the steps of a simulation are broadly the same.
 Firstly, to be able to change spins we need to prepare the system in a given state at the start of the simulation.
-Common choices are to prepare the system in a \(T=\infty\) state where all spins are randomly aligned, or \(T=0\) where all spins are pointing in one randomly chosen direction (in the ferromagnetic case \(J>0\), where there are multiple groundstates).\cite{newman:1999}
+Common choices are to prepare the system in a \(T=\infty\) state where all spins are randomly aligned, or \(T=0\) where all spins are pointing in one randomly chosen direction (in the ferromagnetic case \(J>0\), where there are multiple ground states).\cite{newman:1999}
 
 Given the finite size of the simulated lattice a boundary occurs in the system.
 We can deal with this by wrapping the lattice around in both directions, meaning that the last spin of any row has the second to last spin as well as the first spin of that row as neighbours, and the last spin on a column has the second to last and first spin on the column as neighbours.\cite{landau:2015}
 
-Because the probability distribution of states tends to the Boltzmann distribution only after enough time has elapsed (\cref{eq:detailed_balance}), the system has to be given enough time to atain this state before measurements can be taken.
-A way to determine when this is the case is to plot the values of quantities such as the internal energy and absolute magnetization and determine when these values stabilize.
+Because the probability distribution of states tends to the Boltzmann distribution only after enough time has elapsed (\cref{eq:detailed_balance}), the system has to be given enough time to attain this state before measurements can be taken.
+A way to determine when this is the case is to plot the values of quantities such as the internal energy and absolute magnetisation and determine when these values stabilise.
 
 After every step of the algorithm, measurements are performed.
-What we can measure are the magnetization and the energy.
-The magnetization for the Ising model is defined as
+What we can measure are the magnetisation and the energy.
+The magnetisation for the Ising model is defined as
 \begin{equation}
 	M = \sum_i \sigma_i.
 \end{equation}
-Because in finite systems the spin symmetry is not broken, the system magnetization below \(T_c\) oscillates between the two possible extremes (for the Ising model, \cref{fig:ising_4by4_magnetization_history}).
-The mean of a long enough series of measurements will therefore always be approximatly 0.
-Therefore it is more useful to measure the absolute magnetization per spin \(m = \abs{M} / N\).
+Because in finite systems the spin symmetry is not broken, the system magnetisation below \(T_c\) oscillates between the two possible extremes (for the Ising model, \cref{fig:ising_4by4_magnetization_history}).
+The mean of a long enough series of measurements will therefore always be approximately 0.
+Therefore it is more useful to measure the absolute magnetisation per spin \(m = \abs{M} / N\).
 \begin{figure}
 	\includegraphics[width=\textwidth]{ising_4by4_magnetization_history.pdf}
-	\caption{The magnetization per spin of the Ising model. As the simulation runs (this simulation was done at \(T=2\) for a 4 by 4 system) the magnetization oscillates.}
+	\caption{The magnetisation per spin of the Ising model. As the simulation runs (this simulation was done at \(T=2\) for a 4 by 4 system) the magnetisation oscillates.}
 	\label{fig:ising_4by4_magnetization_history}
 \end{figure}
 
@@ -687,10 +687,10 @@ The algorithm is as follows\cite{binney:1992}:
 	\item Accept the move if \(r \leq A\). Otherwise leave the lattice as it was.
 \end{enumerate}
 The spin flip may also happen to a non-random spin simply by iterating over the rows and columns of the lattice. When studying only equilibrium dynamics, the two approaches are identical.\cite{landau:2015}
-Ergodicity is satisfied because any state can be atained by flipping a suffienct number of single spins. Detailed balance is also satisfied.
+Ergodicity is satisfied because any state can be attained by flipping a sufficient number of single spins. Detailed balance is also satisfied.
 
 To put a measure on the time elapsed in the simulation we define a sweep.
-During a sweep a every point on the lattice has been considered for flipping at least once.
+During a sweep every point on the lattice has been considered for flipping at least once.
 Therefore a sweep consists of \(N\) of the steps described above.
 The advantage of this is that time in a simulation can be measured independent of system size.\cite{newman:1999}
 
@@ -731,16 +731,16 @@ The advantage of this is that time in a simulation can be measured independent o
 	\begin{subfigure}[c]{0.2\linewidth}
 		\includegraphics[width=\linewidth]{20160603125722_40_by_40_Lattice_step5000.pdf}
 	\end{subfigure}
-	\caption{A 40 by 40 Ising model lattice simulated using the Metropolis algorithm at \(T=2.4\) after 0, 10, 20, 40, 100, 200, 400, 1000	and 5000 sweeps. The simulation started in a completly ordered \(T=0\) state.}
+	\caption{A 40 by 40 Ising model lattice simulated using the Metropolis algorithm at \(T=2.4\) after 0, 10, 20, 40, 100, 200, 400, 1000	and 5000 sweeps. The simulation started in a completely ordered \(T=0\) state.}
 \end{figure}
 
-\subsection{Optimizations}
-Especially for the Ising model simulated with the Metropolis algorithm some optimization can be included in the simulation that have a large effect on runtime.
-The exponentials needed for the acceptance ratio can be precalculated since there are (in two dimensions) only 5 possible different ways in which the neighbours are oriented:
+\subsection{Optimisations}
+Especially for the Ising model simulated with the Metropolis algorithm some optimisation can be included in the simulation that have a large effect on runtime.
+The exponentials needed for the acceptance ratio can be pre-calculated since there are (in two dimensions) only 5 possible different ways in which the neighbours are oriented:
 all aligned, 3 aligned, etcetera.
 Because the exponentials require costly floating point operations, caching those values gives a significant speed increase compared to recalculating them at every step.
 For the energy of the Ising model simulated with the Metropolis algorithm there is a trick that allows for much quicker computation of the energy difference than explicitly using the Hamiltonian.
-\todo{optimizations for E and m}
+\todo{optimisations for E and m}
 
 
 \subsection{Critical Slowing Down}\label{sec:critical_slowing_down}
@@ -752,7 +752,7 @@ Close to the phase transition, the correlation time diverges.
 This is because \todo{correlation times, dynamic critical exponents}
 
 \section{The Wolff Algorithm}
-The Wolff algortihm significantly improves in the area of critical slowing down, having a dynamic critical exponent of \(z=0.25(2)\)\cite{barkema:1991}.
+The Wolff algorithm significantly improves in the area of critical slowing down, having a dynamic critical exponent of \(z=0.25(2)\)\cite{barkema:1991}.
 It was first proposed by Wolff in 1989\cite{wolff:1989}, and works by not flipping single spins, but building clusters of spins pointing in the same direction and flipping those en masse.
 The Wolff algorithm goes as follows\cite{landau:2015,newman:1999}:
 \begin{enumerate}
@@ -763,18 +763,18 @@ The Wolff algorithm goes as follows\cite{landau:2015,newman:1999}:
 \end{enumerate}
 If a spin was considered during a previous step but not added to the cluster, this spin may be reconsidered for future steps.
 Spins that are already part of the cluster are not added again.\cite{newman:1999}
-The algorithm fulfills the condition of detailed balance because there is always a non-zero chance that a cluster will consist of only a single spin.
+The algorithm fulfils the condition of detailed balance because there is always a non-zero chance that a cluster will consist of only a single spin.
 A succession of such single spin-flip clusters can reach any state. Detailed balance is also satisfied.\cite{newman:1999}
-Given the much smaller critical expoent for the Wolff algorithm compared to the Metropolis algorithm, critical slowing down is mostly absent.
+Given the much smaller critical exponent for the Wolff algorithm compared to the Metropolis algorithm, critical slowing down is mostly absent.
 \todo{Talk about correlation times and mean cluster sizes.}
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=\textwidth]{wolff_mean_cluster_size_as_fraction_of_lattice.pdf}
-	\caption{The mean size as a fraction of the lattice of clusters generated with the Wolff method. During the simulation the temperature varied from 2 to 3 in steps of 0.1, with a higher resolution from 2.169 to 2.369 in steps of 0.01. The errorbars are too small to see.}
+	\caption{The mean size as a fraction of the lattice of clusters generated with the Wolff method. During the simulation the temperature varied from 2 to 3 in steps of 0.1, with a higher resolution from 2.169 to 2.369 in steps of 0.01. The error bars are too small to see.}
 \end{figure}
 
-\subsection{Generalizing Algorithms to the Potts Model}
-Both the Metropolis and Wolff algorithm can be easily generalized to the q-state Potts model.
+\subsection{Generalising Algorithms to the Potts Model}
+Both the Metropolis and Wolff algorithm can be easily generalised to the q-state Potts model.
 For the Metropolis algorithm we again pick a random spin \(s\) in state \(i\).
 We then pick a new state \(j\) from the remaining \(q-1\) possible state for that spin such that \(s_i \neq s_j\).
 After that we proceed as described earlier.
@@ -783,7 +783,7 @@ For large \(q\) more efficient algorithms exist, but for \(q=3\) Metropolis work
 There is still critical slowing down, with a dynamic critical exponent of \(z=2.198(8)\)\cite{newman:1999} or \(z=2.171(62)\).\cite{fan:2007}
 
 Near phase transitions the Potts model also experiences critical slowing down and cluster algorithms are more appropriate.
-The generalized Wolff algorithm proceeds exactly the same as in the Ising case, with the only difference being that the probability to add a spin to the cluster has become \(P_{add} = 1 - e^{-\beta J}\).
+The generalised Wolff algorithm proceeds exactly the same as in the Ising case, with the only difference being that the probability to add a spin to the cluster has become \(P_{add} = 1 - e^{-\beta J}\).
 We can see where this factor of 2 comes from by considering the \(q=2\) Potts model.
 The Hamiltonian is still
 \begin{equation}
@@ -796,12 +796,12 @@ but for the two-state model we can rewrite this as
 These expressions are the same except for a constant, since for \(\sigma_i = \sigma_j\) we have \(2 (\delta(\sigma_i, \sigma_j) - \frac{1}{2}) = +1\) while it is -1 otherwise.
 We therefore have an interaction energy \(\frac{1}{2}J\) instead of \(J\), explaining the change in the addition probability.
 This algorithm again satisfies detailed balance and ergodicity.\cite{newman:1999}
-The dynamic critical exponent is \(z=0.60(2)\), again an significant improvement over the Metropolis algorithm.
+The dynamic critical exponent is \(z=0.60(2)\), again a significant improvement over the Metropolis algorithm.
 
 
 \chapter{Analysis of Monte Carlo Simulations}
 \section{Statistics}
-Now that we have obtained measurements for the energy and magnetization of the Ising and Potts models, we need to find a way to make these measurements statistically uncorrelated, since the state of a lattice after a single algorithm sweep may not be very different compared to the state before.
+Now that we have obtained measurements for the energy and magnetisation of the Ising and Potts models, we need to find a way to make these measurements statistically uncorrelated, since the state of a lattice after a single algorithm sweep may not be very different compared to the state before.
 Because typical methods for error calculation assume uncorrelated samples, those methods do not work.
 We can calculate the autocorrelation times, and only sample once every two correlation times, but an easier and quicker approach is the Binning method.
 
@@ -829,7 +829,7 @@ From the binning method we can also determine the autocorrelation time:\cite{cor
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=\textwidth]{ising_metropolis_energy_per_site_error_binning.pdf}
-	\caption{The error for the energy per site as a function of the data size. As the binning progresses the error tends to a plateau. A 10 by 10 Ising model was simulated at a temperature of 2, thermalized for 5000 sweeps and then measured for 65536 sweeps.}
+	\caption{The error for the energy per site as a function of the data size. As the binning progresses the error tends to a plateau. A 10 by 10 Ising model was simulated at a temperature of 2, thermalised for 5000 sweeps and then measured for 65536 sweeps.}
 	\label{fig:binning_error_convergence}
 \end{figure}
 
@@ -840,11 +840,11 @@ These include the heat capacity \(c\) and magnetic susceptibility \(\chi\):
 	c &= \frac{\beta^2}{N} \left(\langle E^2 \rangle - \langle E \rangle^2 \right), \\
 	\chi &= \langle m^2 \rangle.
 \end{align}
-These quantities are not defined at a single instant of the simulation, but instead depend on time averages of the energy or magnetization.
+These quantities are not defined at a single instant of the simulation, but instead depend on time averages of the energy or magnetisation.
 
 To still be able to calculate errors on the quantities we use resampling methods.
 The first method that was used is the bootstrap method.
-For conreteness we consider the specific heat.
+For concreteness we consider the specific heat.
 Given a list of \(n\) measurements of the energy (and the energy squared), we randomly choose \(n\) values, allowing duplicates.
 Strictly speaking these measurements should be independent, but for the bootstrap method this does not matter.
 We can simply use measurements made after every sweep of the lattice.
@@ -866,7 +866,7 @@ with \(M\) the number of statistically independent measurements.
 
 \section{The Binder Cumulant}
 Given these statistically independent measurements, one thing we may like to find is the critical temperature.
-Unfortunately we can not determine this simply by looking at the order parameter of a system and when it becomes zero, because the finite size of the simulated lattices precludes a sharp phase transition.
+Unfortunately we cannot determine this simply by looking at the order parameter of a system and when it becomes zero, because the finite size of the simulated lattices precludes a sharp phase transition.
 We can however define the Binder cumulant\cite{binder:1981b}
 \begin{equation}
 	U_4 = 1 - \frac{\langle m^4 \rangle}{3 \langle m^2 \rangle^2},
@@ -876,7 +876,7 @@ At the critical temperature \(U_4\) has the same value independent of the lattic
 Therefore the critical temperature can be found by plotting the binder cumulant for different lattice sizes and looking for the intersection (as seen in \cref{fig:ising_binder_cumulant}).
 \begin{figure}[htb]
 	\includegraphics[width=\textwidth]{wolff_binder_cumulant.pdf}
-	\caption{The Binder cumulant for the Ising model at three different lattice sizes. The critical point occurs at approximately \(T = 2.26\). The values were acquired by simulation the lattice using the Wolff algorithm and running 65536 steps after equilibration. During the simulation the temperature was varied from 2 to 3 in steps of 0.1, with a higher resolution from 2.169 to 2.369 in steps of 0.01. The errorbars are too small to see in this plot.}
+	\caption{The Binder cumulant for the Ising model at three different lattice sizes. The critical point occurs at approximately \(T = 2.26\). The values were acquired by simulation the lattice using the Wolff algorithm and running 65536 steps after equilibration. During the simulation the temperature was varied from 2 to 3 in steps of 0.1, with a higher resolution from 2.169 to 2.369 in steps of 0.01. The error bars are too small to see in this plot.}
 	\label{fig:ising_binder_cumulant}
 \end{figure}
 
@@ -884,13 +884,13 @@ Therefore the critical temperature can be found by plotting the binder cumulant 
 To extract the critical exponents for different models, one way to proceed is to use finite size scaling.
 The advantage of this method is that \(T_c\) does not need to be known in advance, although if a value has already been determined using the Binder cumulant, this can also be used.
 
-We derive finite size scaling for the magnetic susceptibilty.
+We derive finite size scaling for the magnetic susceptibility.
 Close to the critical temperature we have \(\chi \propto \abs{t} ^{-\gamma}\) with \(t = (T-T_c) / T_c\) (\cref{eq:chi_divergence}).
 We also know that for the correlation length \(\xi \propto \abs{t}^{-\nu}\) in this region (\cref{eq:correlation_length}).
 Therefore we can write \(\chi \propto \xi^{\gamma /\nu}\).
 
 The finite size of simulated systems introduced a cutoff for the correlation length equal to the system size \(L\), also cutting off the divergence of the susceptibility.
-If \(\xi\) is the correlation lenght of the infinite system, the cutoff occurs when \(\xi > L\).
+If \(\xi\) is the correlation length of the infinite system, the cutoff occurs when \(\xi > L\).
 For \(\xi \ll L\) \(\chi\) should be the same as in the infinite system.
 We can then write for \(\chi\):
 \begin{equation}\label{eq:finite_size_chi}
@@ -914,7 +914,7 @@ All dependence on system size has been extracted from the scaling function, mean
 Given a set off data for the susceptibility, we can calculate the scaling function for different \(\gamma\), \(\nu\) and \(T_c\).
 If the values are correct, the data collapses onto a single curve around \(t=0\) when plotted (\cref{fig:ising_data_collapse}).
 
-For the specific heat and magnetization similar equations can be derived\cite{newman:1999}:
+For the specific heat and magnetisation similar equations can be derived\cite{newman:1999}:
 \begin{align}
 	\widetilde{c}(L^{1/\nu}t) &= L^{-\alpha/\nu} c, \\
 	\widetilde{m}(L^{1/\nu}t) &= L^{\beta/\nu} m.
@@ -944,7 +944,7 @@ Plotting the values, the slope of the line passing through the points, which can
 	\begin{subfigure}{\textwidth}
 		\includegraphics[width=\textwidth]{ising_susceptibility_exact_data_collapse.pdf}
 	\end{subfigure}
-	\caption{Finite size scaling data collapse for the magnetization and the magnetic susceptibility of the Ising model. The exact values for the exponents \(\gamma = 7/4\), \(\nu=1\) and \(\beta=1/8\) were used.}
+	\caption{Finite size scaling data collapse for the magnetisation and the magnetic susceptibility of the Ising model. The exact values for the exponents \(\gamma = 7/4\), \(\nu=1\) and \(\beta=1/8\) were used.}
 	\label{fig:ising_data_collapse}
 \end{figure}
 
@@ -968,7 +968,7 @@ The average of the different intersection points was taken for the value.
 To determine the error on the estimate intersections were also found for the data points with their respective errors added and subtracted.
 
 Using Log-Log plots the ratio of critical exponents was determined.
-The ratio \(\beta/\nu\) was determined by a linear fit of the magnetization and was determined as 0.125(1).
+The ratio \(\beta/\nu\) was determined by a linear fit of the magnetisation and was determined as 0.125(1).
 From a fit of the susceptibility (\cref{fig:ising_magnetizabilities_loglog_plot}), we found \(\gamma/\nu = 1.758(8)\).
 Both of those values agreed well with the exact values of \(\beta/\nu = 0.125\) and \(\gamma/\nu = 1.75\).
 
@@ -989,7 +989,7 @@ As suggested by Sandvik\cite{sandvik:2011}, the quality of the data collapse was
 \begin{figure}
 	\includegraphics[width=\textwidth]{ising_beta_over_nu_data_collapse.pdf}
 	\includegraphics[width=\textwidth]{ising_gamma_over_nu_data_collapse.pdf}
-	\caption{Data collapses of the magnetization and magnetic susceptibility, using a chi-least-squares method to determine the goodness of fit (yellow line). The images shown represented the the best collapse that could be performed.}
+	\caption{Data collapses of the magnetisation and magnetic susceptibility, using a chi-least-squares method to determine the goodness of fit (yellow line). The images shown represented the best collapse that could be performed.}
 	\label{fig:ising_chi_data_collapse}
 \end{figure}
 
@@ -1029,14 +1029,14 @@ The simulations may also not be long enough to get a sufficient number of statis
 
 \section{Further Work}
 There are severals way to expand on the work presented here.
-One way is use renormalization group techniques to calculate the critical exponents.
+One way is use renormalisation group techniques to calculate the critical exponents.
 This is the way most papers determine those and has as advantage that the errors on the critical exponents can be better determined.
 
 The Ising and Potts model can also be simulated on different kinds of lattice such as triangular or honeycomb lattices, to verify that the critical exponents (but not the critical temperature) remain the same, thus testing universality.
 
 The autocorrelation times were determined using the data from the binning analysis.
 The integrated autocorrelation time proved too slow to determine for large datasets.
-The correlation times could be more accurately investigated and used to establish the occurence of critical slowing down as well as determining the dynamic critical exponents.
+The correlation times could be more accurately investigated and used to establish the occurrence of critical slowing down as well as determining the dynamic critical exponents.
 
 It is also possible to go to \(q > 4\) and try to determine that the phase transition becomes first order in this case.
 To that end the latent heat would have to be accurately determined, while also having to deal with phase transitions that are not sharp in finite systems.
