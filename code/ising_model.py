@@ -2,6 +2,7 @@
 
 import numpy as np
 import cy_ising_model
+import plotting
 
 
 class IsingModel:
@@ -11,7 +12,7 @@ class IsingModel:
                  initial_temperature, sweeps):
         """Initialize variables and the lattice."""
         self.rng_seed = int(lattice_size * temperature * 1000)
-        np.random.seed(self.rng_seed)
+        # np.random.seed(self.rng_seed)
         self.lattice_size = lattice_size
         self.no_of_sites = lattice_size**2
         self.bond_energy = bond_energy
@@ -79,6 +80,8 @@ class IsingModel:
         magnetization = np.sum(self.lattice)
         for t in range(self.sweeps):
             # Measurement every sweep.
+            if t in [0, 10, 20, 40, 100, 200, 400, 1000, self.sweeps - 1]:
+                plotting.show_lattice(self.lattice, self.lattice_size, step=t)
             np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, magnetization)
             for k in range(self.lattice_size**2):
@@ -117,6 +120,9 @@ class IsingModel:
         cluster_sizes = []
         energy = self.calculate_lattice_energy()
         for t in range(self.sweeps):
+            if t in [5000, 5001]:
+                plotting.show_lattice(self.lattice, self.lattice_size)
+
             # Measurement every sweep.
             np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, np.sum(self.lattice))
