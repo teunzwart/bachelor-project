@@ -285,7 +285,7 @@ def chi_squared_data_collapse(data_set, critical_temperature,
                         v_tilde_error = lattice_size**(-second_exponent / nu) * v[2]
                         scaling_functions.setdefault(lattice_size, []).append((scaling_variable, v_tilde, v_tilde_error))
 
-                at_interval = [a for a in list(itertools.chain(*list(scaling_functions.values()))) if -1 <= a[0] <= 1]
+                at_interval = [a for a in list(itertools.chain(*list(scaling_functions.values()))) if -2 <= a[0] <= 2]
                 if len(at_interval) >= 15:
 
                     at_interval_x, at_interval_y, at_interval_y_error = zip(*at_interval)
@@ -302,16 +302,24 @@ def chi_squared_data_collapse(data_set, critical_temperature,
                             plt.ylabel(r'$\mathrm{Scaling\ Function}$')
                             for lattice_size, values in sorted(scaling_functions.items()):
                                 plt.errorbar([k[0] for k in values], [k[1] for k in values], [k[2] for k in values], marker='o', linestyle='None', label=r'${0}$'.format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"))
-                                plt.xlim(-1, 1)
+                            plt.xlim(-2, 2)
                             sns.despine()
                             plt.legend(loc='best')
                             plt.plot(x_new, y_new)
                             if save_plot:
                                 plt.savefig("{0}/{1}_{2}_data_collapse.pdf".format(SAVE_LOCATION, current_time, '{0}_over_nu'.format(second_exponent_name), bbox_inches='tight'))
                             plt.show()
+
+                            for lattice_size, values in sorted(scaling_functions.items()):
+                                plt.errorbar([k[0] for k in values], [k[1] - f(k[0]) for k in values], [k[2] for k in values], marker='o', linestyle='None', label=r'${0}$'.format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"))
+                            plt.axhline(y=0)
+                            plt.xlim(-2, 2)
+                            plt.ylim(-1, 1)
+                            plt.show()
+
             best_nus.append(best_nu)
             best_second_exponents.append(best_second_exponent)
-    print("best {0} = {1} +/- {2}, best nu = {3} +/- {4}".format(second_exponent_name, abs(np.mean(best_second_exponents)), calculate_error(best_second_exponents), np.mean(best_nus), calculate_error(best_nus)))
+    print("best {0} = {1} +/- {2}\nbest nu = {3} +/- {4}\n".format(second_exponent_name, abs(np.mean(best_second_exponents)), calculate_error(best_second_exponents), np.mean(best_nus), calculate_error(best_nus)))
 
     return np.mean(best_second_exponents), calculate_error(best_second_exponents), np.mean(best_nus), calculate_error(best_nus)
 
