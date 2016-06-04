@@ -39,7 +39,7 @@
 
 %%% Personal Information %%%
 \newcommand\TITLE{Monte Carlo Simulations of the 3-State Potts Model in 2D}
-\newcommand\THESISFORM{Bachelor Project Physics and Astronomy, size 15 EC\\conducted between 29-03-2016 and xx-xx-2016}
+\newcommand\THESISFORM{Bachelor Project Physics and Astronomy, 15 EC\\conducted between 29-03-2016 and xx-xx-2016\\submitted on xx-xx-2016}
 \newcommand\INSTITUTE{Instituut voor Theoretische Fysica Amsterdam}
 \newcommand\FACULTY{Faculteit der Natuurwetenschappen, Wiskunde en Informatica}
 \newcommand\UNIVERSITY{Universiteit van Amsterdam}
@@ -57,7 +57,7 @@
 	\begin{center}
 		\rule{\textwidth}{0.4mm}\\[0.5cm]
 		\huge{\textbf{\TITLE}}
-		\rule{\textwidth}{0.4mm}\\[0.5cm]
+		\rule{\textwidth}{0.4mm}\\[0.5cm]\todo{Dates to be filled.}
 		\large{\THESISFORM}\\[0.5cm]
 		\begin{minipage}[t]{0.4\textwidth}
 			\begin{flushleft}
@@ -96,16 +96,25 @@ Bij een faseovergang zien we dat een bepaald getal, dat we de orde parameter noe
 Bij een magneet is dat bijvoorbeeld de magnetisatie, die een waarde heeft bij lage temperaturen maar 0 wordt als de magneet wordt opgewarmd tot boven zijn Curie temperatuur.
 
 In dit verslag beschrijf ik de faseovergang van twee modellen.
-Het Ising model beschrijft een rooster waarbij op ieder roosterpunt een
+Het Ising model beschrijft een rooster waarbij op ieder roosterpunt een klein magneetje zit (dat we een spin noemen), die omhoog of omlaag kan wijzen.
+Het Potts model veralgemeniseerd dit idee door iedere spin in een richting te laten wijzen die gelijk verdeelt zijn over een cirkel.
 
 De faseovergangen worden onderzocht met behulp van Monte Carlo computer simulaties.
 Deze simulaties zijn bijvoorbeeld ook nuttig bij het
 
+\todo{• Covers 300-600 words with at least one picture, but altogether fits on one A4,
+• Is by itself understandable at secondary school level,
+• Explains the key message of the research in an enthusiastic and attractive way,
+• Invites to read the rest of the report.}
 
 \tableofcontents
 
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
+\todo{Motivation for the research conducted.
+• Introduction to the theoretical background.
+• Scientific questions.
+• Approach.}
 Phase transitions are an everyday part of life, the most well known being the transition of water into water vapour or ice into water.
 They also occur in more abstract contexts such as networks of neurons.\cite{tkacik:2015}
 
@@ -581,7 +590,7 @@ For \(q=3\), \(u=1/3\), and these equations reproduce \cref{eq:potts_critical_ex
 
 \section{Markov Processes and Monte Carlo Methods}
 While some success is to be had by using analytical methods to study lattice models and their critical exponents, often the partition function cannot be determined exactly.
-At that point we can use computer simulation of the models in question to study phase transitions, while having the exactly solved models as a benchmark for these simulations.
+At that point we can use computer simulation of the models in question to study phase transitions, while having exactly solved models as a benchmark for these simulations.
 
 We are almost always interested in the value of a thermal average of a quantity:
 \begin{equation}
@@ -663,10 +672,18 @@ Therefore it is more useful to measure the absolute magnetisation per spin \(m =
 \end{figure}
 
 These measurements are not statistically uncorrelated.
-We define the autocorrelation function\cite{binney:1992}\todo{Expand}
+We define the autocorrelation function\cite{binney:1992}
 \begin{equation}
-	C(k) = \frac{\langle X_{\alpha_0} X_{\alpha_k} - \langle X_{\alpha_0} \rangle^2}{\langle X_{\alpha_0}^2 \rangle - \langle X_{\alpha_0} \rangle^2}
+	C(k) = \frac{\langle X_{\alpha_j} X_{\alpha_j+k} \rangle - \langle X_{\alpha_j} \rangle^2}{\langle X_{\alpha_j}^2 \rangle - \langle X_{\alpha_j} \rangle^2}
 \end{equation}
+with \(X_{\alpha_j}\) the values of \(X\) when the system is in state \(\alpha\) at time \(j\).
+The autocorrelation function is 1 when k=0, meaning complete correlation between states, and is approximately 0 when \(k\) is large enough that the states are no longer correlated.
+For long enough time scales the autocorrelation falls off as
+\begin{equation}
+	C(k) \propto e^{-k/\tau},
+\end{equation}
+where \(\tau\) is the typical time for this decay and is called the correlation time.
+Because after a single correlation time the correlation function is still \(1/e\approx0.367\), it is best to sample once every 2\(\tau\) steps, when the correlation is only \(1/e^2\approx 0.135\).\cite{newman:1999}
 
 
 \section{The Metropolis Algorithm}
@@ -679,8 +696,8 @@ The algorithm is as follows\cite{binney:1992}:
 	\begin{equation}
 		A =
 		\begin{cases}
-			e^{-\beta \Delta E}\ \ \ &\Delta E > 0 \\
-			1 \ \ \ &\Delta E \leq 0
+			e^{-\beta \Delta E}\ \ \ &\mathrm{if}\ \Delta E > 0 \\
+			1 \ \ \ &\mathrm{if}\ \Delta E \leq 0
 		\end{cases}
 	\end{equation}
 	\item Generate a random variable \(r\) in the interval \(\left[0, 1\right)\).
@@ -739,17 +756,36 @@ Especially for the Ising model simulated with the Metropolis algorithm some opti
 The exponentials needed for the acceptance ratio can be pre-calculated since there are (in two dimensions) only 5 possible different ways in which the neighbours are oriented:
 all aligned, 3 aligned, etcetera.
 Because the exponentials require costly floating point operations, caching those values gives a significant speed increase compared to recalculating them at every step.
-For the energy of the Ising model simulated with the Metropolis algorithm there is a trick that allows for much quicker computation of the energy difference than explicitly using the Hamiltonian.
-\todo{optimisations for E and m}
+
+For the energy of the Ising model simulated with the Metropolis algorithm there is a trick that allows for much quicker computation of the energy difference than explicitly using the Hamiltonian, which requires as many calculations as there are bonds in the system, a number that scales with \(N\).
+The difference in energy between two states \(\mu\) and \(\nu\) is
+\begin{align}
+	E_{\nu} - E_{\mu} &= -J \sum_{\langle ij \rangle} \sigma_i^{\nu} \sigma_j^{\nu} + J \sum_{\langle ij \rangle} \sigma_i^{\mu} \sigma_j^{\mu}\\
+	&= -J \sum_{\substack{i\ \mathrm{nearest}\\ \mathrm{neighbour\ to}\ k}} \sigma_i^{\mu}\left(\sigma_k^{\nu} - \sigma_k^{\nu}\right)
+\end{align}
+The term in brackets can only be -2 or +2, dependent on the value of the spin \(k\) to be flipped before the flip.
+Thus \(\sigma_k^{\nu} - \sigma_k^{\nu} = -2 \sigma_k^{\mu}\) and
+\begin{equation}
+	E_{\nu} - E_{\mu} = 2 J \sigma_k^{\mu} \sum_{\substack{i\ \mathrm{nearest}\\ \mathrm{neighbour\ to}\ k}} \sigma_i^{\mu}
+\end{equation}
+This expression depends only on the neighbours of the spin that is to be flipped and can be calculated before a spin is flipped.
+Using that \(E_{\mu} = E_{\nu} + \Delta E\) we only have to calculate the energy using the hamiltonian once at the start, and then update the energy after every step with the change in energy.
+A similar trick can be used for the magnetisation, where the change in magnetisation can be shown to be \(\Delta M = 2\sigma_k^{\mu}\).\cite{newman:1999}
 
 
 \subsection{Critical Slowing Down}\label{sec:critical_slowing_down}
 The Metropolis algorithm is very simple but does have one major drawback.
-Let us first consider what it means to have uncorrelated measurements.
-We define the autocorrelation function
-
 Close to the phase transition, the correlation time diverges.
-This is because \todo{correlation times, dynamic critical exponents}
+This is because there the correlation time goes like
+\begin{equation}
+	\tau \propto \xi^z,
+\end{equation}
+where \(z\) is called the critical dynamical exponent and is different for each algorithm and system.
+During critical slowing down in single spin-flip algorithms the correlation length diverges (up to the system size \(L\)) and islands are formed in which all spins point in the same direction.
+A statistically independent configuration would need to have a significant chance of flipping the spins in such an island.
+However, flipping a spin whose neighbours are pointing in the same direction is energetically unfavorable and thus has a suppressed acceptance probability.
+Therefore the correlation time becomes large and the simulation would have to run for a long time to create enough statistically independent measurements,\cite{binney:1992} especially since at \(T_c\) \(\xi = L\), meaning that it would quickly become impractical to simulate large systems.
+For the two dimensional Ising model simulated with the  Metropolis algorithm the dynamic critical exponent has been measured to be \(z=2.1665(12)\).\cite{nightingale:1996}
 
 \section{The Wolff Algorithm}
 The Wolff algorithm significantly improves in the area of critical slowing down, having a dynamic critical exponent of \(z=0.25(2)\)\cite{barkema:1991}.
@@ -762,15 +798,30 @@ The Wolff algorithm goes as follows\cite{landau:2015,newman:1999}:
 	\item Flip the entire cluster.
 \end{enumerate}
 If a spin was considered during a previous step but not added to the cluster, this spin may be reconsidered for future steps.
-Spins that are already part of the cluster are not added again.\cite{newman:1999}
-The algorithm fulfils the condition of detailed balance because there is always a non-zero chance that a cluster will consist of only a single spin.
-A succession of such single spin-flip clusters can reach any state. Detailed balance is also satisfied.\cite{newman:1999}
+Spins that are already part of the cluster are not added again.
+The algorithm fulfills the condition of detailed balance because there is always a non-zero chance that a cluster will consist of only a single spin.
+A succession of such single spin-flip clusters can reach any state. Detailed balance is also satisfied.
 Given the much smaller critical exponent for the Wolff algorithm compared to the Metropolis algorithm, critical slowing down is mostly absent.
-\todo{Talk about correlation times and mean cluster sizes.}
-\begin{figure}[htb]
+
+To compare the correlation times of the Metropolis and Wolff algorithm, we need to properly define the correlation time of the Wolff algorithm.
+A single step will create a cluster that could corresponds to a great many steps of the Metropolis algorithm.
+On average a Wolff cluster will cover a fraction of the lattice \(\langle n \rangle / L^2\). (See \cref{fig:wolff_cluster_size}. As the temperature increases, the probability to add a spin to the cluster decreases, meaning average cluster size decreases.)
+This corresponds to a single sweep of the lattice in a Metropolis simulation.
+The correlation time is then
+\begin{equation}
+	\tau = \tau_{\mathrm{steps}} \frac{\langle n \rangle}{L^2}.
+\end{equation}
+This is especially important in the high temperature regime, where many single-spin cluster will form.
+Without the correction the correlation time would be too large.\cite{newman:1999}
+Comparing correlation time for the Ising model between the Metropolis and Wolff algorithm, it is found that there is indeed a marked difference.
+For Wolff simulations the correlation time of the absolute magnetisation is always of order 1, even for lattices as large as 40 by 40.
+In contrast Metropolis simulations show a correlation time at the critical point of \(\sim 12\) sweeps, for even modest sized 10 by 10 lattices.
+
+
+\begin{figure}[htb]\label{fig:wolff_cluster_size}
 	\centering
 	\includegraphics[width=\textwidth]{wolff_mean_cluster_size_as_fraction_of_lattice.pdf}
-	\caption{The mean size as a fraction of the lattice of clusters generated with the Wolff method. During the simulation the temperature varied from 2 to 3 in steps of 0.1, with a higher resolution from 2.169 to 2.369 in steps of 0.01. The error bars are too small to see.}
+	\caption{The mean size as a fraction of the lattice of clusters generated with the Wolff method. During the simulation the temperature varied from 2 to 3 in steps of 0.1, with a higher resolution of 0.01 from 2.169 to 2.369. The error bars are too small to see.}
 \end{figure}
 
 \subsection{Generalising Algorithms to the Potts Model}
@@ -782,7 +833,7 @@ Just like for the Ising model the algorithm satisfies the ergodicity and detaile
 For large \(q\) more efficient algorithms exist, but for \(q=3\) Metropolis works fine.
 There is still critical slowing down, with a dynamic critical exponent of \(z=2.198(8)\)\cite{newman:1999} or \(z=2.171(62)\).\cite{fan:2007}
 
-Near phase transitions the Potts model also experiences critical slowing down and cluster algorithms are more appropriate.
+Given this slowing in the Potts model cluster algorithms are again more appropriate when investigating the area around the phase transition.
 The generalised Wolff algorithm proceeds exactly the same as in the Ising case, with the only difference being that the probability to add a spin to the cluster has become \(P_{add} = 1 - e^{-\beta J}\).
 We can see where this factor of 2 comes from by considering the \(q=2\) Potts model.
 The Hamiltonian is still
@@ -821,6 +872,7 @@ The error on a quantity for a given binning step is
 	\Delta A^{(l)} = \sqrt{\frac{\mathrm{Var}(A^{(l)})}{N_l}}.
 \end{equation}
 As the binning progresses the error for each step converges to the actual error, meaning that in a plot the errors tend to a plateau (\cref{fig:binning_error_convergence}).
+This method can then be used to calculate the error on the energy, magnetization and any higher order data such as \(E^2\).
 
 From the binning method we can also determine the autocorrelation time:\cite{corboz}
 \begin{equation}
@@ -838,9 +890,12 @@ Other interesting values we would like to know are functions of measured values.
 These include the heat capacity \(c\) and magnetic susceptibility \(\chi\):
 \begin{align}
 	c &= \frac{\beta^2}{N} \left(\langle E^2 \rangle - \langle E \rangle^2 \right), \\
-	\chi &= \langle m^2 \rangle.
+	\chi &= \beta N \left( \langle m^2 \rangle - \langle m^2 \rangle \right).
 \end{align}
 These quantities are not defined at a single instant of the simulation, but instead depend on time averages of the energy or magnetisation.
+Note that binning has to happen for both \(E\) and \(E^2\) separetly when statistically independent samples are created.
+One way to calculate the error on these values is to run the same simulation a large number of times and calculate the error from the calculate errors.
+Given the long running times of Monte Carlo simulations this is not always practical.
 
 To still be able to calculate errors on the quantities we use resampling methods.
 The first method that was used is the bootstrap method.
@@ -863,6 +918,7 @@ The error becomes\cite{corboz}
 \end{equation}
 with \(M\) the number of statistically independent measurements.
 
+Following the advice of Landau and Binder \cite{landau:2015}, when different methods give different errors we use the largest error calculated.
 
 \section{The Binder Cumulant}
 Given these statistically independent measurements, one thing we may like to find is the critical temperature.
@@ -907,13 +963,12 @@ Because we do not know the correlation length of the infinite system it is more 
 \end{equation}
 with which we can rewrite \cref{eq:finite_size_chi} to get
 \begin{equation}
-	\chi = L^{\gamma/\nu}\tilde{\chi}(L^{1/\nu}t).
+	\tilde{\chi}(L^{1/\nu}t) = L^{-\gamma/\nu}\chi.
 \end{equation}
 We call \(\tilde{\chi}\) the scaling function.
 All dependence on system size has been extracted from the scaling function, meaning that its value is the same for all \(L\) when close to the critical temperature.
 Given a set off data for the susceptibility, we can calculate the scaling function for different \(\gamma\), \(\nu\) and \(T_c\).
 If the values are correct, the data collapses onto a single curve around \(t=0\) when plotted (\cref{fig:ising_data_collapse}).
-
 For the specific heat and magnetisation similar equations can be derived\cite{newman:1999}:
 \begin{align}
 	\widetilde{c}(L^{1/\nu}t) &= L^{-\alpha/\nu} c, \\
@@ -954,6 +1009,7 @@ Plotting the values, the slope of the line passing through the points, which can
 All results were obtained from simulations of the Wolff algorithm around the critical point.
 Runs consisted of 10000 equilibration sweeps, followed by 65536 measurement sweeps.
 For the Wolff algorithm a sweep was defined as constructing a single cluster.
+\todo{Indicate how reliable your results are}
 
 \section{The Ising Model at Criticality}
 
@@ -961,9 +1017,9 @@ The critical temperature of the Ising model in two dimensions in zero field was 
 First a simulation in the range 2 to 3 with steps of 0.1 was performed to roughly locate the critical point.
 A more fine-grained simulation from 2.169 to 2.369 with a resolution of 0.01 was performed afterwards.
 The critical temperature was determined to be 2.267(2).
-The critical temperature agrees well with Onsager's result of 2.269\cite{onsager:1944}, as well as those of Ghaemi \textit{et al.}\cite{ghaemi:2001}.
+The critical temperature agrees well with Onsager's result of 2.269\cite{onsager:1944}, as well as those of Ghaemi \textit{et al.} of \(T_c = 2.2691(5)\)\cite{ghaemi:2001}.
 
-The intersection of the Binder cumulants was determined by linearly extrapolation between two consecutive data points and trying to find an intersection between consecutive lattice sizes.
+The intersection of the Binder cumulants was determined by linearly extrapolation between two consecutive data points and trying to find an intersection of those lines between consecutive lattice sizes.
 The average of the different intersection points was taken for the value.
 To determine the error on the estimate intersections were also found for the data points with their respective errors added and subtracted.
 
@@ -975,16 +1031,29 @@ Both of those values agreed well with the exact values of \(\beta/\nu = 0.125\) 
 With the determined critical temperature and ratio of critical exponents a data collapse was performed.
 By having \(\nu\) run over a range of 0.01 to 1 in steps of 0.01, while determining the other critical exponent using the ratio, a data collapse was performed.
 As suggested by Sandvik\cite{sandvik:2011}, the quality of the data collapse was assessed using a chi-least-squares test.
+A polynomial of degree 6 was fitted to the data in the range where most data points fell after scaling, which was in the interval \(L^{1/\nu}t \in [-1, 1]\).
 
 \begin{table}[htb]
 	\centering
+	\renewcommand{\arraystretch}{1.5}
 	\begin{tabular}{l | c c c c c c}
 		\hline
 		& \(\alpha\) & \(\beta\) & \(\gamma\) & \(\eta\) & \(\nu\) & \(\delta\) \\\hline
-		\(\beta/\nu\) & 0.075(13) & 0.1204(8) & 1.683(14) & & 0.962(6)\\
-		\(\gamma/\nu\) & 0.002(2) & 0.121(2) & 1.756(3) & & 0.999(1)
+		Exact & 0 & \(\frac{1}{8}\) & \(\frac{7}{4}\) & \(\frac{1}{4}\) & 1 & 15 \\
+		\(\beta/\nu\) & 0.075(13) & 0.1204(8) & 1.683(14) & 0.250(2) & 0.962(6) & 15(2.8) \\
+		\(\gamma/\nu\) & 0.002(2) & 0.121(2) & 1.756(3) & 0.2424(5) & 0.999(1) & 15.5(14.6)\\\hline
 	\end{tabular}
 \end{table}
+The value for \(\delta\) calculate using \(\gamma/\nu\) has such a large error because, during error propagation the ration \(\Delta \alpha / \alpha\) is approximatly 1. The error on this value can therefore not be regarded as sensible.
+
+With the ratio \(\alpha / \nu\) it is only possible to determine \(\alpha\) and \(\nu\), because the system of equations consisting of the scaling laws after filling in the values of \(\alpha\) and \(\nu\) is a system of three equations with 4 unknowns and therefore underdetermined.
+The log-log plot of the specific heat at criticality gave a ratio \(\alpha / \nu = 0.287(17)\).
+The collapse for the specific heat gave very poor results and gave values of \(\alpha = 0.287(5)\) and \(\nu =1\).
+For \(\nu\) no error could be determined because for all fits \(\nu = 1\) gave the best results.
+
+It was also the case that while iterating over different values of \(\nu\) the upper bound for \(\nu\) was always determined to give the best fit, even though values of \(\nu\) larger than 1 are unphysical in this case.
+For the fits which used \(\beta/\nu\) and \(\gamma/\nu\) the physical exponents remained the same no matter what the upper bound for \(\nu\) was.
+
 
 \begin{figure}
 	\includegraphics[width=\textwidth]{ising_beta_over_nu_data_collapse.pdf}
@@ -995,6 +1064,10 @@ As suggested by Sandvik\cite{sandvik:2011}, the quality of the data collapse was
 
 
 \section{The Potts Model at Criticality}
+
+For the 3-state Potts model in two dimensions and zero-field the critical temperature was found to be \(T_c=1.020(22)\) using Binder intersection at \(L = 10, 20, 40\).
+
+This is in reasonable agreement with the result of Ghaemi \textit{et al.}\cite{ghaemi:2001} (\(T_c=0.9950(1)\)), as well as those of Fan \textit{et al.}\cite{fan:2007} of \(T_c = 0.9968(20)\).
 
 \begin{table}[htb]
 	\begin{adjustbox}{center}
@@ -1008,24 +1081,26 @@ As suggested by Sandvik\cite{sandvik:2011}, the quality of the data collapse was
 			Fan (2007)\cite{fan:2007} & 0.396(66) & 0.108(4) & 1.416(62) & 0.265(19) & 0.816(27) & 14.1(1.1) \\
 			Hu (1980)\cite{hu:1980} & 0.3071 & \\
 			Straley (1973)\cite{straley:1973} & 0.05(10)& 0.103(10) & 1.5(1)\\
-			Binder (1981)\cite{binder:1981a} & \(\sim0.4\) & \(\sim0.1\) & \(\sim1.45\)\\\hline
+			Binder (1981)\cite{binder:1981a} & \(\sim0.4\) & \(\sim0.1\) & \(\sim1.45\)\\
+			\(\beta/\nu\) & 0.43(10) & 0.103(6) & 1.37(12) & 0.263(28) & 0.79(5) & 14.2(3.5)\\
+			\(\gamma/\nu\) & 0.560(67) & 0.07(6) & 1.30(6) & 0.198(13) & 0.72(3) & 19.2(17.3)\\\hline
 		\end{tabular}
 	\end{adjustbox}
 	\caption{The critical exponents of the three-state Potts model. The values quoted for Den Nijs are conjectured exact values. For Blöte the results had to be read from a graphs, and thus do not have error margins. Hu did not report any error margins.
 	Table VI in \cite{wu:1982} contains more values for the critical exponents, from both numerical and analytical methods.}
 \end{table}
-
-The critical temperature agrees well with the result of Ghaemi \textit{et al.}\cite{ghaemi:2001}, as well as those of Fan \textit{et al.} of \(T_c = 0.9968(20)\).
-
+The error on \(\delta\) determined with the ratio \(\gamma /\nu\) has a large error because during error propagation the ratio \(\Delta \nu / \nu\) is approximatly 1.
 
 \vspace*{\baselineskip}
 
-Note that all Monte Carlo simulations performed here also suffer from systemic errors that are difficult to quantify.
+Note that all Monte Carlo simulations presented here also suffer from systemic errors that are difficult to quantify.
 First, in all systems only a finite time was used for equilibration, giving rise to the possibility that the Boltzmann distribution was not correctly sampled.
 The simulations may also not be long enough to get a sufficient number of statistically independent measurements\cite{newman:1999}, although that would have probably shown up during binning as a failure for the error to reach a plateau.
 
 
 \chapter{Conclusions}
+
+For the Ising model and 3-state Potts model in two dimensions and zero field critical exponents were determined using Monte Carlo simulations.
 
 \section{Further Work}
 There are severals way to expand on the work presented here.
