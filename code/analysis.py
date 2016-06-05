@@ -273,7 +273,7 @@ def chi_squared_data_collapse(data_set, critical_temperature,
             lowest_residual = np.inf
             best_nu = 0
             best_second_exponent = 0
-            for nu in np.linspace(0.01, 1, 100):
+            for nu in np.linspace(0.01, 1.1, 110):
                 second_exponent = (ratio + k * ratio_error) * nu
                 scaling_functions = {}
                 for lattice_size, data in sorted(data_set.items()):
@@ -314,7 +314,11 @@ def chi_squared_data_collapse(data_set, critical_temperature,
                                 plt.errorbar([k[0] for k in values], [k[1] - f(k[0]) for k in values], [k[2] for k in values], marker='o', linestyle='None', label=r'${0}$'.format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"))
                             plt.axhline(y=0)
                             plt.xlim(-2, 2)
-                            plt.ylim(-1, 1)
+                            plt.ylim(-0.01, 0.01)
+                            plt.xlabel(r'$L^{(1/\nu)}t$')
+                            plt.ylabel(r'$\mathrm{Scaling\ Function\ -\ polynomial}$')
+                            if save_plot:
+                                plt.savefig("{0}/{1}_{2}_data_collapse_residual.pdf".format(SAVE_LOCATION, current_time, '{0}_over_nu'.format(second_exponent_name), bbox_inches='tight'))
                             plt.show()
 
             best_nus.append(best_nu)
@@ -325,19 +329,20 @@ def chi_squared_data_collapse(data_set, critical_temperature,
 
 
 def data_collapse(data_set, quantity, critical_temperature, critical_exponent1, nu, name1, save=False):
-    print(critical_exponent1, "hi")
+    # print(data_set)
     scaling_functions = {}
     for lattice_size, data in sorted(data_set.items()):
         for v in data:
             t = (v[0] - critical_temperature) / critical_temperature
             scaling_variable = lattice_size**(1 / nu) * t
             v_tilde = lattice_size**(critical_exponent1 / nu) * v[1]
-            scaling_functions.setdefault(lattice_size, []).append((scaling_variable, v_tilde))
+            v_tilde_error = lattice_size**(critical_exponent1 / nu) * v[2]
+            scaling_functions.setdefault(lattice_size, []).append((scaling_variable, v_tilde, v_tilde_error))
     for lattice_size, data in sorted(scaling_functions.items()):
         plt.xlabel(r'$L^{(1 / \nu)}t$')
         plt.ylabel(r'${0}$'.format('\mathrm{' + quantity.replace(' ', '\ ') + '\ Scaling\ Function}'))
         sns.despine()
-        plt.plot([k[0] for k in data], [k[1] for k in data], linestyle='None', marker='o', label=r"${0}$".format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"))
+        plt.errorbar([k[0] for k in data], [k[1] for k in data], [k[2] for k in data], linestyle='None', marker='o', label=r"${0}$".format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"))
     print("{0} = {1}, nu = {2}".format(name1, critical_exponent1, nu))
     plt.legend(loc='best')
     sns.despine()
@@ -361,6 +366,7 @@ def loglog_exponent_finding(data_set, quantity, save=False):
     lattice_sizes = np.asarray(lattice_sizes_log)
     magnetizations_log = np.asarray(magnetizations_log)
     slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(lattice_sizes, magnetizations_log)
+
     plt.xlabel(r'$\log(L)$')
     plt.ylabel(r'$\log({0})$'.format('\mathrm{' + quantity.replace(" ", "\ ") + '}'))
     plt.errorbar(lattice_sizes, magnetizations_log, magnetizations_log_error, linestyle='None', marker='o')
