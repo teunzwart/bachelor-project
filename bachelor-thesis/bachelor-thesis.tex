@@ -57,7 +57,7 @@
 	\begin{center}
 		\rule{\textwidth}{0.4mm}\\[0.5cm]
 		\huge{\textbf{\TITLE}}
-		\rule{\textwidth}{0.4mm}\\[0.5cm]\todo{Dates to be filled.}
+		\rule{\textwidth}{0.4mm}\\[0.5cm]
 		\large{\THESISFORM}\\[0.5cm]
 		\begin{minipage}[t]{0.4\textwidth}
 			\begin{flushleft}
@@ -85,41 +85,57 @@ We studied the critical behaviour of the 3-state Potts model in two dimensions a
 Monte Carlo simulations were used to find the critical temperature, as well as the critical exponents of the model.
 These values were calculated by using finite size scaling methods.
 The Ising model in two dimensions was used as a benchmark for the methods used, given that it is exactly solved.
-The values found for the critical exponents as well as the critical temperature for the Potts model were in agreement with the values found in the literature which were determined using Monte Carlo simulations, as well as conjectured exact values.
+The critical temperature found agreed well with exact known value of Onsager's exact solution.
+Values of ratios of critical exponents and critical exponents themselves agreed less well.
+
+For the Potts model the critical temperature was found to be in moderate agreement with exact results.
+Ratios of critical exponents and critical exponents did, outside of a few exceptions, not agree with conjectured exact results.
 
 
 \newpage
 \thispagestyle{plain}
 \section*{Populaire Samenvatting}
-Faseovergangen zien we overal om ons heen. Water verandert in stoom, of bevriest tot ijs.
+Faseovergangen zien we overal om ons heen. Water verandert in stoom of bevriest tot ijs.
 Bij een faseovergang zien we dat een bepaald getal, dat we de orde parameter noemen, een sprong maakt.
 Bij een magneet is dat bijvoorbeeld de magnetisatie, die een waarde heeft bij lage temperaturen maar 0 wordt als de magneet wordt opgewarmd tot boven zijn Curie temperatuur.
 
-In dit verslag beschrijf ik de faseovergang van twee modellen.
+Faseovergangen worden getypeerd door de temperatuur waarop ze plaatsvinden, de zogenaamde kritische temperatuur, en door kritische exponenten.
+Dit zijn getallen die bepalen hoe snel een eigenschap van een systeem verandert dicht bij de faseovergang.
+
+In dit verslag beschrijf ik de faseovergang van twee modellen en hoe ik heb geprobeerd hun kritische temperatuur en exponenten te vinden.
 Het Ising model beschrijft een rooster waarbij op ieder roosterpunt een klein magneetje zit (dat we een spin noemen), die omhoog of omlaag kan wijzen.
-Het Potts model veralgemeniseerd dit idee door iedere spin in een richting te laten wijzen die gelijk verdeelt zijn over een cirkel.
+Het Potts model veralgemeniseerd dit idee door iedere spin in een richting te laten wijzen, waarbij de mogelijke richtingen gelijk verdeelt zijn over een cirkel.
+Ik heb specifiek gekeken naar een model met drie mogelijke richtingen.
 
-De faseovergangen worden onderzocht met behulp van Monte Carlo computer simulaties.
-Deze simulaties zijn bijvoorbeeld ook nuttig bij het
+Om de faseovergangen te onderzoeken heb ik twee verschillende zogenaamde Monte Carlo algoritmen gebruikt om de systemen te simuleren.
+De eerste was het Metropolis algoritme.
+Hierbij wordt voor de spins op het rooster een voor een geprobeerd ze om te draaien. Dit gebeurt met een bepaalde kans.
+Omdat het in de buurt van de faseovergang kan gebeuren dat er grote eilanden ontstaan die allemaal dezelfde richting op wijzen en waarvan de kans klein is dat ze worden omgedraaid, heb ik ook gebruik gemaakt van het Wolff algoritme, dat grote clusters van spins in een keer omdraait.
+Zo kan het niet gebeuren dat het rooster tijdens de simulatie lange tijd in dezelfde toestand blijft.
 
-\todo{• Covers 300-600 words with at least one picture, but altogether fits on one A4,
-• Is by itself understandable at secondary school level,
-• Explains the key message of the research in an enthusiastic and attractive way,
-• Invites to read the rest of the report.}
+Tijdens het draaien van de simulaties deed ik de hele tijd metingen van de energie en magnetisatie.
+Met behulp van die metingen kon ik verschillende grootheden uitrekenen zoals de warmte capaciteit.
+Om de data te analyseren en de kritische temperatuur en exponenten te bepalen  heb ik gebruikt gemaakt van een eigenschap die dit soort systemen hebben.
+Als je roosters van verschillende grootten simuleert en dan de waarde van bepaalde eigenschappen met een factor schaalt blijkt dat de verschillende lijnen van verschillenden rooster grootten precies over elkaar heen vallen.
+Dit gebeurt wel alleen als je de juiste factor, die afhangt van de kritische exponenten, gebruikt.
+Door verschillende waarden te proberen kun je zo de exponenten vinden.
+
+Voor zowel het Ising model als het Potts model heb ik de kritische temperatuur kunnen vinden.
+De kritische exponenten waren lastiger te bepalen.
+Het is mij bij beide modellen wel gelukt om de verhouding tussen de verschillende exponenten te nauwkeurig te bepalen, maar bij de exponenten zelf lukte dat minder goed.
+
+
 
 \tableofcontents
 
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
-\todo{Motivation for the research conducted.
-• Introduction to the theoretical background.
-• Scientific questions.
-• Approach.}
 Phase transitions are an everyday part of life, the most well known being the transition of water into water vapour or ice into water.
 They also occur in more abstract contexts such as networks of neurons.\cite{tkacik:2015}
 
-Although there are some systems that can be exactly solved and thus be studied at the phase transition, many more cannot, and thus different methods have to be employed to understand the phase transitions.
-In this thesis we will use Monte Carlo simulations to study the critical behaviour of the Potts model.
+Although there are some systems that can be exactly solved and for which all properties are known, including at the phase transition, many more cannot, and thus different methods have to be employed to understand the phase transitions.
+In this thesis we will use Monte Carlo simulations to study the critical behaviour of the 3-state Potts model.
+Specifically we are interested in the critical exponents and critical temperature of the model.
 We proceed as follows:
 
 In Chapter 1 we consider exactly what properties a phase transitions has.
@@ -134,16 +150,15 @@ We also consider some optimisations for the simulations.
 
 Chapter 3 lays out the way to analyse the data obtained from the simulation.
 Some care has to be taken to use statistically independent measurements.
-We also look at resampling methods used to calculate properties of the system that depend in a complicated way on the measured quantities.
+We also look at resampling methods used to calculate errors of properties of the system that depend in a complicated way on the measured quantities.
 The critical temperature is found by using Binder cumulants, while critical exponents are found using finite size scaling arguments.
 
 In Chapter 4 the results of applying the methods from Chapter 3 are presented for the two-dimensional Ising and Potts models.
-The measured values for the critical temperatures and exponents agree well with the exact solution (for the Ising model) and other simulation and conjectures (for the Potts model).
+The measured values for the critical temperatures and exponents agree reasonably well with the exact solution (for the Ising model) and other simulation and conjectures (for the Potts model).
 
 In Chapter 5 we summarise the results and give an outlook for further work.
-
 Due to the strong computational component of this project, a significant chunk of code is not included here.
-A repository containing Python and Cython\footnote{Cython is a Python module that allows the inclusion of static types and other C features in Python code and converts the resulting code into valid C, which is then normally compiled. Especially for-loop heavy code may become 300 times faster. See \url{cython.org}} code as well as the data sets that were generated may be found at \url{github.com/teunzwart/bachelor-project}, including a basic guide on how to use it.\todo{Currently this repository is still private.}
+A repository containing the code use as well as the data sets that were generated may be found at \url{github.com/teunzwart/bachelor-project}, including a basic guide on how to use it.\todo{Currently this repository is still private.}
 
 Finally I would like to thank my supervisor, dr. Phillipe Corboz, for introducing me into the field of computational physics and patiently explaining statistical analysis of Monte Carlo data.
 I would also like to thank Edan Lerner for acting as my second assessor.
@@ -783,7 +798,7 @@ This is because there the correlation time goes like
 where \(z\) is called the critical dynamical exponent and is different for each algorithm and system.
 During critical slowing down in single spin-flip algorithms the correlation length diverges (up to the system size \(L\)) and islands are formed in which all spins point in the same direction.
 A statistically independent configuration would need to have a significant chance of flipping the spins in such an island.
-However, flipping a spin whose neighbours are pointing in the same direction is energetically unfavorable and thus has a suppressed acceptance probability.
+However, flipping a spin whose neighbours are pointing in the same direction is energetically unfavourable and thus has a suppressed acceptance probability.
 Therefore the correlation time becomes large and the simulation would have to run for a long time to create enough statistically independent measurements,\cite{binney:1992} especially since at \(T_c\) \(\xi = L\), meaning that it would quickly become impractical to simulate large systems.
 For the two dimensional Ising model simulated with the  Metropolis algorithm the dynamic critical exponent has been measured to be \(z=2.1665(12)\).\cite{nightingale:1996}
 
@@ -872,7 +887,7 @@ The error on a quantity for a given binning step is
 	\Delta A^{(l)} = \sqrt{\frac{\mathrm{Var}(A^{(l)})}{N_l}}.
 \end{equation}
 As the binning progresses the error for each step converges to the actual error, meaning that in a plot the errors tend to a plateau (\cref{fig:binning_error_convergence}).
-This method can then be used to calculate the error on the energy, magnetization and any higher order data such as \(E^2\).
+This method can then be used to calculate the error on the energy, magnetisation and any higher order data such as \(E^2\).
 
 From the binning method we can also determine the autocorrelation time:\cite{corboz}
 \begin{equation}
@@ -893,8 +908,8 @@ These include the heat capacity \(c\) and magnetic susceptibility \(\chi\):
 	\chi &= \beta N \left( \langle m^2 \rangle - \langle m^2 \rangle \right).
 \end{align}
 These quantities are not defined at a single instant of the simulation, but instead depend on time averages of the energy or magnetisation.
-Note that binning has to happen for both \(E\) and \(E^2\) separetly when statistically independent samples are created.
-One way to calculate the error on these values is to run the same simulation a large number of times and calculate the error from the calculate errors.
+Note that binning has to happen for both \(E\) and \(E^2\) separately when statistically independent samples are created.
+One way to calculate the error on these values is to run the same simulation a large number of times and calculate the error from the calculated errors.
 Given the long running times of Monte Carlo simulations this is not always practical.
 
 To still be able to calculate errors on the quantities we use resampling methods.
@@ -999,7 +1014,7 @@ Plotting the values, the slope of the line passing through the points, which can
 	\begin{subfigure}{\textwidth}
 		\includegraphics[width=\textwidth]{ising_susceptibility_exact_data_collapse.pdf}
 	\end{subfigure}
-	\caption{Finite size scaling data collapse for the magnetisation and the magnetic susceptibility of the Ising model. The exact values for the exponents \(\gamma = 7/4\), \(\nu=1\) and \(\beta=1/8\) were used.}
+	\caption{Finite size scaling data collapse for the magnetisation and the magnetic susceptibility of the Ising model. The exact values for the exponents \(\gamma = 7/4\), \(\nu=1\) and \(\beta=1/8\) were used. The error bars are too small to see in these plots.}
 	\label{fig:ising_data_collapse}
 \end{figure}
 
@@ -1009,29 +1024,44 @@ Plotting the values, the slope of the line passing through the points, which can
 All results were obtained from simulations of the Wolff algorithm around the critical point.
 Runs consisted of 10000 equilibration sweeps, followed by 65536 measurement sweeps.
 For the Wolff algorithm a sweep was defined as constructing a single cluster.
-\todo{Indicate how reliable your results are}
 
 \section{The Ising Model at Criticality}
 
 The critical temperature of the Ising model in two dimensions in zero field was determined by finding the intersection of the Binder cumulant for lattices of sizes 10, 20, 30 and 40 (\cref{fig:ising_binder_cumulant}).
-First a simulation in the range 2 to 3 with steps of 0.1 was performed to roughly locate the critical point.
+First a simulation in the temperature range 2 to 3 with steps of 0.1 was performed to roughly locate the critical point (the reported temperature all assume \(k_B = 1\)).
 A more fine-grained simulation from 2.169 to 2.369 with a resolution of 0.01 was performed afterwards.
 The critical temperature was determined to be 2.267(2).
 The critical temperature agrees well with Onsager's result of 2.269\cite{onsager:1944}, as well as those of Ghaemi \textit{et al.} of \(T_c = 2.2691(5)\)\cite{ghaemi:2001}.
 
-The intersection of the Binder cumulants was determined by linearly extrapolation between two consecutive data points and trying to find an intersection of those lines between consecutive lattice sizes.
+The intersection of the Binder cumulants was determined by linearly extrapolating between two consecutive data points and trying to find an intersection of those lines between consecutive lattice sizes.
 The average of the different intersection points was taken for the value.
 To determine the error on the estimate intersections were also found for the data points with their respective errors added and subtracted.
 
 Using Log-Log plots the ratio of critical exponents was determined.
-The ratio \(\beta/\nu\) was determined by a linear fit of the magnetisation and was determined as 0.125(1).
+The ratio \(\beta/\nu\) was determined by a linear fit of the magnetisation and was found to be 0.125(1).
 From a fit of the susceptibility (\cref{fig:ising_magnetizabilities_loglog_plot}), we found \(\gamma/\nu = 1.758(8)\).
 Both of those values agreed well with the exact values of \(\beta/\nu = 0.125\) and \(\gamma/\nu = 1.75\).
+The presented errors are as reported by the linear regression tool used (\url{numpy.polyfit}).
+
+For the heat capacity a value inconsistent with theory was found.
+A log-log plot gave \(\alpha /\nu = 0.28(2)\), while theory predicts 0.
+This result may be tied to the poor quality of the finite size scaling data collapse for the heat capacity (\cref{fig:ising_heat_capacity_collapse}).
+Using that \(\alpha=0\) corresponds to logarithmic divergence did not improve the results of the collapse.
+
+\begin{figure}[htb]
+	\includegraphics[width=\linewidth]{ising_heat_capacity_data_collapse.pdf}
+	\caption{A finite size scaling data collapse for the heat capacity of the Ising model. The exact values \(\alpha=0\) and \(\nu=1\) were used, but the collapse was poor. Using \(\log{L}\) did not markedly improve the plot.}
+	\label{fig:ising_heat_capacity_collapse}
+\end{figure}
+
 
 With the determined critical temperature and ratio of critical exponents a data collapse was performed.
-By having \(\nu\) run over a range of 0.01 to 1 in steps of 0.01, while determining the other critical exponent using the ratio, a data collapse was performed.
+By having \(\nu\) run over a range of 0.01 to 1.1 in steps of 0.01, while determining the other critical exponent using the ratio, a data collapse was performed.
 As suggested by Sandvik\cite{sandvik:2011}, the quality of the data collapse was assessed using a chi-least-squares test.
 A polynomial of degree 6 was fitted to the data in the range where most data points fell after scaling, which was in the interval \(L^{1/\nu}t \in [-1, 1]\).
+The collapse with the least spread and therefore the lowest residual was then considered to produce the best fit.
+The values found, as well as those determined using scaling relations, are found in \cref{tab:ising_critical_exponents}.
+Errors were determined by adding and subtracting the error on the critical temperature and redoing the collapse, as well as adding and subtracting the errors on the ratios of critical exponents.
 
 \begin{table}[htb]
 	\centering
@@ -1040,34 +1070,38 @@ A polynomial of degree 6 was fitted to the data in the range where most data poi
 		\hline
 		& \(\alpha\) & \(\beta\) & \(\gamma\) & \(\eta\) & \(\nu\) & \(\delta\) \\\hline
 		Exact & 0 & \(\frac{1}{8}\) & \(\frac{7}{4}\) & \(\frac{1}{4}\) & 1 & 15 \\
-		\(\beta/\nu\) & 0.075(13) & 0.1204(8) & 1.683(14) & 0.250(2) & 0.962(6) & 15(2.8) \\
-		\(\gamma/\nu\) & 0.002(2) & 0.121(2) & 1.756(3) & 0.2424(5) & 0.999(1) & 15.5(14.6)\\\hline
+		\(\gamma/\nu\) & -0.044(5) & 0.123(6) & 1.799(7) & 0.240(1) & 1.022(3) & 15.6(1) \\
+		\(\beta/\nu\) & 0.10(1) & 0.119(1) & 1.66(1) & 0.250(2) & 0.947(6) & 15(1.8)\\\hline
 	\end{tabular}
+	\caption{Critical exponents of the Ising model.}
+	\label{tab:ising_critical_exponents}
 \end{table}
-The value for \(\delta\) calculate using \(\gamma/\nu\) has such a large error because, during error propagation the ration \(\Delta \alpha / \alpha\) is approximatly 1. The error on this value can therefore not be regarded as sensible.
+
+For \(\gamma/\nu\) most critical exponents agreed somewhat with the expected values, although not within their error bars, with the exception of \(\beta\).
+The value of \(\alpha\) is negative, which is not physical, but this stems from the value of \(\nu\) being slightly too large.
+Given that \(\alpha\) is still small the value seems reasonable.
+With \(\beta/\nu\) the critical exponents also agreed somewhat with exact values, notably \(\eta\) and \(\delta\).
 
 With the ratio \(\alpha / \nu\) it is only possible to determine \(\alpha\) and \(\nu\), because the system of equations consisting of the scaling laws after filling in the values of \(\alpha\) and \(\nu\) is a system of three equations with 4 unknowns and therefore underdetermined.
-The log-log plot of the specific heat at criticality gave a ratio \(\alpha / \nu = 0.287(17)\).
-The collapse for the specific heat gave very poor results and gave values of \(\alpha = 0.287(5)\) and \(\nu =1\).
-For \(\nu\) no error could be determined because for all fits \(\nu = 1\) gave the best results.
+As seen in \cref{fig:ising_heat_capacity_collapse} the collapse of the heat capacity is poor even with exact values.
+Therefore the poor agreement of the values found was no surprise.
 
-It was also the case that while iterating over different values of \(\nu\) the upper bound for \(\nu\) was always determined to give the best fit, even though values of \(\nu\) larger than 1 are unphysical in this case.
-For the fits which used \(\beta/\nu\) and \(\gamma/\nu\) the physical exponents remained the same no matter what the upper bound for \(\nu\) was.
+Allowing \(\nu\) to run to 1.1 simply gave \(\nu = 1.1\) as the best fit and \(\alpha = 0.312(6)\).
+Increasing the maximum allowed value to 5 had the result that the best fit occurred at \(\nu=5\),
+indicating that the collapse is in general fairly poorly behaved.
+Because the different fits used to determine the error all gave \(\nu=1.1\) no error on \(\nu\) could be determined.
+For the fits which used \(\beta/\nu\) and \(\gamma/\nu\) the critical exponents found remained the same no matter what the upper bound for \(\nu\) was.
 
-
-\begin{figure}
-	\includegraphics[width=\textwidth]{ising_beta_over_nu_data_collapse.pdf}
-	\includegraphics[width=\textwidth]{ising_gamma_over_nu_data_collapse.pdf}
-	\caption{Data collapses of the magnetisation and magnetic susceptibility, using a chi-least-squares method to determine the goodness of fit (yellow line). The images shown represented the best collapse that could be performed.}
-	\label{fig:ising_chi_data_collapse}
-\end{figure}
 
 
 \section{The Potts Model at Criticality}
 
 For the 3-state Potts model in two dimensions and zero-field the critical temperature was found to be \(T_c=1.020(22)\) using Binder intersection at \(L = 10, 20, 40\).
+This is in reasonable agreement with the result of Ghaemi \textit{et al.}\cite{ghaemi:2001} (\(T_c=0.9950(1)\)), as well as those of Fan \textit{et al.}\cite{fan:2007} of \(T_c = 0.9968(20)\) and the exact value of \(T_c = 1/\log(1+\sqrt{3}) \approx 0.995\).
 
-This is in reasonable agreement with the result of Ghaemi \textit{et al.}\cite{ghaemi:2001} (\(T_c=0.9950(1)\)), as well as those of Fan \textit{et al.}\cite{fan:2007} of \(T_c = 0.9968(20)\).
+From a log-log plot the critical exponents ratios were found to be \(\beta/\nu = 0.131(5)\), \(\alpha/\nu = 0.54(4)\) and \(\gamma/\nu = 1.80(3)\).
+The conjectured exact values for these ratios are \(\beta/\nu = 2/15 \approx 0.133\), \(\alpha/\nu = 2/5 =0.4\) and \(\gamma/\nu = 26/15 \approx 1.73\).
+The value for \(\beta/\nu\) is in good agreement, with the other two ratios less so, especially \(\alpha/\nu\).
 
 \begin{table}[htb]
 	\begin{adjustbox}{center}
@@ -1082,14 +1116,31 @@ This is in reasonable agreement with the result of Ghaemi \textit{et al.}\cite{g
 			Hu (1980)\cite{hu:1980} & 0.3071 & \\
 			Straley (1973)\cite{straley:1973} & 0.05(10)& 0.103(10) & 1.5(1)\\
 			Binder (1981)\cite{binder:1981a} & \(\sim0.4\) & \(\sim0.1\) & \(\sim1.45\)\\
-			\(\beta/\nu\) & 0.43(10) & 0.103(6) & 1.37(12) & 0.263(28) & 0.79(5) & 14.2(3.5)\\
-			\(\gamma/\nu\) & 0.560(67) & 0.07(6) & 1.30(6) & 0.198(13) & 0.72(3) & 19.2(17.3)\\\hline
+			\(\beta/\nu\) & 0.10(14) & 0.125(1) & 1.65(16) & 0.263(32) & 0.95(7) & 14.2(20.1)\\
+			\(\gamma/\nu\) & 0.57(6) & 0.07(6) & 1.30(5) & 0.193(12) & 0.71(3) & 19.7(16.6)\\\hline
 		\end{tabular}
 	\end{adjustbox}
 	\caption{The critical exponents of the three-state Potts model. The values quoted for Den Nijs are conjectured exact values. For Blöte the results had to be read from a graphs, and thus do not have error margins. Hu did not report any error margins.
 	Table VI in \cite{wu:1982} contains more values for the critical exponents, from both numerical and analytical methods.}
+	\label{tab:potts_critical_exponents}
 \end{table}
-The error on \(\delta\) determined with the ratio \(\gamma /\nu\) has a large error because during error propagation the ratio \(\Delta \nu / \nu\) is approximatly 1.
+
+From least-square fits the values of the critical exponents were found (\cref{tab:potts_critical_exponents}).
+Here most data points fell in the interval \(L^{1/\nu}t \in [-2, 2]\).
+With \(\beta/\nu\), the value for \(\eta\) agreed well.
+Other exponents compared poorly with their conjectured values, with the exception of \(\gamma\) which was only slightly larger.
+For \(\delta\) the error is extremely large. This is because during error propagation the ratio \(\Delta \nu / \nu\) is approximately 1.
+Multiplying by the value of \(\delta\) then gives a large error.
+Given the size this value should not be judged as sensible.
+
+For the values determined with the ratio \(\gamma / \nu\) agreement with conjectured other experimental values was about similar, with only \(\beta\) agreeing well.
+Note that for all data collapses performed here the collapse was never as good as in the case of the Ising model magnetisation and susceptibility.
+Even using the conjectured exact values of the critical exponents gave quite poor collapses (\cref{fig:potts_exact_collapse}).
+
+From the ratio \(\alpha/\nu\) it was again only possible to determine \(\alpha\) and \(\nu\).
+We found \(\alpha = 0.39(2)\) and \(\nu = 0.80(3)\).
+Both values agree somewhat with the conjectured and Monte Carlo values of other sources, especially the value for \(\nu\).
+Using the final scaling law (\(2\nu = 2 -\alpha\)) as a consistency check it was found that these values where consistent within error bars.
 
 \vspace*{\baselineskip}
 
@@ -1098,28 +1149,61 @@ First, in all systems only a finite time was used for equilibration, giving rise
 The simulations may also not be long enough to get a sufficient number of statistically independent measurements\cite{newman:1999}, although that would have probably shown up during binning as a failure for the error to reach a plateau.
 
 
+\begin{figure}
+	\includegraphics[width=\textwidth]{ising_beta_over_nu_data_collapse.pdf}
+	\includegraphics[width=\textwidth]{ising_beta_over_nu_data_collapse_residual.pdf}
+	\caption{Data collapse of the magnetisation of the Ising model, using a chi-least-squares method to determine the goodness of fit (yellow line). The image shown represents the best collapse that could be performed. The bottom image shows the data points with the polynomial subtracted, to assess how good the fit is.}
+	\label{fig:ising_chi_data_collapse}
+\end{figure}
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=\linewidth]{potts_susceptibility_data_collapse.pdf}
+	\includegraphics[width=\linewidth]{potts_heat_capacity_data_collapse.pdf}
+	\caption{Data collapse for the Potts susceptibility and heat capacity. Note how poor the collapse is, even when the conjectured exact values of \(\nu = 5/6\), \(\alpha=1/3\) and \(\gamma =13/9\) are used.}
+	\label{fig:potts_exact_collapse}
+\end{figure}
+
+
 \chapter{Conclusions}
 
-For the Ising model and 3-state Potts model in two dimensions and zero field critical exponents were determined using Monte Carlo simulations.
+Phase transitions and critical phenomena play a large role in life.
+These transitions are characterised by critical exponents, which are related to each other by scaling laws.
+Because only a few systems have been solved exactly, the exact values of the critical exponents of many systems are not known.
+In this work the critical exponents and critical temperature of the Ising model and 3-state Potts model in two dimensions and zero field were determined.
+To this end lattices were simulated with Monte Carlo methods, using the Metropolis algorithm as well as the Wolff algorithm.
+The data was analysed using finite size scaling methods.
+The intersection of Binder cumulants gave a value for the critical temperature, while data collapses for simulations of different sized lattices were used to determine critical exponents.
+
+For the Ising model the value of the critical temperature as well as the ratios of critical exponents, with the exception of \(\alpha/\nu\), agreed with the exact values of Onsager's solution.
+Using a data collapse the values of the critical exponents themselves were found to usually not be in agreement with the exact values, with the exception of \(\beta\) and \(\eta\).
+
+The Potts model results gave a value for the critical temperature that was in moderate agreement with the exact result.
+Ratios of critical exponents were generally not in agreement.
+Interestingly the values of \(\alpha\) and \(\nu\) determined from \(\alpha /\nu\) did agree with conjectured results.
+
 
 \section{Further Work}
 There are severals way to expand on the work presented here.
 One way is use renormalisation group techniques to calculate the critical exponents.
 This is the way most papers determine those and has as advantage that the errors on the critical exponents can be better determined.
 
-The Ising and Potts model can also be simulated on different kinds of lattice such as triangular or honeycomb lattices, to verify that the critical exponents (but not the critical temperature) remain the same, thus testing universality.
+It would also be beneficial to further investigate the usefulness of finite size scaling in determining the critical exponents.
+At least in the present work data collapses proved to be a fairly poor way of assessing the values of exponents.
+
+The Ising and Potts model can also be simulated on different kinds of lattices such as triangular or honeycomb lattices, to verify that the critical exponents (but not the critical temperature) remain the same, thus testing universality.
 
 The autocorrelation times were determined using the data from the binning analysis.
-The integrated autocorrelation time proved too slow to determine for large datasets.
-The correlation times could be more accurately investigated and used to establish the occurrence of critical slowing down as well as determining the dynamic critical exponents.
+The correlation times could be investigated using an explicit calculation instead and used to establish the occurrence of critical slowing down as well as determining the dynamic critical exponents.
 
 It is also possible to go to \(q > 4\) and try to determine that the phase transition becomes first order in this case.
 To that end the latent heat would have to be accurately determined, while also having to deal with phase transitions that are not sharp in finite systems.
 
-The order parameter of the Potts model was in this thesis defined based on the definition of the Potts model.
+Finally, the order parameter of the Potts model could be more closely examined.
+In this thesis it was defined based on the definition of the Potts model.
 Many papers used a slightly different definition that is does not have the property of being 1 below \(T_c\) and 0 above \(T_c\).\cite{binder:1981a,wu:1982,fan:2007}
 
-Finally the heat-bath algorithm could be used to simulate Potts model with large \(q\) more efficiently\cite{newman:1999}, tying into trying to measure that for \(q > 4\) in two-dimensions the transitions is first-order.
+
 
 % Set style to abbrv to get Vancouver style citations.
 \bibliographystyle{abbrv}
