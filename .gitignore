@@ -5,3 +5,6 @@ code/analysis_images/
 .ipynb_checkpoints/
 *.so
 *.c
+*.bcf
+*.run.xml
+*-blx.bib

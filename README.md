@@ -8,7 +8,7 @@ Using finite size scaling methods the critical temperature and critical exponent
 
 ## Workflow
 You can play with the simulations yourself.
-The required packages are
+The required Python 3 packages are
 ```
 - Matplotlib
 - Scipy
@@ -16,6 +16,7 @@ The required packages are
 - Cython
 - Seaborn
 ```
+You also need an OpenMP-compatible C compiler.
 
 To run a simulation yourself:
 ```shell
