@@ -5,6 +5,7 @@ import copy
 import numpy as np
 
 import cy_potts_model
+import plotting
 
 
 class PottsModel:
@@ -39,7 +40,7 @@ class PottsModel:
 
         elif self.initial_temperature == "lo":
             if self.bond_energy > 0:
-                ground_state = np.random.choice([0, 1, 2])
+                ground_state = 0 #np.random.choice([0, 1, 2])
                 lattice = np.full((self.lattice_size, self.lattice_size), ground_state, dtype="int64")
             else:
                 raise NotImplementedError("Low temperature anti-ferromagnetic starting lattices are not implemented.")
@@ -69,6 +70,10 @@ class PottsModel:
         energy = cy_potts_model.calculate_lattice_energy(self.lattice, self.lattice_size, self.bond_energy)
         magnetization = self.potts_order_parameter()
         for t in range(self.sweeps):
+            if t == 5000:
+                plotting.show_lattice(self.lattice, self.lattice_size, step=t, save=True, temperature=self.temperature)
+                print("Break")
+                break
             # Measurement every sweep.
             np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, magnetization)

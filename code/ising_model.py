@@ -79,9 +79,11 @@ class IsingModel:
         energy = self.calculate_lattice_energy()
         magnetization = np.sum(self.lattice)
         for t in range(self.sweeps):
+            if t == 5000:
+                plotting.show_lattice(self.lattice, self.lattice_size, step=t, save=True, temperature=self.temperature)
+                print("Break")
+                break
             # Measurement every sweep.
-            # if t in [0, 10, 20, 40, 100, 200, 400, 1000, self.sweeps - 1]:
-            #     plotting.show_lattice(self.lattice, self.lattice_size, step=t)
             np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, magnetization)
             for k in range(self.lattice_size**2):

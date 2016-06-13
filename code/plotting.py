@@ -24,7 +24,7 @@ def show_history(data, quantity, save_plot=False):
     plt.show()
 
 
-def show_lattice(lattice, lattice_size, save=False, step=0):
+def show_lattice(lattice, lattice_size, save=False, step=0, temperature=0):
     """Show the lattice."""
     for tic in plt.gca().xaxis.get_major_ticks():
         tic.tick1On = tic.tick2On = False
@@ -36,7 +36,7 @@ def show_lattice(lattice, lattice_size, save=False, step=0):
     plt.imshow(lattice, interpolation="nearest")
     plt.axis('off')
     if save:
-        plt.savefig("{0}/{1}_{2}_by_{2}_Lattice_step{3}.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())), lattice_size, step), bbox_inches='tight')
+        plt.savefig("{0}/{1}_{2}_by_{2}_Lattice_step{3}_T={4}.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())), lattice_size, step, temperature), bbox_inches='tight')
     plt.show()
 
 
