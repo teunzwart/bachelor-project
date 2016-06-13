@@ -7,18 +7,17 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
-
 import seaborn as sns
-plt.rc('text', usetex=True)
-sns.set_style("ticks")
-sns.set_palette('colorblind')  # Options: deep, muted, pastel, bright, dark, colorblind
 
 import exact_ising_model as exact
 import plotting
 
+plt.rc('text', usetex=True)
+sns.set_style("ticks")
+sns.set_palette('colorblind')  # Options: deep, muted, pastel, bright, dark, colorblind
+
 SIMULATION_FOLDER = "./simulation_runs"
 SAVE_LOCATION = "./analysis_images"
-
 
 
 def open_simulation_files(data_files):
@@ -98,14 +97,15 @@ def data_analysis(data_files, save=False, show_plots=True, exact_ising=True):
     return critical_temperature, critical_temperature_error, magnetizabilities, magnetizations, heat_capacities
 
 
-def find_critical_exponents(critical_temperature, critical_temperature_error, magnetizabilities, magnetizations, heat_capacities, alpha, beta, gamma, nu, save=False):
+def find_critical_exponents(critical_temperature, critical_temperature_error, magnetizabilities, magnetizations, heat_capacities, alpha, beta, gamma, nu, save=False, heat_capacity_correction=0):
+    """Perform a data collapse for the different quantities."""
     # Sanity check.
     # if not 0 <= alpha < 1:
     #     raise ValueError("Alpha should be in the interval [0, 1), alpha is {0}".format(alpha))
     if critical_temperature and critical_temperature_error:
         data_collapse(magnetizabilities, "Susceptibility", critical_temperature, -gamma, nu, "Gamma", save=save)
         data_collapse(magnetizations, "Magnetization", critical_temperature, beta, nu, "Beta", save=save)
-        data_collapse(heat_capacities, "Heat Capacity", critical_temperature, -alpha, nu, "Alpha", save=save)
+        data_collapse(heat_capacities, "Heat Capacity", critical_temperature, -alpha, nu, "Alpha", save=save, heat_capacity_correction=heat_capacity_correction)
 
         critical_exponent_consistency(gamma, alpha, beta, nu)
 
@@ -263,13 +263,14 @@ def find_binder_intersection(data):
 
 
 def chi_squared_data_collapse(data_set, critical_temperature,
-                              critical_temperature_error, ratio, ratio_error, second_exponent_name, show_plots=False, save_plot=False):
+                              critical_temperature_error, ratio, ratio_error, second_exponent_name, show_plots=False, save_plot=False, heat_capacity_correction=0, collapse_limit=1):
     """Find critical exponents through an iterative data fit."""
     best_nus = []
     best_second_exponents = []
+    # Easier to overwrite the same file a number of times than to figure out when the last figure was made.
     current_time = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
-    for k in [-1, 0, 1]:
-        for p in [-1, 0, 1]:
+    for k in [-1, 0, 1]:  # For subtraction and addition of error on ratio.
+        for p in [-1, 0, 1]:  # Same for error on critical temperature.
             lowest_residual = np.inf
             best_nu = 0
             best_second_exponent = 0
@@ -277,20 +278,25 @@ def chi_squared_data_collapse(data_set, critical_temperature,
                 second_exponent = (ratio + k * ratio_error) * nu
                 scaling_functions = {}
                 for lattice_size, data in sorted(data_set.items()):
+                    # if lattice_size == 10:
+                    #     continue
                     for v in data:
                         TC = critical_temperature + p * critical_temperature_error
                         t = (v[0] - TC) / TC
                         scaling_variable = lattice_size**(1 / nu) * t
-                        v_tilde = lattice_size**(-second_exponent / nu) * v[1]
+                        if abs(second_exponent) < 0.0001:
+                            v_tilde = np.log(lattice_size) * (v[1] + heat_capacity_correction)
+                        else:
+                            v_tilde = lattice_size**(-second_exponent / nu) * (v[1] + heat_capacity_correction)
                         v_tilde_error = lattice_size**(-second_exponent / nu) * v[2]
                         scaling_functions.setdefault(lattice_size, []).append((scaling_variable, v_tilde, v_tilde_error))
 
-                at_interval = [a for a in list(itertools.chain(*list(scaling_functions.values()))) if -2 <= a[0] <= 2]
-                if len(at_interval) >= 15:
-
-                    at_interval_x, at_interval_y, at_interval_y_error = zip(*at_interval)
+                # Only consider the temperature range where the most data points ly.
+                at_interval = sorted([a for a in list(itertools.chain(*list(scaling_functions.values()))) if abs(a[0]) <= collapse_limit])
+                if len(at_interval) >= 15:  # We need enough data points to be able to do a collapse.
+                    at_interval_x, at_interval_y, at_interval_y_error = zip(*at_interval)  # Seperate x and y values.
                     polynomial, residuals, _, _, _ = np.polyfit(at_interval_x, at_interval_y, 5, full=True)
-                    if residuals / (len(at_interval) - 5) < lowest_residual:
+                    if residuals / (len(at_interval) - 6) < lowest_residual:  # Determine whether this fit is better than previous ones.
                         lowest_residual = residuals / (len(at_interval) - 6)
                         best_second_exponent = second_exponent
                         best_nu = nu
@@ -302,7 +308,7 @@ def chi_squared_data_collapse(data_set, critical_temperature,
                             plt.ylabel(r'$\mathrm{Scaling\ Function}$')
                             for lattice_size, values in sorted(scaling_functions.items()):
                                 plt.errorbar([k[0] for k in values], [k[1] for k in values], [k[2] for k in values], marker='o', linestyle='None', label=r'${0}$'.format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"))
-                            plt.xlim(-2, 2)
+                            plt.xlim(-collapse_limit, collapse_limit)
                             sns.despine()
                             plt.legend(loc='best')
                             plt.plot(x_new, y_new)
@@ -313,7 +319,7 @@ def chi_squared_data_collapse(data_set, critical_temperature,
                             for lattice_size, values in sorted(scaling_functions.items()):
                                 plt.errorbar([k[0] for k in values], [k[1] - f(k[0]) for k in values], [k[2] for k in values], marker='o', linestyle='None', label=r'${0}$'.format(str(lattice_size) + '\mathrm{\ by\ }' + str(lattice_size) + "\mathrm{\ Lattice}"))
                             plt.axhline(y=0)
-                            plt.xlim(-2, 2)
+                            plt.xlim(-collapse_limit, collapse_limit)
                             plt.ylim(-0.01, 0.01)
                             plt.xlabel(r'$L^{(1/\nu)}t$')
                             plt.ylabel(r'$\mathrm{Scaling\ Function\ -\ polynomial}$')
@@ -328,14 +334,17 @@ def chi_squared_data_collapse(data_set, critical_temperature,
     return np.mean(best_second_exponents), calculate_error(best_second_exponents), np.mean(best_nus), calculate_error(best_nus)
 
 
-def data_collapse(data_set, quantity, critical_temperature, critical_exponent1, nu, name1, save=False):
-    # print(data_set)
+def data_collapse(data_set, quantity, critical_temperature, critical_exponent1, nu, name1, save=False, heat_capacity_correction=0):
+    """Perform a data collapse with a given set of critical exponents. Used to see how the exact result collapses."""
     scaling_functions = {}
     for lattice_size, data in sorted(data_set.items()):
         for v in data:
             t = (v[0] - critical_temperature) / critical_temperature
             scaling_variable = lattice_size**(1 / nu) * t
-            v_tilde = lattice_size**(critical_exponent1 / nu) * v[1]
+            if critical_exponent1 == 0:
+                v_tilde = np.log(lattice_size) * (v[1] + heat_capacity_correction)
+            else:
+                v_tilde = lattice_size**(critical_exponent1 / nu) * (v[1] + heat_capacity_correction)
             v_tilde_error = lattice_size**(critical_exponent1 / nu) * v[2]
             scaling_functions.setdefault(lattice_size, []).append((scaling_variable, v_tilde, v_tilde_error))
     for lattice_size, data in sorted(scaling_functions.items()):
@@ -352,12 +361,14 @@ def data_collapse(data_set, quantity, critical_temperature, critical_exponent1, 
     plt.show()
 
 
-def loglog_exponent_finding(data_set, quantity, save=False):
+def loglog_exponent_finding(data_set, quantity, save=False, heat_capacity_correction=0):
+    """Find ratios of critical exponents by finding a linear relation between logarithms of lattice sizes and quantity values."""
     lattice_sizes_log = []
     magnetizations_log = []
     magnetizations_log_error = []
+
     for lattice_size, data in data_set.items():
-        magnetization_log = np.log(data[0][1])
+        magnetization_log = np.log(data[0][1] + heat_capacity_correction)
         magnetization_log_error = data[0][2] / data[0][1]
         lattice_sizes_log.append(np.log(lattice_size))
         magnetizations_log.append(magnetization_log)
@@ -367,9 +378,12 @@ def loglog_exponent_finding(data_set, quantity, save=False):
     magnetizations_log = np.asarray(magnetizations_log)
     slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(lattice_sizes, magnetizations_log)
 
+    fitted_line = slope * lattice_sizes + intercept
+
     plt.xlabel(r'$\log(L)$')
     plt.ylabel(r'$\log({0})$'.format('\mathrm{' + quantity.replace(" ", "\ ") + '}'))
     plt.errorbar(lattice_sizes, magnetizations_log, magnetizations_log_error, linestyle='None', marker='o')
+    plt.plot(lattice_sizes, fitted_line)
     sns.despine()
     if save:
         plt.savefig("{0}/{1}_{2}_loglog_plot.pdf".format(SAVE_LOCATION, time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())), quantity.lower().replace(" ", "_"), bbox_inches='tight'))
@@ -378,6 +392,7 @@ def loglog_exponent_finding(data_set, quantity, save=False):
 
 
 def critical_exponent_consistency(gamma, alpha, beta, nu):
+    """Use scaling laws to determine consistency of critical exponents."""
     delta = (2 - alpha) / beta - 1
     eta = 2 - gamma / nu
     print("Eta = {0}, Delta = {1}".format(eta, delta))
