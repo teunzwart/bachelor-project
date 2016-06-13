@@ -2,7 +2,6 @@
 
 import numpy as np
 import cython
-import cython.parallel
 cimport numpy as np
 
 @cython.boundscheck(False)
@@ -24,8 +23,8 @@ def calculate_lattice_energy(np.ndarray[np.int_t, ndim=2] lattice, int lattice_s
     """
     cdef int energy = 0
     cdef int y, x, center, offset_y, offset_x, xnn, ynn
-    with nogil, cython.parallel.parallel(num_threads=4):
-        for y in cython.parallel.prange(lattice_size):
+    with nogil:
+        for y in range(lattice_size):
             # The same for all x values, so can be precalculated.
             offset_y = y + 1
             # Wraparound the lattice. Note that truncated assignment operaters are used

@@ -4,9 +4,7 @@ from Cython.Distutils import build_ext
 import numpy
 
 modules = [Extension("cy_ising_model",
-                     ["cy_ising_model.pyx"],
-                     extra_compile_args=["-fopenmp"],
-                     extra_link_args=["-fopenmp"]),
+                     ["cy_ising_model.pyx"]),
            Extension("cy_potts_model",
                      ["cy_potts_model.pyx"])]
 
