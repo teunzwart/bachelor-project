@@ -17,7 +17,7 @@
 \usepackage[utf8]{inputenc} % Special characters (e.g. trema) can be entered directly: .tex file has to be saved using UTF-8 encoding.
 \usepackage{lmodern} % Alternative font because 'fontenc' package does not work with default.
 \usepackage{microtype} % Improves character spacing.
-\usepackage[backend=bibtex,bibencoding=ascii,style=ieee,sorting=none,giveninits=true,sortcites=true]{biblatex}
+\usepackage[backend=bibtex,bibencoding=ascii,style=numeric-comp,sorting=none,giveninits=true,sortcites=true]{biblatex}
 \addbibresource{bachelor-thesis}
 
 
@@ -29,10 +29,11 @@
 \usepackage{subcaption} % Allow subcaptions.
 \usepackage[nottoc]{tocbibind} % Include references in table of contents.
 \usepackage[colorinlistoftodos]{todonotes} % Add todo notes.
-\usepackage{cleveref} % Automate "equation (...)" reference. Use \vref.
+\usepackage[noabbrev]{cleveref} % Automate "equation (...)" reference. Use \vref.
 \usepackage{commath}
 \usepackage{breqn}
 \usepackage{adjustbox}
+\usepackage{wrapfig}
 
 %%% Additional options %%%
 \pagestyle{fancy} % Set header style.
@@ -71,9 +72,10 @@
 		\begin{minipage}[t]{0.4\textwidth}
 			\begin{flushright}
 				\large\emph{Supervisor}\\{\SUPERVISOR}\\~\\
-				\large\emph{Second Assessor}\\{\SECONDASSESSOR}
+				\large\emph{Second Assessor}\\{\SECONDASSESSOR}\\~\\~\\
 			\end{flushright}
 		\end{minipage}
+		\includegraphics[width=\textwidth]{monte_carlo_casino.jpg}
 		\vfill
 		\large{\INSTITUTE}\\
 		\large{\FACULTY}\\
@@ -88,12 +90,21 @@
 We study the critical behaviour of the 3-state Potts model in two dimensions and zero-field.
 Monte Carlo simulations are used to find the critical temperature, as well as the critical exponents of the model.
 These values are calculated by using finite size scaling methods.
+
 The Ising model in two dimensions is used as a benchmark for the methods used, given that it is exactly solved.
-The critical temperature found agrees well with exact known value of Onsager's solution.
-Values of ratios of critical exponents and critical exponents themselves agree less well.
+The critical temperature found agrees well with the exact known value of Onsager's solution.
+Values of ratios of critical exponents also agreed well.
+Most critical exponents agreed reasonably well with exact values.
 
 For the Potts model the critical temperature is found to be in moderate agreement with exact results.
-Ratios of critical exponents and critical exponents do, outside of a few exceptions, not agree with conjectured exact results.
+Ratios of critical exponents agree reasonably well with conjectured results.
+Using the ratio \(\beta/\nu\) all critical exponents agree with conjectured results.
+Agreement using \(\gamma/\nu\) is poorer, possible because of finite size scaling corrections.
+Special attention is paid to scaling for the heat capacity by including a background term.
+
+\vfill
+\noindent
+\textbf{Image Credit:} Eastern frontal view of the Trente-Quarante Gaming Room of the Monte Carlo Casino, from which the methods used in this work get their name, designed by Charles Garnier c. 1878–80. Image retrieved from Wikimedia Commons, originally in Bonillo et al. (2004). \textit{Charles Garnier and Gustave Eiffel on the French and Italian Rivieras: The Dream of Reason}
 
 
 \newpage
@@ -117,17 +128,19 @@ Hierbij wordt voor de spins op het rooster een voor een geprobeerd ze om te draa
 Omdat het in de buurt van de faseovergang kan gebeuren dat er grote eilanden ontstaan van spins die allemaal dezelfde richting op wijzen en waarvan de kans klein is dat ze worden omgedraaid, heb ik ook gebruik gemaakt van het Wolff algoritme dat grote clusters van spins in één keer omdraait.
 Zo kan het niet gebeuren dat het rooster tijdens de simulatie lange tijd in dezelfde toestand blijft.
 
-Tijdens het draaien van de simulaties deed ik de  continue metingen van de energie en magnetisatie.
+Tijdens het draaien van de simulaties deed ik continue metingen van de energie en magnetisatie.
 Met behulp van die metingen kon ik verschillende grootheden uitrekenen zoals de warmtecapaciteit.
 Om de data te analyseren en de kritische temperatuur en exponenten te bepalen  heb ik gebruikt gemaakt van een eigenschap die dit soort systemen hebben.
-Als je roosters van verschillende grootten simuleert en dan de waarde van bepaalde eigenschappen met een factor schaalt, blijkt dat de verschillende lijnen van verschillenden rooster grootten precies over elkaar heen vallen.
-Dit gebeurt wel alleen als je de juiste factor, die afhangt van de kritische exponenten, gebruikt.
-Door verschillende waarden te proberen kun je zo de exponenten vinden.
+Als je roosters van verschillende grootten simuleert en dan de waarde van bepaalde eigenschappen met een factor (die afhangt van de grootte van het rooster, de kritische temperatuur en de kritische exponenten) vermenigvuldigt, blijkt dat de verschillende lijnen van verschillenden rooster grootten precies over elkaar heen vallen.
+Dit gebeurt wel alleen als je de factor met de juiste exponenten en temperatuur berekent.
+Door verschillende waarden te proberen kun je zo de exponenten vinden, door te kijken wanneer de metingen van verschillende roostergrootten het best samenvallen.
 
 Voor zowel het Ising model als het Potts model heb ik de kritische temperatuur kunnen vinden.
-De kritische exponenten waren lastiger te bepalen.
-Het is mij bij beide modellen wel gelukt om de verhouding tussen de verschillende exponenten nauwkeurig te bepalen, maar bij de exponenten zelf lukte dat minder goed.
-
+Ook kon ik voor beide nauwkeurig de verhouding tussen kritische exponenten bepalen.
+Bij het Ising model vond ik kritische exponenten die goed overeenkomen met de exacte waarden.
+Voor het Potts model vond ik met één manier om data samen te laten vallen exponenten die overeenkomen met voorspelde waarden.
+Een andere manier gaf juist resultaten die niet goed waren.
+Dit komt mogelijk doordat de systemen die ik simuleerde relatief klein zijn, terwijl deze technieken better werken voor grote systemen.
 
 
 \tableofcontents
@@ -172,11 +185,12 @@ To determine when a phase transition has taken place, we consider the order para
 In ferromagnetic systems such as iron, as well as in the systems we will study in this work, this is the magnetisation.
 On one side of the phase transition a non-zero magnetisation is present.
 As the iron is heated, it moves past its Curie temperature and the magnetisation does become zero.
-More generally we consider an order parameter \(\phi\) which is a quantity that is non-zero on one side of the phase transition, and vanishes  on the other side. Usually the order parameter is zero on the high temperature side of the phase transition. (See \cref{fig:ising_magnetization}. The Ising model is considered in more detail in \cref{sec:ising_model}.)
-The temperature at which the order parameter becomes zero is the critical temperature \(T_c\).
+More generally we consider an order parameter \(\phi\) which is a quantity that is non-zero on one side of the phase transition, where a symmetry of the Hamiltonian governing this system is spontaneously broken, and vanishes on the other side. Usually the order parameter is zero on the high temperature side of the phase transition. (See \cref{fig:ising_magnetization}. The Ising model is considered in more detail in \cref{sec:ising_model}.)
+
+
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=\linewidth]{ising_magnetization}
+	\includegraphics[width=0.85\linewidth]{ising_magnetization}
 	\caption{The magnetisation of the two-dimensional Ising model as a function of temperature. The critical temperature is 2.269. Notice how the magnetisation is finite on one side of the phase transition, but zero on the other side.}
 	\label{fig:ising_magnetization}
 \end{figure}
@@ -310,6 +324,7 @@ In the case where the interaction strength in both directions is the same the Ha
 	H = -J \sum_{\langle ij \rangle} \sigma_{i} \sigma_{j}.
 \end{align}
 The sum runs over all nearest neighbour bonds on the lattice.
+This Hamiltonian is symmetric under a change of sign of all spins.
 In the ferromagnetic ground state (\(J>0\), \(T=0\)) all spins on the lattice are aligned in one of the two possible directions (the direction is chosen when the mirror symmetry in the lattice plane is spontaneously broken as the lattice cools).
 The Hamiltonian is subject to periodic boundary conditions in both directions, meaning \(\sigma_{1,k} = \sigma_{\mathcal{M}+1,k}\) and \(\sigma_{j,1} = \sigma_{j,\mathcal{N}+1}\).
 We are interested in the thermodynamic properties of the Ising Model.
@@ -318,7 +333,8 @@ To that end we define the partition function
 	Z &= \sum_{\sigma = \pm 1} e^{-\beta H} \\
 	  &= \sum_{\sigma = \pm 1} \prod_{j=1}^{\mathcal{M}} \prod_{k=1}^{\mathcal{N}} e^{\beta J_1 \sigma_{j,k} \sigma_{j,k+1}} \prod_{j=1}^{\mathcal{M}} \prod_{k=1}^{\mathcal{N}} e^{\beta J_2 \sigma_{j,k} \sigma_{j+1,k}},
 \end{align}
-with \(\beta=1/k_B T\) and the sum running over every possible orientation of the spins on the lattice. Solving this requires a non-trivial amount of effort and it is best to refer to either Onsager~\cite{onsager:1944}, who systemically added one-dimensional Ising models together to create a two dimensional lattice, or Kasteleyn as described in~\cite{mccoy:1973}, whose approach considerably simplifies the derivation by reducing it to a combinatorial problem.
+with \(\beta=1/k_B T\) and the sum running over every possible orientation of the spins on the lattice. Solving this in the thermodynamic limit requires a non-trivial amount of effort and it is best to refer to either Onsager~\cite{onsager:1944}, who systemically added one-dimensional Ising models together to create a two dimensional lattice, or Kasteleyn as described in~\cite{mccoy:1973}, whose approach considerably simplifies the derivation by reducing it to a combinatorial problem.
+For small systems (for example a 3 by 3 lattice) the sum could be explicitly calculated, but the number of terms grows exponentially as \(2^N\) \cite{newman:1999,binney:1992}.
 
 The derivation introduces a sign ambiguity in \(Z\) which takes some additional care to resolve, but we can avoid having to deal with this by considering the free energy \(F\) in the thermodynamic limit\footnote{This is the limit in which the number of particles on the lattice tends to infinity.} instead of the partition function
 \begin{dgroup*}
@@ -441,7 +457,7 @@ Using \cref{eq:k_derivative} and \cref{eq:elliptic_identity} the expression for 
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=\linewidth]{ising_internal_energy.pdf}
+	\includegraphics[width=0.85\linewidth]{ising_internal_energy.pdf}
 	\caption{The internal energy per site and the specific heat per site of the two-dimensional Ising model in zero-field. Notice the divergence of the specific heat around \(T=T_c \approx 2.269\), which is cut off in this graph due to the limited resolution.}
 	\label{fig:ising_internal_energy}
 \end{figure}
@@ -637,6 +653,19 @@ We therefore set \(p_{\alpha_i}\) equal to \cref{eq:boltzmann_probability}, afte
 \end{equation}
 This way of sampling is called importance sampling. The states that contribute the most are also sampled most often~\cite{newman:1999}.
 
+If the \(M\) observations of \(X_{\alpha_i}\) are statistically independent and distributed according to a Gaussian, the error on the estimate is
+\begin{equation}\label{eq:uncorrelated_error}
+	\Delta X_M = \frac{\sigma}{\sqrt{M}},
+\end{equation}
+with
+\begin{equation}
+	\sigma = \sqrt{\mathrm{Var}(X)} = \sqrt{\langle X^2 \rangle - \langle X \rangle^2}
+\end{equation}
+the standard deviation.
+We see that the error on an estimate goes like \(M^{-1/2}\), meaning that with more samples the error becomes smaller.
+The above equation is only valid for statistically independent measurements, which the measurements done in the simulations generally will not be \cite{landau:2015}.
+Dealing with correlated measurements is discussed in \cref{sec:statistics}.
+
 To pick states randomly according to the Boltzmann distribution we use a Markov process.
 In a Markov process a system in state \(\mu\) is mutated into a state \(\nu\) with probability \(P(\mu\to\nu)\).
 These probabilities do not vary over time and depend only on the system as it is in state \(\mu\), not as it was earlier.
@@ -731,6 +760,7 @@ Therefore a sweep consists of \(N\) of the steps described above.
 The advantage of this is that time in a simulation can be measured independent of system size~\cite{newman:1999}.
 To keep the number of measurements reasonable, measurements are performed after every sweep, and not after every algorithm step.
 In \cref{fig:metropolis_ising_at_steps} we see the progression towards equilibrium as a Metropolis simulation of an Ising model lattice progresses.
+\Cref{fig:metropolis_ising_at_temps} shows how the lattice differs at equilibrium for different temperatures.
 
 \begin{figure}[htb]
 	\centering
@@ -776,30 +806,30 @@ In \cref{fig:metropolis_ising_at_steps} we see the progression towards equilibri
 \begin{figure}[htb]
 	\centering
 	\begin{subfigure}[c]{0.2\linewidth}
-		\includegraphics[width=\linewidth]{20160603124433_40_by_40_Lattice_step0.pdf}
+		\includegraphics[width=\linewidth]{20_by_20_Lattice_step5000_T=22.pdf}
 	\end{subfigure}
 	~
 	\begin{subfigure}[c]{0.2\linewidth}
-		\includegraphics[width=\linewidth]{20160603125613_40_by_40_Lattice_step10.pdf}
+		\includegraphics[width=\linewidth]{20_by_20_Lattice_step5000_T=23.pdf}
 	\end{subfigure}
 	~
 	\begin{subfigure}[c]{0.2\linewidth}
-		\includegraphics[width=\linewidth]{20160603125613_40_by_40_Lattice_step20.pdf}
+		\includegraphics[width=\linewidth]{20_by_20_Lattice_step5000_T=24.pdf}
 	\end{subfigure}
 
 	\begin{subfigure}[c]{0.2\linewidth}
-		\includegraphics[width=\linewidth]{20160603125614_40_by_40_Lattice_step40.pdf}
+		\includegraphics[width=\linewidth]{20_by_20_Lattice_step5000_T=28.pdf}
 	\end{subfigure}
 	~
 	\begin{subfigure}[c]{0.2\linewidth}
-		\includegraphics[width=\linewidth]{20160603125616_40_by_40_Lattice_step100.pdf}
+		\includegraphics[width=\linewidth]{20_by_20_Lattice_step5000_T=34.pdf}
 	\end{subfigure}
 	~
 	\begin{subfigure}[c]{0.2\linewidth}
-		\includegraphics[width=\linewidth]{20160603125617_40_by_40_Lattice_step200.pdf}
+		\includegraphics[width=\linewidth]{20_by_20_Lattice_step5000_T=38.pdf}
 	\end{subfigure}
 
-	\caption{Typical structures in a Metropolis simulation of a 20 by 20 Ising model at different temperatures. From top left: \(T=\)}
+	\caption{Typical structures in a Metropolis simulation of a 20 by 20 Ising model at different temperatures after 5000 sweeps. From top left: \(T=2.2,2.3,2.4,2.8,3.4,3.8\)}
 	\label{fig:metropolis_ising_at_temps}
 \end{figure}
 
@@ -903,11 +933,17 @@ This algorithm again satisfies detailed balance and ergodicity~\cite{newman:1999
 The dynamic critical exponent is \(z=0.60(2)\), again a significant improvement over the Metropolis algorithm.
 
 
-\chapter{Analysis of Monte Carlo Simulations}
-\section{Statistics}
+\chapter{Analysing Monte Carlo Simulations}
+\section{Statistics}\label{sec:statistics}
 Now that we have obtained measurements for the energy and magnetisation of the Ising and Potts models, we need to find a way to make these measurements statistically uncorrelated, since the state of a lattice after a single algorithm sweep may not be very different compared to the state before.
-Because typical methods for error calculation assume uncorrelated samples, those methods do not work.
-We can calculate the autocorrelation times, and only sample once every two correlation times, but an easier approach is the Binning method.
+To calculate the error on statistically independent measurements we use \cref{eq:uncorrelated_error}.
+It is possible to modify this equation for correlated measurements as
+\begin{equation}
+	\Delta = \sqrt{\frac{\sigma^2}{M}\left(1+2\frac{\tau}{\delta t}\right)},
+\end{equation}
+with \(\tau\) the correlation time and \(\delta t\) the time step between measurements \cite{landau:2015}.
+In this case we need to know the correlation time of the measured quantity.
+It is often easier to use the Binning method, which does not require explicit knowledge of the correlation time and actually allows for the calculation of those correlation times.
 
 \subsection{Binning}
 
@@ -922,8 +958,9 @@ The average in each bin is less correlated with every step while the mean remain
 The error on a quantity for a given binning step is
 \begin{equation}
 	\label{eq:basic_error}
-	\Delta A^{(l)} = \sqrt{\frac{\mathrm{Var}(A^{(l)})}{N_l}}.
+	\Delta A^{(l)} = \sqrt{\frac{\mathrm{Var}(A^{(l)})}{N_l}},
 \end{equation}
+which is the same as for uncorrelated errors (\cref{eq:uncorrelated_error}).
 As the binning progresses the error for each step converges to the actual error, meaning that in a plot the errors tend to a plateau (\cref{fig:binning_error_convergence}).
 This method can then be used to calculate the error on the energy, magnetisation and any higher order data such as \(E^2\).
 
@@ -934,7 +971,7 @@ From the binning method we can also determine the autocorrelation time~\cite{cor
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=\linewidth]{ising_metropolis_energy_per_site_error_binning.pdf}
-	\caption{The error for the energy per site as a function of the data size. As the binning progresses the error tends to a plateau. A 10 by 10 Ising model was simulated at a temperature of 2, thermalised for 5000 sweeps and then measured for 65536 sweeps.}
+	\caption{The error for the energy per site as a function of the data size. As the binning progresses the error tends to a plateau. A 4 by 4 Ising model was simulated at a temperature of 2, thermalised for 10000 sweeps and then measured for 131072 sweeps.}
 	\label{fig:binning_error_convergence}
 \end{figure}
 
@@ -958,7 +995,7 @@ Strictly speaking these measurements should be independent, but for the bootstra
 We can simply use measurements made after every sweep of the lattice.
 With the \(n\) samples we calculate the desired quantity.
 Then we repeat the random sampling a number of times (1000 should be enough).
-With those values of the heat capacity, we can use basic methods to calculate errors, such as \cref{eq:basic_error}~\cite{newman:1999}.
+With those values of the heat capacity, we can use methods for uncorrelated samples to calculate errors, such as \cref{eq:basic_error}~\cite{newman:1999}.
 
 We can also use the jackknife method.
 Here we do need statistically uncorrelated samples.
@@ -1040,6 +1077,8 @@ With out this correction no data collapse will be possible that allows for the e
 
 
 \section{The Binder Cumulant}
+With a finite size scaling data collapse it is possible to find the critical temperature, but fitting three parameters requires that a large parameter space is searched.
+An alternate way to find \(T_c\) is therefore desirable.
 Because of the finite size of the lattice a sharp phase transition is not present and it is not possible to determine the critical temperature by determining when the order parameter is zero.
 We can however define the Binder cumulant~\cite{binder:1981b}
 \begin{equation}
@@ -1048,11 +1087,11 @@ We can however define the Binder cumulant~\cite{binder:1981b}
 which for \(L \to \infty\) becomes \(2/3\) for \(T \to 0\) and 0 for \(T \to \infty\)~\cite{landau:2015}.
 At the critical temperature \(U_4\) has the same value independent of the lattice size.
 This is because in \cref{eq:magnetisation_scaling}, \(\widetilde{m}\) becomes a constant independent of lattice size (since \(t=0\)).
-We have:~\cite{corboz}
+We have~\cite{corboz}:
 \begin{align}
 	U_4 &= 1 - \frac{\langle m^4 \rangle}{3 \langle m^2 \rangle^2}\\
-	&=1 - \frac{\langle \left(\widetilde{m}(L^{1/\nu}t) L^{-\beta/\nu}\right)^4 \rangle}{3 \langle \left(\widetilde{m}(L^{1/\nu}t) L^{-\beta/\nu}\right)^2 \rangle^2} \\
-	&= 1 - \frac{\langle \widetilde{m}(L^{1/\nu}t) ^4 \rangle}{3 \langle \widetilde{m}(L^{1/\nu}t)^2 \rangle^2} \\
+	&=1 - \frac{\langle \left(\widetilde{m}(L^{1/\nu}t) L^{-\beta/\nu}\right)^4 \rangle}{3 \langle \left(\widetilde{m}(L^{1/\nu}t) L^{-\beta/\nu}\right)^2 \rangle^2}\Bigg|_{t=0} \\
+	&= 1 - \frac{\langle \widetilde{m}(L^{1/\nu}t) ^4 \rangle}{3 \langle \widetilde{m}(L^{1/\nu}t)^2 \rangle^2} \Bigg|_{t=0}
 \end{align}
 which is constant for all lattice sizes.
 Therefore the critical temperature can be found by plotting the Binder cumulant for different lattice sizes and looking for the intersection (as seen in \cref{fig:ising_binder_cumulant}).
@@ -1061,7 +1100,7 @@ If a value for the critical temperature is found in this way, it can also be plu
 
 \begin{figure}[htb]
 	\includegraphics[width=\linewidth]{wolff_binder_cumulant.pdf}
-	\caption{The Binder cumulant for the Ising model at three different lattice sizes. The critical point occurs at approximately \(T = 2.26\). The values were acquired by simulation the lattice using the Wolff algorithm and running 65536 steps after equilibration. During the simulation the temperature was varied from 2 to 3 in steps of 0.1, with a higher resolution from 2.169 to 2.369 in steps of 0.01. The error bars are too small to see in this plot.}
+	\caption{The Binder cumulant for the Ising model at three different lattice sizes. The critical point occurs at approximately \(T = 2.26\). The values were acquired by simulation the lattice using the Wolff algorithm and running 65536 steps after equilibration. During the simulation the temperature was varied from 2 to 3 in steps of 0.1, with a higher resolution from 2.169 to 2.369 in steps of 0.01.}
 	\label{fig:ising_binder_cumulant}
 \end{figure}
 
@@ -1088,7 +1127,7 @@ By binning measurements until 128 data points remained, statistically independen
 
 \section{The Ising Model at Criticality}
 
-The critical temperature of the Ising model in two dimensions in zero field was determined by finding the intersection of the Binder cumulant for lattices of sizes 10, 20, 30 and 40 (\cref{fig:ising_binder_cumulant}).
+The critical temperature of the Ising model in two dimensions in zero field was determined by finding the intersection of the Binder cumulant for lattices of sizes 10, 20, 30 and 40 (see \cref{fig:ising_binder_cumulant}, which does not include the 30 by 30 lattice).
 First a simulation in the temperature range 2 to 3 with steps of 0.1 was performed to roughly locate the critical point (the reported temperature all assume \(k_B = 1\)).
 A more fine-grained simulation from 2.169 to 2.369 with a resolution of 0.01 was performed afterwards.
 The critical temperature was determined to be 2.267(2).
@@ -1139,7 +1178,7 @@ With \(\beta/\nu\) the critical exponents also agreed somewhat with exact values
 
 \begin{figure}[htb]
 	\includegraphics[width=\linewidth]{ising_heat_capacity_data_collapse.pdf}
-	\caption{A finite size scaling data collapse for the heat capacity of the Ising model. The exact values \(\alpha=0\) and \(\nu=1\) were used. Because this corresponds to logarithmic divergence the logarithm of \(L\) was taken when calculating the scaling function. The constant background was had a value of 3.}
+	\caption{A finite size scaling data collapse for the heat capacity of the Ising model. The exact values \(\alpha=0\) and \(\nu=1\) were used. Because this corresponds to logarithmic divergence the logarithm of \(L\) was taken when calculating the scaling function. The constant background term had a value of 3.}
 	\label{fig:ising_heat_capacity_collapse}
 \end{figure}
 
@@ -1151,8 +1190,6 @@ Using the exact ratio of 0 we find \(\alpha=0.003(4)\) and \(\nu=0,77(8)\).
 In this case the logarithm of \(L\) is used in the scaling function.
 The scaling laws \(2\nu = 2-\alpha\) is also not satisfied since \(1.54(16) \neq 1.997(3)\).
 As we see in \cref{fig:ising_heat_capacity_collapse}, the collapse for the heat capacity even with exact results is not of as high a quality as those of the susceptibility and magnetization.
-As seen in \cref{fig:ising_heat_capacity_collapse} the collapse of the heat capacity is poor even with exact values.
-Therefore the poor agreement of the values found was no surprise.
 
 
 \section{The Potts Model at Criticality}
@@ -1184,7 +1221,7 @@ Note that these values were calculated with simulations done at \(T_c=0.995\), t
 	\end{adjustbox}
 	\caption{The critical exponents of the three-state Potts model. The values quoted for Den Nijs are conjectured exact values. For Blöte the results had to be read from a graphs, and thus do not have error margins. Hu did not report any error margins.
 	Table VI in~\cite{wu:1982} contains more values for the critical exponents, from both numerical and analytical methods.
-	The final two rows of values were calculated by using the given ratio, iterating over different values of \(\nu\) and determining the other critical exponent using the ratio, and then determining which values gave the best fit. The other critical exponents are calculated using scaling laws.}
+	The final two rows of values were calculated by using the given ratio, iterating over different values of \(\nu\) and determining the other critical exponent using the ratio, and then determining which values gave the best fit. The other critical exponents are calculated using scaling laws. The presented values were found with a collapse done with \(T_c=0.995\).}
 	\label{tab:potts_critical_exponents}
 \end{table}
 
@@ -1197,21 +1234,21 @@ Here most data points fell in the interval \(L^{1/\nu}t \in [-2, 2]\).
 With \(\beta/\nu\), the value for all critical exponents agreed well with the conjectured values as well as those of Fan \textit{et al.}~\cite{fan:2007}.
 
 
-For the values determined with the ratio \(\gamma / \nu\) agreement with conjectured other experimental values was about similar, with only \(\beta\) agreeing well.
-For \(\delta\) the error is extremely large. This is because during error propagation the ratio \(\Delta \nu / \nu\) is approximately 1.
+For the values determined with the ratio \(\gamma / \nu\) agreement with conjectured other experimental values was poorer, with only \(\beta\) agreeing withing error bars.
+For \(\delta\) the error is extremely large. This is because during error propagation the ratio \(\Delta \beta / \beta\) is approximately 1.
 Multiplying by the value of \(\delta\) then gives a large error.
-Given the size this value should not be judged as sensible.
+Given the size of the error this value should not be judged as sensible.
 
 From the ratio \(\alpha/\nu\) it was again only possible to determine \(\alpha\) and \(\nu\).
 We found \(\alpha = 0.37(2)\) and \(\nu = 0.92(4)\).
 Both values agree somewhat with the conjectured and Monte Carlo values of other sources, especially the value for \(\alpha\).
-Using the final scaling law (\(2\nu = 2 -\alpha\)) as a consistency check it was found that these values where not consistent within error bars.
+Using the final scaling law (\(2\nu = 2 -\alpha\)) as a consistency check it was found that these values where not consistent within error bars since \(1.84(8) \neq 1.63(2)\).
 
 \vspace*{\baselineskip}
 
 For the finite size scaling collapse it is important to note that the collapse is only good very close to \(t=0\).
-This also means that \(T_c\) has to be known to a high degree of precision (as seen above).
-Another problem is that the scaling functions are only approximatly correct even when \(t\) is small.
+This also means that \(T_c\) has to be known to a high degree of precision (as seen above for the Potts model).
+Another problem is that the scaling functions are only approximately correct even when \(t\) is small.
 The scaling functions are in better agreement as the system size increases, but for small \(L\) correction terms to the scaling functions have to be taken into account~\cite{newman:1999}.
 
 \begin{figure}
@@ -1231,7 +1268,7 @@ The scaling functions are in better agreement as the system size increases, but 
 
 \chapter{Conclusions}
 
-Phase transitions and critical phenomena play a large role in life.
+Phase transitions and critical phenomena play an important role in life.
 These transitions are characterised by critical exponents, which are related to each other by scaling laws.
 Because only a few systems have been solved exactly, the exact values of the critical exponents of many systems are not known.
 In this work the critical exponents and critical temperature of the Ising model and 3-state Potts model in two dimensions and zero field were determined.
@@ -1240,11 +1277,15 @@ The data was analysed using finite size scaling methods.
 The intersection of Binder cumulants gave a value for the critical temperature, while data collapses for simulations of different sized lattices were used to determine critical exponents.
 
 For the Ising model the value of the critical temperature as well as the ratios of critical exponents, with the exception of \(\alpha/\nu\), agreed with the exact values of Onsager's solution.
-Using a data collapse the values of the critical exponents themselves were found to usually not be in agreement with the exact values, with the exception of \(\beta\) and \(\eta\).
+Using a data collapse the values of the critical exponents themselves were found to usually be in reasonable agreement with the exact values. The values found for \(\alpha\) were close to zero, although one value was negative, a non-physical result.
 
 The Potts model results gave a value for the critical temperature that was in moderate agreement with the exact result.
-Ratios of critical exponents were generally not in agreement.
-Interestingly the values of \(\alpha\) and \(\nu\) determined from \(\alpha /\nu\) did agree with conjectured results.
+Ratios of critical exponent ratios were generally within twice the error of the conjectured results.
+Only the ratio for \(\alpha/\nu\) differed significantly.
+The data collapse was done using the exact value for the critical temperature as opposed to the value found using the Binder cumulant because that value gave very poor collapses.
+For the collapse done with \(\beta/\nu\) all critical exponents agreed with conjectured results and the most recent Monte Carlo estimates within error bars.
+The collapse using \(\gamma/\nu\) was much poorer, with only \(\beta\) agreeing with conjectured results and an error on \(\delta\) that was approximatly as large as the value found.
+The values for \(\alpha\) and \(\nu\) found from \(\alpha/\nu\) were not in agreement with conejctured results.
 
 
 \section{Further Work}
@@ -1253,7 +1294,7 @@ One way is use renormalisation group techniques to calculate the critical expone
 This is the way most papers determine those and has as advantage that the errors on the critical exponents can be better determined.
 
 Another approach is to study finite size scaling in more detail and try to determine the corrections that become important for small systems or far away from \(T_c\).
-We could also study larger systems, for which the corrections are not important.
+We could also study larger systems, for which the corrections are less important.
 This would require a rewrite of the simulations in a compiled language to increase execution time.
 
 The Ising and Potts model can also be simulated on different kinds of lattices such as triangular or honeycomb lattices, to verify that the critical exponents (but not the critical temperature) remain the same, thus testing universality.
@@ -1270,13 +1311,11 @@ Many papers used a slightly different definition that is does not have the prope
 
 \vspace*{\baselineskip}
 \noindent
-Finally I would like to thank my supervisor, dr. Philippe Corboz, for introducing me into the field of computational physics and patiently explaining statistical analysis of Monte Carlo data.
+I would like to thank my supervisor, dr. Philippe Corboz, for introducing me into the field of computational physics and patiently explaining statistical analysis of Monte Carlo data.
 I would also like to thank Edan Lerner for acting as my second assessor.
 
 
-% Set style to abbrv to get Vancouver style citations.
-% \bibliographystyle{unsrt}
-% \bibliography{bachelor-thesis}
+\addcontentsline{toc}{chapter}{Bibliography}
 \printbibliography
 
 \end{document}
