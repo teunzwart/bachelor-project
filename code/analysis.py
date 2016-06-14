@@ -278,7 +278,7 @@ def chi_squared_data_collapse(data_set, critical_temperature,
                 second_exponent = (ratio + k * ratio_error) * nu
                 scaling_functions = {}
                 for lattice_size, data in sorted(data_set.items()):
-                    # if lattice_size == 10:
+                    # if lattice_size == 20:
                     #     continue
                     for v in data:
                         TC = critical_temperature + p * critical_temperature_error
@@ -291,19 +291,20 @@ def chi_squared_data_collapse(data_set, critical_temperature,
                         v_tilde_error = lattice_size**(-second_exponent / nu) * v[2]
                         scaling_functions.setdefault(lattice_size, []).append((scaling_variable, v_tilde, v_tilde_error))
 
-                # Only consider the temperature range where the most data points ly.
+                # Only consider the temperature range where the most data points lie.
                 at_interval = sorted([a for a in list(itertools.chain(*list(scaling_functions.values()))) if abs(a[0]) <= collapse_limit])
                 if len(at_interval) >= 15:  # We need enough data points to be able to do a collapse.
                     at_interval_x, at_interval_y, at_interval_y_error = zip(*at_interval)  # Seperate x and y values.
                     polynomial, residuals, _, _, _ = np.polyfit(at_interval_x, at_interval_y, 5, full=True)
-                    if residuals / (len(at_interval) - 6) < lowest_residual:  # Determine whether this fit is better than previous ones.
-                        lowest_residual = residuals / (len(at_interval) - 6)
+                    degrees_of_freedom = len(at_interval) - 6
+                    if (residuals / degrees_of_freedom) < lowest_residual:  # Determine whether this fit is better than previous ones.
+                        lowest_residual = residuals / degrees_of_freedom
                         best_second_exponent = second_exponent
                         best_nu = nu
+                        f = np.poly1d(polynomial)
+                        x_new = np.linspace(min(at_interval_x), max(at_interval_x), 50)
+                        y_new = f(x_new)
                         if show_plots and k == 0 and p == 0:
-                            f = np.poly1d(polynomial)
-                            x_new = np.linspace(min(at_interval_x), max(at_interval_x), 50)
-                            y_new = f(x_new)
                             plt.xlabel(r'$L^{(1/\nu)}t$')
                             plt.ylabel(r'$\mathrm{Scaling\ Function}$')
                             for lattice_size, values in sorted(scaling_functions.items()):
