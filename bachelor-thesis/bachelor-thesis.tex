@@ -97,7 +97,7 @@ Values of ratios of critical exponents also agreed well.
 Most critical exponents agreed reasonably well with exact values.
 
 For the Potts model the critical temperature is found to be in moderate agreement with exact results.
-Ratios of critical exponents agree reasonably well with conjectured results.
+Ratios of critical exponents agree well with conjectured results.
 Using the ratio \(\beta/\nu\) all critical exponents agree with conjectured results.
 Agreement using \(\gamma/\nu\) is poorer, possible because of finite size scaling corrections.
 Special attention is paid to scaling for the heat capacity by including a background term.
@@ -1066,7 +1066,7 @@ That is
 \begin{equation}
 	\widetilde{c} \propto L^{\alpha/\nu} + c_{\mathrm{background}}.
 \end{equation}
-With out this correction no data collapse will be possible that allows for the extraction of critical exponents.
+Without this correction no data collapse will be possible that allows for the extraction of correct critical exponents.
 
 \begin{figure}[htb]
 	\centering
@@ -1137,6 +1137,12 @@ The intersection of the Binder cumulants was determined by linearly extrapolatin
 The average of the different intersection points was taken for the value.
 To determine the error on the estimate intersections were also found for the data points with their respective errors added and subtracted.
 
+The Binder cumulant intersection for the Ising model was found to drift somewhat as different lattice sizes are considered.
+The intersection of lattices of size 10 by 10 and 20 by 20 and the intersection of 20 by 20 and 30 by 30 lattices was found to occur at a temperature that was lower than the critical temperature (\(T_c = 2.2646(5)\) and \(2.2651(3)\) respectively).
+The intersection between 30 by 30 and 40 by 40 lattice Binder cumulants occurred at \( T_c = 2.2723(4)\), and overshot the exact critical temperature.
+It would be expected that the critical temperature decreases from a value larger than the exact value and decreases as \(L\) increases.
+This would agree with the way the maximum of quantities like the heat capacity and magnetic susceptibility moves towards lower \(T\) as the lattice size increases.
+
 Using log-log plots the ratio of critical exponents was determined.
 The ratio \(\beta/\nu\) was determined by a linear fit of the magnetisation and was found to be 0.125(1).
 From a fit of the susceptibility (\cref{fig:ising_magnetizabilities_loglog_plot}), we found \(\gamma/\nu = 1.758(8)\).
@@ -1176,6 +1182,10 @@ The value of \(\alpha\) is negative, which is not physical, but this stems from 
 Given that \(\alpha\) is still small the value seems reasonable.
 With \(\beta/\nu\) the critical exponents also agreed somewhat with exact values, notably \(\eta\) and \(\delta\).
 
+For \(\gamma/\nu\) and \(\beta /\nu\) collapses were also performed while leaving out a data set for a given data size.
+All data sizes were left out one by one.
+The drift observed in all critical exponents by doing this was always of the order 0.02 or smaller.
+
 \begin{figure}[htb]
 	\includegraphics[width=\linewidth]{ising_heat_capacity_data_collapse.pdf}
 	\caption{A finite size scaling data collapse for the heat capacity of the Ising model. The exact values \(\alpha=0\) and \(\nu=1\) were used. Because this corresponds to logarithmic divergence the logarithm of \(L\) was taken when calculating the scaling function. The constant background term had a value of 3.}
@@ -1184,22 +1194,23 @@ With \(\beta/\nu\) the critical exponents also agreed somewhat with exact values
 
 With the ratio \(\alpha / \nu\) it is only possible to determine \(\alpha\) and \(\nu\), because the system of equations consisting of the scaling laws after filling in the values of \(\alpha\) and \(\nu\) is a system of three equations with four unknowns and therefore underdetermined.
 Using the ratio of 0.27(2), we found \(\alpha=0.312(5)\) and \(\nu=1.096(1)\).
-Neither of these values agrees with the exact results.
+Neither of these values agree with the exact results.
 The scaling laws \(2\nu = 2-\alpha\) is also not satisfied since \(2.193(3) \neq 1.69(1)\).
 Using the exact ratio of 0 we find \(\alpha=0.003(4)\) and \(\nu=0,77(8)\).
 In this case the logarithm of \(L\) is used in the scaling function.
 The scaling laws \(2\nu = 2-\alpha\) is also not satisfied since \(1.54(16) \neq 1.997(3)\).
-As we see in \cref{fig:ising_heat_capacity_collapse}, the collapse for the heat capacity even with exact results is not of as high a quality as those of the susceptibility and magnetization.
+As we see in \cref{fig:ising_heat_capacity_collapse}, the collapse for the heat capacity even with exact results is not of as high a quality as those of the susceptibility and magnetisation.
 
 
 \section{The Potts Model at Criticality}
 
 For the 3-state Potts model in two dimensions and zero-field the critical temperature was found to be \(T_c=1.020(22)\) using Binder intersection at \(L = 10, 20, 40\).
 This is in reasonable agreement with the result of Ghaemi \textit{et al.}~\cite{ghaemi:2001} (\(T_c=0.9950(1)\)), as well as those of Fan \textit{et al.}~\cite{fan:2007} of \(T_c = 0.9968(20)\) and the exact value of \(T_c = 1/\log(1+\sqrt{3}) \approx 0.995\).
+The same behaviour of the intersection temperature increasing as the system sizes increases present in the Ising model was observed here.
 
-From a log-log plot the critical exponents ratios were found to be \(\beta/\nu = 0.131(5)\), \(\alpha/\nu = 0.54(4)\) and \(\gamma/\nu = 1.80(3)\).
+From a log-log plot the critical exponents ratios were found to be \(\beta/\nu = 0.131(5)\), \(\alpha/\nu = 0.41(2)\) and \(\gamma/\nu = 1.80(3)\).
 The conjectured exact values for these ratios are \(\beta/\nu = 2/15 \approx 0.133\), \(\alpha/\nu = 2/5 =0.4\) and \(\gamma/\nu = 26/15 \approx 1.73\).
-The value for \(\beta/\nu\) is in good agreement, with the other two ratios less so, especially \(\alpha/\nu\).
+The values for \(\beta/\nu\) and \(\alpha/\nu\) are in good agreement, with \(\gamma/\nu\) less so.
 Note that these values were calculated with simulations done at \(T_c=0.995\), the exact critical temperature.
 
 \begin{table}[htb]
@@ -1234,22 +1245,49 @@ Here most data points fell in the interval \(L^{1/\nu}t \in [-2, 2]\).
 With \(\beta/\nu\), the value for all critical exponents agreed well with the conjectured values as well as those of Fan \textit{et al.}~\cite{fan:2007}.
 
 
-For the values determined with the ratio \(\gamma / \nu\) agreement with conjectured other experimental values was poorer, with only \(\beta\) agreeing withing error bars.
+For the values determined with the ratio \(\gamma / \nu\) agreement with conjectured other experimental values was poorer, with only \(\beta\) agreeing within error bars.
 For \(\delta\) the error is extremely large. This is because during error propagation the ratio \(\Delta \beta / \beta\) is approximately 1.
 Multiplying by the value of \(\delta\) then gives a large error.
 Given the size of the error this value should not be judged as sensible.
 
+By leaving out data sets for given system sizes, an estimate could be made how well behaved the collapse is.
+From \cref{tab:potts_leave_out} it is clear that the some critical exponents show a large drift.
+This table lists the critical exponents determined using the ratio \(\gamma/\nu\).
+The values drift as different data sets are left out.
+This drift is most apparent for \(\alpha\), \(\gamma\) and \(\nu\).
+Leaving out different lattice sizes may be considered as an alternate way of assessing errors on the measurements.
+
+\begin{table}[htb]
+	\begin{adjustbox}{center}
+		\centering
+		\renewcommand{\arraystretch}{1.5}
+		\begin{tabular}{l | c c c c c c}
+			\hline
+			Size left out& \(\alpha\) & \(\beta\) & \(\gamma\) & \(\eta\) & \(\nu\) & \(\delta\) \\\hline
+			None & 0.60(6) & 0.07(6) & 1.26(5) & 0.20(1) & 0.70(3) & 19.5(16.8)\\
+			10 & 0.05(6) & 0.09(6) & 1.76(6)& 0.20(1) & 0.97(3) & 20(27) \\
+			20 & 0.23(11) & 0.1(1) & 1.6(1) & 0.20(1) & 0.88(5) & 20(25) \\
+			40 & 0.02(7) & 0.10(7) & 1.78(6) & 0.20(1)&  0.99(4) & 19(59) \\ \hline
+		\end{tabular}
+	\end{adjustbox}
+	\caption{The critical exponents of the three-state Potts model when a data set for a given lattice size are left out, determined with the ratio \(\gamma/\nu\).
+	A noticeable drift is present for the values of \(\alpha\), \(\gamma\) and \(\nu\).
+	The values were calculated by using the given ratio, iterating over different values of \(\nu\) and determining the other critical exponent using the ratio, and then determining which values gave the best fit. The other critical exponents are calculated using scaling laws. The presented values were found with a collapse done with \(T_c=0.995\).}
+	\label{tab:potts_leave_out}
+\end{table}
+
 From the ratio \(\alpha/\nu\) it was again only possible to determine \(\alpha\) and \(\nu\).
-We found \(\alpha = 0.37(2)\) and \(\nu = 0.92(4)\).
+We found \(\alpha = 0.36(2)\) and \(\nu = 0.89(4)\).
+The phenomenological constant added to the heat capacity was determined to be 1.5, which was also used in the log-log plot mentioned above.
 Both values agree somewhat with the conjectured and Monte Carlo values of other sources, especially the value for \(\alpha\).
-Using the final scaling law (\(2\nu = 2 -\alpha\)) as a consistency check it was found that these values where not consistent within error bars since \(1.84(8) \neq 1.63(2)\).
+Using the final scaling law (\(2\nu = 2 -\alpha\)) as a consistency check it was found that these values where not consistent within error bars since \(1.78(8) \neq 1.64(2)\).
 
 \vspace*{\baselineskip}
 
 For the finite size scaling collapse it is important to note that the collapse is only good very close to \(t=0\).
 This also means that \(T_c\) has to be known to a high degree of precision (as seen above for the Potts model).
 Another problem is that the scaling functions are only approximately correct even when \(t\) is small.
-The scaling functions are in better agreement as the system size increases, but for small \(L\) correction terms to the scaling functions have to be taken into account~\cite{newman:1999}.
+The scaling functions are in better agreement as the system size increases, but for small \(L\) correction terms to the scaling functions have to be taken into consideration~\cite{newman:1999}.
 
 \begin{figure}
 	\centering
@@ -1280,12 +1318,11 @@ For the Ising model the value of the critical temperature as well as the ratios 
 Using a data collapse the values of the critical exponents themselves were found to usually be in reasonable agreement with the exact values. The values found for \(\alpha\) were close to zero, although one value was negative, a non-physical result.
 
 The Potts model results gave a value for the critical temperature that was in moderate agreement with the exact result.
-Ratios of critical exponent ratios were generally within twice the error of the conjectured results.
-Only the ratio for \(\alpha/\nu\) differed significantly.
+Ratios of critical exponent ratios agreed well with conjectured results, with the exception of \(\gamma/\nu\), which was too large.
 The data collapse was done using the exact value for the critical temperature as opposed to the value found using the Binder cumulant because that value gave very poor collapses.
-For the collapse done with \(\beta/\nu\) all critical exponents agreed with conjectured results and the most recent Monte Carlo estimates within error bars.
-The collapse using \(\gamma/\nu\) was much poorer, with only \(\beta\) agreeing with conjectured results and an error on \(\delta\) that was approximatly as large as the value found.
-The values for \(\alpha\) and \(\nu\) found from \(\alpha/\nu\) were not in agreement with conejctured results.
+For the collapse done with \(\beta/\nu\) all critical exponents agreed with conjectured results and the most recent Monte Carlo estimates found in the literature within error bars.
+The collapse using \(\gamma/\nu\) was much poorer, with only \(\beta\) agreeing with conjectured results and an error on \(\delta\) that was approximately as large as the value found.
+The values for \(\alpha\) and \(\nu\) found from \(\alpha/\nu\) were not in agreement with conjectured results.
 
 
 \section{Further Work}
@@ -1296,6 +1333,9 @@ This is the way most papers determine those and has as advantage that the errors
 Another approach is to study finite size scaling in more detail and try to determine the corrections that become important for small systems or far away from \(T_c\).
 We could also study larger systems, for which the corrections are less important.
 This would require a rewrite of the simulations in a compiled language to increase execution time.
+It is possible that with larger system sizes the drift of quantities like the Binder cumulant could be better characterised.
+With larger and more systems, it would also be possible to find the change in critical exponents as data sets are left out while determining the critical exponents from a data collapse.
+This would allow for a different way of assessing errors on the critical exponents.
 
 The Ising and Potts model can also be simulated on different kinds of lattices such as triangular or honeycomb lattices, to verify that the critical exponents (but not the critical temperature) remain the same, thus testing universality.
 
@@ -1309,8 +1349,7 @@ Lastly, the order parameter of the Potts model could be more closely examined.
 In this thesis it was defined based on the definition of the Potts model.
 Many papers used a slightly different definition that is does not have the property of being 1 below \(T_c\) and 0 above \(T_c\)~\cite{binder:1981a,wu:1982,fan:2007}.
 
-\vspace*{\baselineskip}
-\noindent
+\section{Acknowledgements}
 I would like to thank my supervisor, dr. Philippe Corboz, for introducing me into the field of computational physics and patiently explaining statistical analysis of Monte Carlo data.
 I would also like to thank Edan Lerner for acting as my second assessor.
 
