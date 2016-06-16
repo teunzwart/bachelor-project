@@ -9,7 +9,7 @@ class IsingModel:
     """A Monte Carlo simulation of the Ising model."""
 
     def __init__(self, lattice_size, bond_energy, temperature,
-                 initial_temperature, sweeps):
+                 initial_temperature, sweeps, cython=True):
         """Initialize variables and the lattice."""
         self.rng_seed = int(lattice_size * temperature * 1000)
         # np.random.seed(self.rng_seed)
@@ -23,6 +23,7 @@ class IsingModel:
         self.lattice = self.init_lattice()
         self.energy_history = np.empty(self.sweeps)
         self.magnetization_history = np.empty(self.sweeps)
+        self.cython = cython
 
     def init_lattice(self):
         """
@@ -73,16 +74,18 @@ class IsingModel:
         return energy
 
     def metropolis(self):
+        if self.cython:
+            self.energy_history, self.magnetization_history = cy_ising_model.cy_metropolis(self.lattice, self.lattice_size, self.bond_energy, self.beta, self.sweeps)
+        else:
+            self.python_metropolis()
+
+    def python_metropolis(self):
         """Implentation of the Metropolis alogrithm."""
         # Precalculate the exponenents because floating point operations are expensive.
         exponents = {2 * self.bond_energy * x: np.exp(-self.beta * 2 * self.bond_energy * x) for x in range(-4, 5, 2)}
         energy = self.calculate_lattice_energy()
         magnetization = np.sum(self.lattice)
         for t in range(self.sweeps):
-            if t == 5000:
-                plotting.show_lattice(self.lattice, self.lattice_size, step=t, save=True, temperature=self.temperature)
-                print("Break")
-                break
             # Measurement every sweep.
             np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, magnetization)
@@ -122,9 +125,6 @@ class IsingModel:
         cluster_sizes = []
         energy = self.calculate_lattice_energy()
         for t in range(self.sweeps):
-            # if t in [5000, 5001]:
-            #     plotting.show_lattice(self.lattice, self.lattice_size)
-
             # Measurement every sweep.
             np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, np.sum(self.lattice))

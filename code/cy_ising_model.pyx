@@ -1,12 +1,16 @@
 """Performance critical functions for Ising Model Monte Carlo simulations."""
 
+from libc.math cimport exp as c_exp
+from libc.stdlib cimport rand, RAND_MAX
+
 import numpy as np
 import cython
 cimport numpy as np
 
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def calculate_lattice_energy(np.ndarray[np.int_t, ndim=2] lattice, int lattice_size, int bond_energy):
+cpdef calculate_lattice_energy(np.ndarray[np.int_t, ndim=2] lattice, int lattice_size, int bond_energy):
     """
     Calculate the energy of the lattice using the Ising model Hamiltonian in zero-field.
 
@@ -50,3 +54,69 @@ def calculate_lattice_energy(np.ndarray[np.int_t, ndim=2] lattice, int lattice_s
                 else:
                     energy += bond_energy
     return energy
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+def cy_metropolis(np.ndarray[np.int_t, ndim=2] lattice, int lattice_size, int bond_energy, double beta, int sweeps):
+    """
+    Implentation of the Metropolis alogrithm.
+
+    On a 4 by 4 lattice 10000 sweeps at T=8 take 1.29 seconds in a pure Python implementation,
+    and 12 ms in a Cython implementation (107 times speedup).
+    """
+    cdef int t, k, spin, rand_y, rand_x, spin_sum, prev_x, next_x, prev_y, next_y
+    cdef double energy_delta, acceptance_probability
+    cdef double energy = calculate_lattice_energy(lattice, lattice_size, bond_energy)
+    cdef double magnetization = np.sum(lattice)
+    cdef np.ndarray[np.float_t, ndim=1] energy_history = np.empty(sweeps, dtype=np.float64)
+    cdef np.ndarray[np.float_t, ndim=1] magnetization_history = np.empty(sweeps, dtype=np.float64)
+    with nogil:
+        for t in range(sweeps):
+            # Measurement every sweep.
+            energy_history[t] = energy
+            magnetization_history[t] = magnetization
+            for k in range(lattice_size**2):
+                # Pick a random location on the lattice.
+                rand_y = int(<double> rand() * lattice_size / RAND_MAX)
+                rand_x = int(<double> rand() * lattice_size / RAND_MAX)
+
+                spin = lattice[rand_y, rand_x]  # Get spin at the random location.
+
+                spin_sum = 0
+
+                prev_x = rand_x - 1
+                if prev_x < 0:
+                    prev_x += lattice_size
+                spin_sum += lattice[rand_y, prev_x]
+
+                next_x = rand_x + 1
+                if next_x >= lattice_size:
+                    next_x -= lattice_size
+                spin_sum += lattice[rand_y, next_x]
+
+                prev_y = rand_y - 1
+                if prev_y < 0:
+                    prev_y += lattice_size
+                spin_sum += lattice[prev_y, rand_x]
+
+                next_y = rand_y + 1
+                if next_y >= lattice_size:
+                    next_y -= lattice_size
+                spin_sum += lattice[next_y, rand_x]
+
+                energy_delta = 2 * bond_energy * spin * spin_sum
+
+                # Energy may always be lowered.
+                if energy_delta <= 0:
+                    acceptance_probability = 1
+                # Energy is increased with probability proportional to Boltzmann distribution.
+                else:
+                    acceptance_probability = c_exp(-beta * energy_delta)
+                if <double> rand()/RAND_MAX <= acceptance_probability:
+                    # Flip the spin and change the energy.
+                    lattice[rand_y, rand_x] = -1 * spin
+                    energy += energy_delta
+                    magnetization += -2 * spin
+    return energy_history, magnetization_history
