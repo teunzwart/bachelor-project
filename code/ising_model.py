@@ -120,6 +120,13 @@ class IsingModel:
                     magnetization += -2 * spin
 
     def wolff(self):
+        if self.cython:
+            self.energy_history, self.magnetization_history, cluster_sizes = cy_ising_model.cy_wolff(self.lattice, self.lattice_size, self.bond_energy, self.beta, self.sweeps)
+        else:
+            cluster_sizes = self.python_wolff()
+        return cluster_sizes
+
+    def python_wolff(self):
         """Simulate the lattice using the Wolff algorithm."""
         padd = 1 - np.exp(-2 * self.beta * self.bond_energy)
         cluster_sizes = []
