@@ -12,7 +12,7 @@ class PottsModel:
     """A Monte Carlo simulation of the 3-state Potts model."""
 
     def __init__(self, lattice_size, bond_energy, temperature,
-                 initial_temperature, sweeps):
+                 initial_temperature, sweeps, cython=True):
         """Initialize variables and the lattice."""
         self.rng_seed = int(lattice_size * temperature * 1000)
         np.random.seed(self.rng_seed)
@@ -26,6 +26,7 @@ class PottsModel:
         self.lattice = self.init_lattice()
         self.energy_history = np.empty(self.sweeps)
         self.magnetization_history = np.empty(self.sweeps)
+        self.cython = cython
 
     def init_lattice(self):
         """
@@ -40,8 +41,8 @@ class PottsModel:
 
         elif self.initial_temperature == "lo":
             if self.bond_energy > 0:
-                ground_state = 0 #np.random.choice([0, 1, 2])
-                lattice = np.full((self.lattice_size, self.lattice_size), ground_state, dtype="int64")
+                ground_state = np.random.choice([0, 1, 2])
+                lattice = np.full((self.lattice_size, self.lattice_size), ground_state, dtype="int32")
             else:
                 raise NotImplementedError("Low temperature anti-ferromagnetic starting lattices are not implemented.")
         else:
@@ -66,14 +67,16 @@ class PottsModel:
         return energy
 
     def metropolis(self):
+        if self.cython:
+            self.energy_history, self.magnetization_history = cy_potts_model.cy_metropolis(self.lattice, self.lattice_size, self.bond_energy, self.beta, self.sweeps)
+        else:
+            self.python_metropolis()
+
+    def python_metropolis(self):
         """Implentation of the Metropolis alogrithm."""
         energy = cy_potts_model.calculate_lattice_energy(self.lattice, self.lattice_size, self.bond_energy)
         magnetization = self.potts_order_parameter()
         for t in range(self.sweeps):
-            if t == 5000:
-                plotting.show_lattice(self.lattice, self.lattice_size, step=t, save=True, temperature=self.temperature)
-                print("Break")
-                break
             # Measurement every sweep.
             np.put(self.energy_history, t, energy)
             np.put(self.magnetization_history, t, magnetization)
@@ -106,6 +109,14 @@ class PottsModel:
                     magnetization = self.potts_order_parameter()
 
     def wolff(self):
+        if self.cython:
+            self.energy_history, self.magnetization_history, cluster_sizes = cy_potts_model.cy_wolff(self.lattice, self.lattice_size, self.bond_energy, self.beta, self.sweeps)
+        else:
+            cluster_sizes = self.python_wolff()
+        return cluster_sizes
+
+
+    def python_wolff(self):
         """Simulate the lattice using the Wolff algorithm."""
         padd = 1 - np.exp(-self.beta * self.bond_energy)
         cluster_sizes = []
