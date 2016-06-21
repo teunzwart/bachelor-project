@@ -93,13 +93,13 @@ These values are calculated by using finite size scaling methods.
 
 The Ising model in two dimensions is used as a benchmark for the methods used, given that it is exactly solved.
 The critical temperature found agrees well with the exact known value of Onsager's solution.
-Values of ratios of critical exponents also agreed well.
-Most critical exponents agreed reasonably well with exact values.
+Values of ratios of critical exponents also agree well.
+Most critical exponents agree reasonably well with exact values.
 
 For the Potts model the critical temperature is found to be in moderate agreement with exact results.
 Ratios of critical exponents agree well with conjectured results.
 Using the ratio \(\beta/\nu\) all critical exponents agree with conjectured results.
-Agreement using \(\gamma/\nu\) is poorer, possible because of finite size scaling corrections.
+Agreement using \(\gamma/\nu\) is poorer, possibly because of finite size scaling corrections.
 Special attention is paid to scaling for the heat capacity by including a background term.
 
 \vfill
@@ -136,11 +136,11 @@ Dit gebeurt wel alleen als je de factor met de juiste exponenten en temperatuur 
 Door verschillende waarden te proberen kun je zo de exponenten vinden, door te kijken wanneer de metingen van verschillende roostergrootten het best samenvallen.
 
 Voor zowel het Ising model als het Potts model heb ik de kritische temperatuur kunnen vinden.
-Ook kon ik voor beide nauwkeurig de verhouding tussen kritische exponenten bepalen.
+Ook kon ik voor beiden nauwkeurig de verhouding tussen kritische exponenten bepalen.
 Bij het Ising model vond ik kritische exponenten die goed overeenkomen met de exacte waarden.
 Voor het Potts model vond ik met één manier om data samen te laten vallen exponenten die overeenkomen met voorspelde waarden.
 Een andere manier gaf juist resultaten die niet goed waren.
-Dit komt mogelijk doordat de systemen die ik simuleerde relatief klein zijn, terwijl deze technieken better werken voor grote systemen.
+Dit komt mogelijk doordat de systemen die ik simuleerde relatief klein zijn, terwijl deze technieken beter werken voor grote systemen.
 
 
 \tableofcontents
@@ -307,7 +307,7 @@ The critical exponents then only depend on \(\lambda\) in that they have one val
 This also means that, if both \(H_0\) and \(H_1\) have the same symmetries, then, if \(H_0\) is some simple Hamiltonian while \(H_1\) is more complicated, it is possible to obtain the critical exponents of a system using the simple part while stripping the more complicated part.
 This may significantly ease the determination of critical exponents when performing simulations.
 Different systems with the same critical exponents are said to be in the same universality class.
-It is believed (and experimentally established with error) that such diverse systems as carbon dioxide, xenon and the three-dimensional Ising model are in the same universality class~\cite{baxter:1989}.
+It is believed (and experimentally established within error) that such diverse systems as carbon dioxide, xenon and the three-dimensional Ising model are in the same universality class~\cite{baxter:1989}.
 
 \section{The Two-Dimensional Ising Model}\label{sec:ising_model}
 
@@ -574,7 +574,7 @@ For \(q=3\) (a second order transition) \(u_{\mathrm{average}} = -(1+\frac{1}{\s
 
 To properly define when the phase transition occurs we define the order parameter, which here is the magnetisation, as
 \begin{equation}
-	m = \frac{1}{N}\abs{\sum_i^N e^{i2\pi n_k / q}},
+	m = \frac{1}{N}\abs{\sum_k^N e^{i2\pi n_k / q}},
 \end{equation}
 with the sum running over every site of the lattice, \(N\) being the number of sites and \(n_k\) being the state of the spin at site \(k\).
 This is based on the definition of the \(q\)-state Potts model as consisting of equally spaced vectors.
@@ -692,7 +692,7 @@ The probability \(P\) can be decomposed into two parts:
 with \(g\) the selection probability, the probability of selecting the state \(\nu\) given a starting state \(\mu\) and \(A\) the acceptance ratio, how likely it is to accept a given new state.
 To efficiently sample states in as simulation the acceptance probability should be as large as possible.
 
-To simulate the systems using Markov chains we use Monte Carlo simulations.\footnote{Monte Carlo simulations have their origin in the Manhattan Project and were used after World War 2 to simulate neutron transport in hydrogen bombs~\cite{newman:1999}}.
+To simulate the systems using Markov chains we use Monte Carlo simulations.\footnote{Monte Carlo simulations have their origin in the Manhattan Project and were used after World War 2 to simulate neutron transport in hydrogen bombs~\cite{newman:1999}.}.
 While specific algorithms are described below, the steps of a simulation are broadly the same.
 First, to be able to change spins we need to prepare the system in a given state at the start of the simulation.
 Common choices are to prepare the system in a \(T=\infty\) state where all spins are randomly aligned, or \(T=0\) where all spins are pointing in one randomly chosen direction (in the ferromagnetic case \(J>0\), where there are multiple ground states)~\cite{newman:1999}.\footnote{In the anti-ferromagnetic case, \(J < 0\), each spin wants to have a different orientation compared to its neighbours. This results in a checkerboard pattern.}
@@ -1034,11 +1034,11 @@ where \(\chi_0\) has the properties
 \end{align}
 Because we do not know the correlation length of the infinite system it is more useful to define
 \begin{equation}
-	\tilde{\chi} = (L/\xi)^{-\gamma} \chi_0((L/\xi)^{\nu}),
+	\widetilde{\chi} = (L/\xi)^{-\gamma} \chi_0((L/\xi)^{\nu}),
 \end{equation}
 with which we can rewrite \cref{eq:finite_size_chi} to get
 \begin{equation}
-	\tilde{\chi}(L^{1/\nu}t) = L^{-\gamma/\nu}\chi.
+	\widetilde{\chi}(L^{1/\nu}t) = L^{-\gamma/\nu}\chi.
 \end{equation}
 We call \(\tilde{\chi}\) the scaling function.
 All dependence on system size has been extracted from the scaling function, meaning that its value is the same for all \(L\) when close to the critical temperature.
@@ -1196,7 +1196,7 @@ With the ratio \(\alpha / \nu\) it is only possible to determine \(\alpha\) and 
 Using the ratio of 0.27(2), we found \(\alpha=0.312(5)\) and \(\nu=1.096(1)\).
 Neither of these values agree with the exact results.
 The scaling laws \(2\nu = 2-\alpha\) is also not satisfied since \(2.193(3) \neq 1.69(1)\).
-Using the exact ratio of 0 we find \(\alpha=0.003(4)\) and \(\nu=0,77(8)\).
+Using the exact ratio of 0 we find \(\alpha=0.003(4)\) and \(\nu=0.77(8)\).
 In this case the logarithm of \(L\) is used in the scaling function.
 The scaling laws \(2\nu = 2-\alpha\) is also not satisfied since \(1.54(16) \neq 1.997(3)\).
 As we see in \cref{fig:ising_heat_capacity_collapse}, the collapse for the heat capacity even with exact results is not of as high a quality as those of the susceptibility and magnetisation.
@@ -1332,7 +1332,7 @@ This is the way most papers determine those and has as advantage that the errors
 
 Another approach is to study finite size scaling in more detail and try to determine the corrections that become important for small systems or far away from \(T_c\).
 We could also study larger systems, for which the corrections are less important.
-This would require a rewrite of the simulations in a compiled language to increase execution time.
+This would require a rewrite of the simulations in a compiled language to improve execution time.
 It is possible that with larger system sizes the drift of quantities like the Binder cumulant could be better characterised.
 With larger and more systems, it would also be possible to find the change in critical exponents as data sets are left out while determining the critical exponents from a data collapse.
 This would allow for a different way of assessing errors on the critical exponents.
