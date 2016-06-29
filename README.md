@@ -16,7 +16,7 @@ The required Python 3 packages are
 - Cython
 - Seaborn
 ```
-You also need a C-compiler.
+You also need a C compiler.
 
 To run a simulation yourself:
 ```shell
