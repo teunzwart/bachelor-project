@@ -44,7 +44,7 @@
 
 %%% Personal Information %%%
 \newcommand\TITLE{Monte Carlo Simulations of the 3-State Potts Model in 2D}
-\newcommand\THESISFORM{Bachelor Project Physics and Astronomy, 15 EC\\conducted between 29-03-2016 and xx-xx-2016\\submitted on xx-xx-2016}
+\newcommand\THESISFORM{Bachelor Project Physics and Astronomy, 15 EC\\conducted between 29-03-2016 and 30-06-2016\\submitted on 30-06-2016}
 \newcommand\INSTITUTE{Instituut voor Theoretische Fysica Amsterdam}
 \newcommand\FACULTY{Faculteit der Natuurwetenschappen, Wiskunde en Informatica}
 \newcommand\UNIVERSITY{Universiteit van Amsterdam}
@@ -85,23 +85,8 @@
 \end{titlepage}
 
 \thispagestyle{plain}
-\section*{Abstract}
 
-We study the critical behaviour of the 3-state Potts model in two dimensions and zero-field.
-Monte Carlo simulations are used to find the critical temperature, as well as the critical exponents of the model.
-These values are calculated by using finite size scaling methods.
-
-The Ising model in two dimensions is used as a benchmark for the methods used, given that it is exactly solved.
-The critical temperature found agrees well with the exact known value of Onsager's solution.
-Values of ratios of critical exponents also agree well.
-Most critical exponents agree reasonably well with exact values.
-
-For the Potts model the critical temperature is found to be in moderate agreement with exact results.
-Ratios of critical exponents agree well with conjectured results.
-Using the ratio \(\beta/\nu\) all critical exponents agree with conjectured results.
-Agreement using \(\gamma/\nu\) is poorer, possibly because of finite size scaling corrections.
-Special attention is paid to scaling for the heat capacity by including a background term.
-
+~
 \vfill
 \noindent
 \textbf{Image Credit:} Eastern frontal view of the Trente-Quarante Gaming Room of the Monte Carlo Casino, from which the methods used in this work get their name, designed by Charles Garnier c. 1878–80. Image retrieved from Wikimedia Commons, originally in Bonillo et al. (2004). \textit{Charles Garnier and Gustave Eiffel on the French and Italian Rivieras: The Dream of Reason}
@@ -109,6 +94,22 @@ Special attention is paid to scaling for the heat capacity by including a backgr
 
 \newpage
 \thispagestyle{plain}
+
+\section*{Abstract}
+
+We study the critical behaviour of the 3-state Potts model in two dimensions and zero-field.
+Monte Carlo simulations are used to find the critical temperature, as well as the critical exponents of the model.
+These values are calculated by using finite size scaling methods.
+
+The Ising model in two dimensions is used as a benchmark for the methods used, given that it is exactly solved.
+The critical temperature found corresponds well with the exact known value of Onsager's solution.
+Values of ratios of critical exponents also agree reasonably well as do critical exponents themselves, when compared to exact results.
+
+For the Potts model the critical temperature is found to be in moderate correspondence with exact results.
+Ratios of critical exponents agree well with conjectured results.
+Using the ratio \(\beta/\nu\) all critical exponents are in agreement with conjectured results while this is less so using \(\gamma/\nu\), possibly because of finite size scaling corrections.
+Special attention is paid to scaling for the heat capacity by including a background term.
+
 \section*{Populaire Samenvatting}
 Faseovergangen zien we overal om ons heen. Water verandert in stoom of bevriest tot ijs.
 Bij een faseovergang zien we dat een bepaald getal, dat we de orde parameter noemen, een sprong maakt.
@@ -120,17 +121,17 @@ Dit zijn getallen die bepalen hoe snel een eigenschap van een systeem verandert 
 In dit verslag beschrijf ik de faseovergang van volledig gemagnetiseerde naar ongemagnetiseerde toestand van twee modellen en hoe ik heb geprobeerd hun kritische temperatuur en exponenten te vinden.
 Het Ising model beschrijft een rooster waarbij op ieder roosterpunt een klein magneetje zit (dat we een spin noemen), dat omhoog of omlaag kan wijzen.
 Het Potts model veralgemeniseert dit idee door iedere spin in een richting te laten wijzen, waarbij de mogelijke richtingen gelijk verdeelt zijn over een cirkel.
-Ik heb specifiek gekeken naar een model met drie mogelijke richtingen.
+Ik heb specifiek gekeken naar een Potts model met drie mogelijke richtingen.
 
 Om de faseovergangen te onderzoeken heb ik twee verschillende zogenaamde Monte Carlo algoritmen gebruikt om de systemen te simuleren.
-De eerste was het Metropolis algoritme.
+De eerste was het Metropolis algoritme (In het plaatje zie je hoe het rooster verandert als het met dit algoritme gesimuleerd wordt.)
 Hierbij wordt voor de spins op het rooster een voor een geprobeerd ze om te draaien. Dit gebeurt met een bepaalde kans.
 Omdat het in de buurt van de faseovergang kan gebeuren dat er grote eilanden ontstaan van spins die allemaal dezelfde richting op wijzen en waarvan de kans klein is dat ze worden omgedraaid, heb ik ook gebruik gemaakt van het Wolff algoritme dat grote clusters van spins in één keer omdraait.
 Zo kan het niet gebeuren dat het rooster tijdens de simulatie lange tijd in dezelfde toestand blijft.
 
 Tijdens het draaien van de simulaties deed ik continue metingen van de energie en magnetisatie.
 Met behulp van die metingen kon ik verschillende grootheden uitrekenen zoals de warmtecapaciteit.
-Om de data te analyseren en de kritische temperatuur en exponenten te bepalen  heb ik gebruikt gemaakt van een eigenschap die dit soort systemen hebben.
+Om de data te analyseren en de kritische temperatuur en exponenten te bepalen heb ik gebruik gemaakt van een eigenschap die dit soort systemen hebben.
 Als je roosters van verschillende grootten simuleert en dan de waarde van bepaalde eigenschappen met een factor (die afhangt van de grootte van het rooster, de kritische temperatuur en de kritische exponenten) vermenigvuldigt, blijkt dat de verschillende lijnen van verschillenden rooster grootten precies over elkaar heen vallen.
 Dit gebeurt wel alleen als je de factor met de juiste exponenten en temperatuur berekent.
 Door verschillende waarden te proberen kun je zo de exponenten vinden, door te kijken wanneer de metingen van verschillende roostergrootten het best samenvallen.
@@ -138,9 +139,14 @@ Door verschillende waarden te proberen kun je zo de exponenten vinden, door te k
 Voor zowel het Ising model als het Potts model heb ik de kritische temperatuur kunnen vinden.
 Ook kon ik voor beiden nauwkeurig de verhouding tussen kritische exponenten bepalen.
 Bij het Ising model vond ik kritische exponenten die goed overeenkomen met de exacte waarden.
-Voor het Potts model vond ik met één manier om data samen te laten vallen exponenten die overeenkomen met voorspelde waarden.
-Een andere manier gaf juist resultaten die niet goed waren.
+Voor het Potts model vond ik, met één manier om data samen te laten vallen, exponenten die overeenkomen met voorspelde waarden.
+De andere manier gaf juist resultaten die niet goed waren.
 Dit komt mogelijk doordat de systemen die ik simuleerde relatief klein zijn, terwijl deze technieken beter werken voor grote systemen.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{leken_afbeelding.png}
+\end{figure}
 
 
 \tableofcontents
@@ -484,7 +490,7 @@ At \(T_c\) the internal energy per spin \(u\) does not diverge and has the value
 The heat capacity per spin \(c\) does diverge. Using the previous expansions
 \begin{align}
 	\frac{c(T)}{k_B} &\approx \frac{8}{\pi} \left(\beta_c J\right)^2 \left[\log(\frac{4}{k^'})\right] \\
-	&= \frac{2}{\pi} \log(1 + \sqrt{2})^2 \left[-\log\abs{\frac{T}{T_c} - 1} - 1 - \frac{\pi}{4} - \log(\frac{\sqrt{2}}{4} \log(1+\sqrt{2}))\right]
+	&= \frac{2}{\pi} \log(1 + \sqrt{2})^2 \left[-\log\abs{\frac{T}{T_c} - 1} - 1 - \frac{\pi}{4} - \log(\frac{\sqrt{2}}{4} \log(1+\sqrt{2}))\right]\label{eq:ising_heat_cap_expanded}
 \end{align}
 and we see \(c\) diverging logarithmically as \(T \to T_c\).
 This means that the critical exponents \(\alpha = 0\) for the two-dimensional Ising model.
@@ -692,7 +698,7 @@ The probability \(P\) can be decomposed into two parts:
 with \(g\) the selection probability, the probability of selecting the state \(\nu\) given a starting state \(\mu\) and \(A\) the acceptance ratio, how likely it is to accept a given new state.
 To efficiently sample states in as simulation the acceptance probability should be as large as possible.
 
-To simulate the systems using Markov chains we use Monte Carlo simulations.\footnote{Monte Carlo simulations have their origin in the Manhattan Project and were used after World War 2 to simulate neutron transport in hydrogen bombs~\cite{newman:1999}.}.
+To simulate the systems using Markov chains we use Monte Carlo simulations.\footnote{Monte Carlo simulations have their origin in the Manhattan Project and were used after World War 2 to simulate neutron transport in hydrogen bombs~\cite{newman:1999}.}
 While specific algorithms are described below, the steps of a simulation are broadly the same.
 First, to be able to change spins we need to prepare the system in a given state at the start of the simulation.
 Common choices are to prepare the system in a \(T=\infty\) state where all spins are randomly aligned, or \(T=0\) where all spins are pointing in one randomly chosen direction (in the ferromagnetic case \(J>0\), where there are multiple ground states)~\cite{newman:1999}.\footnote{In the anti-ferromagnetic case, \(J < 0\), each spin wants to have a different orientation compared to its neighbours. This results in a checkerboard pattern.}
@@ -855,6 +861,7 @@ Using that \(E_{\mu} = E_{\nu} + \Delta E\) we only have to calculate the energy
 A similar trick can be used for the magnetisation, where the change in magnetisation can be shown to be \(\Delta M = 2\sigma_k^{\mu}\)~\cite{newman:1999}.
 
 
+
 \subsection{Critical Slowing Down}\label{sec:critical_slowing_down}
 The Metropolis algorithm is very simple but does have one major drawback.
 Close to the phase transition, the correlation time diverges.
@@ -893,12 +900,15 @@ The correlation time is then
 \begin{equation}
 	\tau = \tau_{\mathrm{steps}} \frac{\langle n \rangle}{L^2}.
 \end{equation}
-This is especially important in the high temperature regime, where many single-spin cluster will form.
+This is especially important in the high temperature regime, where many single-spin clusters will form.
 Without the correction the correlation time would be too large~\cite{newman:1999}.
 Comparing correlation time for the Ising model between the Metropolis and Wolff algorithm, it is found that there is indeed a marked difference.
 For Wolff simulations the correlation time of the absolute magnetisation is always of order 1, even for lattices as large as 40 by 40.
 In contrast Metropolis simulations show a correlation time at the critical point of \(\sim 12\) sweeps for even modest sized 10 by 10 lattices.
 
+For the Wolff algorithm and the Ising model it is possible to calculate the change in magnetisation by considering that the change in magnetisation for a single spin is \(\Delta m = -2 \sigma\).
+The total change in magnetisation caused by flipping a spin cluster is then \(\Delta m = -2 \sigma \times \mathrm{cluster\ size}\).
+This is quicker to calculate than explicitly considering every spin on the lattice to find the magnetisation.
 
 \begin{figure}[htb]
 	\centering
@@ -931,6 +941,8 @@ These expressions are the same except for a constant, since for \(\sigma_i = \si
 We therefore have an interaction energy \(\frac{1}{2}J\) instead of \(J\), explaining the change in the addition probability.
 This algorithm again satisfies detailed balance and ergodicity~\cite{newman:1999}.
 The dynamic critical exponent is \(z=0.60(2)\), again a significant improvement over the Metropolis algorithm.
+
+
 
 
 \chapter{Analysing Monte Carlo Simulations}
@@ -1090,10 +1102,10 @@ This is because in \cref{eq:magnetisation_scaling}, \(\widetilde{m}\) becomes a 
 We have~\cite{corboz}:
 \begin{align}
 	U_4 &= 1 - \frac{\langle m^4 \rangle}{3 \langle m^2 \rangle^2}\\
-	&=1 - \frac{\langle \left(\widetilde{m}(L^{1/\nu}t) L^{-\beta/\nu}\right)^4 \rangle}{3 \langle \left(\widetilde{m}(L^{1/\nu}t) L^{-\beta/\nu}\right)^2 \rangle^2}\Bigg|_{t=0} \\
-	&= 1 - \frac{\langle \widetilde{m}(L^{1/\nu}t) ^4 \rangle}{3 \langle \widetilde{m}(L^{1/\nu}t)^2 \rangle^2} \Bigg|_{t=0}
+	&=1 - \frac{ \widetilde{m}_4(L^{1/\nu}t) L^{-4\beta/\nu} }{3 \widetilde{m}_2(L^{1/\nu}t) L^{-4\beta/\nu}}\Bigg|_{t=0} \\
+	&=1 - \frac{ \widetilde{m}_4(L^{1/\nu}t) }{3 \widetilde{m}_2(L^{1/\nu}t) }\Bigg|_{t=0} \\
 \end{align}
-which is constant for all lattice sizes.
+which has a universal value for all lattice sizes.
 Therefore the critical temperature can be found by plotting the Binder cumulant for different lattice sizes and looking for the intersection (as seen in \cref{fig:ising_binder_cumulant}).
 If a value for the critical temperature is found in this way, it can also be plugged into the finite size scaling data collapse.
 
@@ -1155,6 +1167,7 @@ This value was found while taking into account the background term needed in the
 The background term was determined by finding when the finite size heat capacity data collapse was best (see below). This was the case when \(c_{\mathrm{background}} = 3\).
 Simply adding a background that gave a correct ratio is not a good approach, because by making the background arbitrarily large, an arbitrarily small ratio can be achieved.
 The data collapse would also be poor.
+Using the value of the constant in the expansion of the heat capacity of the Ising model around \(T_c\) from \cref{eq:ising_heat_cap_expanded} (\(c_{\mathrm{background}} = 0.3)\), the collapse is also very poor, with no curves intersecting.
 
 With the determined critical temperature and ratio of critical exponents a data collapse was performed by having \(\nu\) run over a range of 0.01 to 1.1 in steps of 0.01.
 As suggested by Sandvik~\cite{sandvik:2011}, the quality of the data collapse was assessed using a chi least squares test.
@@ -1173,7 +1186,9 @@ Errors were determined by adding and subtracting the error on the critical tempe
 		\(\gamma/\nu\) & -0.022(8) & 0.120(8) & 1.762(8) & 0.240(1) & 1.001(4) & 15.7(3.6) \\
 		\(\beta/\nu\) & 0.033(3) & 0.1230(7) & 1.721(4) & 0.250(2) & 0.983(1) & 15(1.4)\\\hline
 	\end{tabular}
-	\caption{Critical exponents of the Ising model. The values were calculated by using the given ratio, iterating over different values of \(\nu\) and determining the other critical exponent using the ratio, and then determining which values gave the best fit. The other critical exponents are calculated using scaling laws.}
+	\caption{Critical exponents of the Ising model. The values were calculated by using the given ratio, iterating over different values of \(\nu\) and determining the other critical exponent using the ratio, and then determining which values gave the best fit. The other critical exponents are calculated using scaling laws.
+	If data points for smaller system sizes are left out, the fluctuations in the values of the critical exponents result in error bars which are potentially larger than those reported here.
+	}
 	\label{tab:ising_critical_exponents}
 \end{table}
 
@@ -1185,6 +1200,9 @@ With \(\beta/\nu\) the critical exponents also agreed somewhat with exact values
 For \(\gamma/\nu\) and \(\beta /\nu\) collapses were also performed while leaving out a data set for a given data size.
 All data sizes were left out one by one.
 The drift observed in all critical exponents by doing this was always of the order 0.02 or smaller.
+This is larger than the values reported in \cref{tab:ising_critical_exponents}.
+Leaving out different data sets could thus possibly serve as an alternative way to calculate the error on critical exponents.
+
 
 \begin{figure}[htb]
 	\includegraphics[width=\linewidth]{ising_heat_capacity_data_collapse.pdf}
@@ -1251,7 +1269,7 @@ Multiplying by the value of \(\delta\) then gives a large error.
 Given the size of the error this value should not be judged as sensible.
 
 By leaving out data sets for given system sizes, an estimate could be made how well behaved the collapse is.
-From \cref{tab:potts_leave_out} it is clear that the some critical exponents show a large drift.
+From \cref{tab:potts_leave_out} it is clear that some critical exponents show a large drift.
 This table lists the critical exponents determined using the ratio \(\gamma/\nu\).
 The values drift as different data sets are left out.
 This drift is most apparent for \(\alpha\), \(\gamma\) and \(\nu\).
@@ -1316,6 +1334,8 @@ The intersection of Binder cumulants gave a value for the critical temperature, 
 
 For the Ising model the value of the critical temperature as well as the ratios of critical exponents, with the exception of \(\alpha/\nu\), agreed with the exact values of Onsager's solution.
 Using a data collapse the values of the critical exponents themselves were found to usually be in reasonable agreement with the exact values. The values found for \(\alpha\) were close to zero, although one value was negative, a non-physical result.
+Because the error analysis with data collapses poses some problems, some of the errors reported may be underestimated.
+If alternatively the error bars are calculated by leaving out data sets for smaller system sizes, the error is larger and \(\alpha\) would be 0 within error bars.
 
 The Potts model results gave a value for the critical temperature that was in moderate agreement with the exact result.
 Ratios of critical exponent ratios agreed well with conjectured results, with the exception of \(\gamma/\nu\), which was too large.
@@ -1334,7 +1354,7 @@ Another approach is to study finite size scaling in more detail and try to deter
 We could also study larger systems, for which the corrections are less important.
 This would require a rewrite of the simulations in a compiled language to improve execution time.
 It is possible that with larger system sizes the drift of quantities like the Binder cumulant could be better characterised.
-With larger and more systems, it would also be possible to find the change in critical exponents as data sets are left out while determining the critical exponents from a data collapse.
+With larger and more system sizes, it would also be possible to find the change in critical exponents as data sets are left out while determining the critical exponents from a data collapse.
 This would allow for a different way of assessing errors on the critical exponents.
 
 The Ising and Potts model can also be simulated on different kinds of lattices such as triangular or honeycomb lattices, to verify that the critical exponents (but not the critical temperature) remain the same, thus testing universality.
@@ -1347,7 +1367,7 @@ To that end the latent heat would have to be accurately determined, while also h
 
 Lastly, the order parameter of the Potts model could be more closely examined.
 In this thesis it was defined based on the definition of the Potts model.
-Many papers used a slightly different definition that is does not have the property of being 1 below \(T_c\) and 0 above \(T_c\)~\cite{binder:1981a,wu:1982,fan:2007}.
+Many papers used a slightly different definition that does not have the property of being 1 below \(T_c\) and 0 above \(T_c\)~\cite{binder:1981a,wu:1982,fan:2007}.
 
 \section{Acknowledgements}
 I would like to thank my supervisor, dr. Philippe Corboz, for introducing me into the field of computational physics and patiently explaining statistical analysis of Monte Carlo data.
