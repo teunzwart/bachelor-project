@@ -278,8 +278,6 @@ def chi_squared_data_collapse(data_set, critical_temperature,
                 second_exponent = (ratio + k * ratio_error) * nu
                 scaling_functions = {}
                 for lattice_size, data in sorted(data_set.items()):
-                    if lattice_size == 40:
-                        continue
                     for v in data:
                         TC = critical_temperature + p * critical_temperature_error
                         t = (v[0] - TC) / TC
